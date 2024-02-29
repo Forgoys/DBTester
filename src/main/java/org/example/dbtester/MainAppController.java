@@ -21,30 +21,46 @@ public class MainAppController {
     private TextField sshUserNameInput;
     @FXML
     private TextField sshPasswordInput;
-
-    // 测试对象选择
-    @FXML
-    private ComboBox<String> testObjectSelectBox;  // 测试对象选择下拉列表
-    @FXML
-    private GridPane testObjectConfigPane;  // 测试对象配置输入表格
-
-    // 测试项目选择
-    @FXML
-    private ComboBox<String> testProjectSelectBox;  // 测试项目选择下拉列表
-    @FXML
-    private GridPane testProjectConfigPane;  // 测试项目配置输入表格
-
-    private Map<String, List<TestProject>> testProjectsMap = new HashMap<>();
-
     private SSHConnection currentSSHConnection;
+
+    /**
+     * 数据库连接
+     */
+    DBConnection currentDBConnection;
+
+    /**
+     * 测试对象选择下拉列表
+     */
+    @FXML
+    private ComboBox<String> testObjectSelectBox;
+    /**
+     * 测试对象配置输入表格
+     */
+    @FXML
+    private GridPane testObjectConfigPane;
+
+    /**
+     * 测试项目选择下拉列表
+     */
+    @FXML
+    private ComboBox<String> testProjectSelectBox;
+    /**
+     * 测试项目配置输入表格
+     */
+    @FXML
+    private GridPane testProjectConfigPane;
+
 
     @FXML
     private void initialize() {
-
         testObjectSelectBox.getItems().addAll("PolarDB", "神通数据库", "OpenGauss", "TDengine", "InfluxDB", "Lindorm", "GlusterFS", "OceanFS");
-//        testObjectSelectBox.setOnAction(event -> onTestObjectSelect());
     }
 
+    // =================================== ssh连接服务器 =================================================
+
+    /**
+     * ssh连接按钮确认，连接服务器
+     */
     @FXML
     private void sshConnectButtonClick() {
         String ip = sshIPInput.getText().isEmpty() ? "127.0.0.1" : sshIPInput.getText();
@@ -74,6 +90,13 @@ public class MainAppController {
         }
     }
 
+    /**
+     * 根据ssh连接参数连接到新服务器
+     * @param ip
+     * @param port
+     * @param userName
+     * @param password
+     */
     private void connectToNewSSH(String ip, int port, String userName, String password) {
         currentSSHConnection = new SSHConnection(ip, port, userName, password);
         boolean isConnected = currentSSHConnection.sshConnect();
@@ -88,28 +111,36 @@ public class MainAppController {
         alert.showAndWait();
     }
 
+    // ================================ 数据库连接或文件系统挂载 ===========================================
+
+    /**
+     * 根据选择的测试对象，显示对应的连接参数，更新可选择的测试项目
+     */
     @FXML
-    // 选择测试对象，显示对应的配置
     private void onTestObjectSelect() {
         String selectedTestObject = testObjectSelectBox.getValue();
         clearGridPaneRowsAfterFirst(testObjectConfigPane);
         testProjectSelectBox.getItems().clear();
 
         int rowIndex = 1;
+        // 根据选定的测试对象更新测试项目下拉菜单，并配置相关UI
         switch (selectedTestObject) {
             case "PolarDB":
             case "神通数据库":
             case "OpenGauss":
+                testProjectSelectBox.getItems().addAll("TPC-C", "TPC-H", "可靠性", "适配性");
+                rowIndex = configureDBConnectUI(rowIndex);
+                break;
             case "TDengine":
             case "InfluxDB":
             case "Lindorm":
-                updateTestProjectSelectBox(selectedTestObject);
-                configureDatabaseConnectionUI(rowIndex);
+                testProjectSelectBox.getItems().addAll("写入性能", "查询性能", "可靠性", "适配性");
+                rowIndex = configureDBConnectUI(rowIndex);
                 break;
             case "GlusterFS":
             case "OceanFS":
-                updateFileSystemTestProjectSelectBox();
-                configureFileSystemUI(rowIndex);
+                testProjectSelectBox.getItems().addAll("读写速度测试", "并发度测试", "可靠性测试");
+                rowIndex = configureFSConnectUI(rowIndex);
                 break;
         }
 
@@ -119,15 +150,53 @@ public class MainAppController {
         testObjectConfigPane.add(testObjectConnectConfirmButton, 1, rowIndex, 2, 2);
     }
 
-    private void updateTestProjectSelectBox(String selectedTestObject) {
-        if (selectedTestObject.equals("PolarDB") || selectedTestObject.equals("神通数据库") || selectedTestObject.equals("OpenGauss")) {
-            testProjectSelectBox.getItems().addAll("TPC-C", "TPC-H", "可靠性", "适配性");
-        } else {
-            testProjectSelectBox.getItems().addAll("写入性能", "查询性能", "可靠性", "适配性");
+    /**
+     * 测试对象连接按钮
+     */
+    private void onTestObjectConnectConfirmButtonClicked() {
+        System.out.println("确认按钮被点击");
+        String selectedTestObject = testObjectSelectBox.getValue();
+
+        // 根据selectedTestObject的值来决定执行哪种类型的连接操作
+        switch (selectedTestObject) {
+            case "PolarDB":
+            case "神通数据库":
+            case "OpenGauss":
+            case "TDengine":
+            case "InfluxDB":
+            case "Lindorm":
+                // 这里调用连接数据库的方法
+                connectDatabase();
+                break;
+            case "GlusterFS":
+            case "OceanFS":
+                // 这里调用挂载文件系统的方法
+                mountFileSystem();
+                break;
         }
     }
 
-    private void configureDatabaseConnectionUI(int rowIndex) {
+    private void connectDatabase() {
+        // 实现连接数据库的逻辑
+        System.out.println("连接数据库...");
+        // 根据之前设置的数据库配置参数进行数据库连接
+        // 可能需要访问保存这些参数的变量或控件
+    }
+
+    private void mountFileSystem() {
+        // 实现挂载文件系统的逻辑
+        System.out.println("挂载文件系统...");
+        // 根据之前设置的文件系统配置参数进行文件系统挂载
+        // 可能需要访问保存这些参数的变量或控件
+    }
+
+    // ================================== 测试项目参数配置 ==========================================
+
+    /**
+     * 设置数据库连接参数配置的相关UI
+     * @param rowIndex 从gridPane的第几行开始装参数配置的“参数名-输入框”对
+     */
+    private int configureDBConnectUI(int rowIndex) {
         String[] databaseConfigParm = new String[]{"JDBC驱动选择", "数据库URL", "用户名", "密码"};
 
         Label jdbcDriverNameLabel = new Label("未选择驱动");
@@ -168,13 +237,11 @@ public class MainAppController {
         dbPasswordTextField.setId("dbPasswordTextField");
         testObjectConfigPane.add(dbPasswordLabel, 0, rowIndex);
         testObjectConfigPane.add(dbPasswordTextField, 1, rowIndex++);
+
+        return rowIndex;
     }
 
-    private void updateFileSystemTestProjectSelectBox() {
-        testProjectSelectBox.getItems().addAll("读写速度测试", "并发度测试", "可靠性测试");
-    }
-
-    private void configureFileSystemUI(int rowIndex) {
+    private int configureFSConnectUI(int rowIndex) {
         String[] fileSystemConfigParm = new String[]{"服务器卷路径", "挂载目录"};
         Label fsServerPathLabel = new Label("服务器卷路径");
         TextField fsServerPathTextField = new TextField();
@@ -187,17 +254,14 @@ public class MainAppController {
         fsMountPathTextField.setId("fsMountPathTextField");
         testObjectConfigPane.add(fsMountPathLabel, 0, rowIndex);
         testObjectConfigPane.add(fsMountPathTextField, 1, rowIndex++);
+
+        return rowIndex;
     }
 
-    // 测试对象连接按钮
-    private void onTestObjectConnectConfirmButtonClicked() {
-        // 确认按钮的事件处理器
-        // 这里可以处理配置数据，比如获取TextField的值等
-        System.out.println("确认按钮被点击");
-    }
-
+    /**
+     * 测试项目选择及参数配置显示
+     */
     @FXML
-    // 测试项目选择及参数配置显示
     private void onTestProjectSelect() {
         clearGridPaneRowsAfterFirst(testProjectConfigPane);
         String testProject = testProjectSelectBox.getValue();
@@ -290,13 +354,19 @@ public class MainAppController {
         testProjectConfigPane.add(testProjectParmConfirmButton, 1, rowIndex, 1, 2);
     }
 
-    // 测试对象开始测试按钮点击
+    /**
+     * 测试项目开始测试按钮点击
+     */
     private void onTestProjectParmConfirmButtonClicked() {
         // 确认按钮的事件处理器
         // 这里可以处理配置数据，比如获取TextField的值等
         System.out.println("确认按钮被点击");
     }
 
+    /**
+     * 清除gridPane第一行之后的所有行，第一行是测试对象或项目的下拉列表，后面是相关的参数配置
+     * @param gridPane 装了测试对象或项目的gridPane
+     */
     public void clearGridPaneRowsAfterFirst(GridPane gridPane) {
         // 创建一个列表来收集所有第一行之后的节点
         List<Node> nodesToRemove = new ArrayList<>();
