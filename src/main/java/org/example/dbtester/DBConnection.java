@@ -8,6 +8,8 @@ public class DBConnection {
     private String username;
     private String password;
 
+    private Connection connection;
+
     // 构造器
     public DBConnection() {
     }
@@ -19,16 +21,70 @@ public class DBConnection {
         this.password = password;
     }
 
-    // 连接数据库的方法（示例，需要根据实际情况实现）
+    // 连接数据库
     public boolean connect() {
-        // 这里应包含连接数据库的实际代码
-        // 例如加载JDBC驱动，尝试建立连接等
-        return true;
+        try {
+            // 动态加载JDBC驱动
+            Class.forName(jdbcDriverPath);
+            // 建立连接
+            this.connection = DriverManager.getConnection(dbURL, username, password);
+            return true;
+        } catch (ClassNotFoundException e) {
+            System.out.println("JDBC Driver not found: " + e.getMessage());
+            return false;
+        } catch (SQLException e) {
+            System.out.println("Failed to connect to the database: " + e.getMessage());
+            return false;
+        }
     }
 
-    // 执行SQL语句的方法（示例，需要根据实际情况实现）
-    public void executeSQL(String sql) {
-        // 这里应包含执行SQL语句的实际代码
+    public String executeSQL(String sql) {
+        if (this.connection == null) {
+            return "No connection. Please connect to the database first.";
+        }
+        try (Statement statement = this.connection.createStatement()) {
+            boolean isResultSet = statement.execute(sql);
+            if (isResultSet) {
+                return extractDataFromResultSet(statement.getResultSet());
+            } else {
+                return "Update count: " + statement.getUpdateCount();
+            }
+        } catch (SQLException e) {
+            return "Error executing SQL statement: " + e.getMessage();
+        }
+    }
+
+    // 从ResultSet中提取数据
+    private String extractDataFromResultSet(ResultSet resultSet) throws SQLException {
+        StringBuilder builder = new StringBuilder();
+        while (resultSet.next()) {
+            int columnCount = resultSet.getMetaData().getColumnCount();
+            for (int i = 1; i <= columnCount; i++) {
+                builder.append(resultSet.getString(i)).append(" ");
+            }
+            builder.append("\n");
+        }
+        return builder.toString();
+    }
+
+    // 检查数据库连接状态
+    public boolean isConnected() {
+        try {
+            return this.connection != null && !this.connection.isClosed();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    // 断开数据库连接
+    public void disconnect() {
+        if (this.connection != null) {
+            try {
+                this.connection.close();
+            } catch (SQLException e) {
+                System.out.println("Failed to close the database connection: " + e.getMessage());
+            }
+        }
     }
 
     // Getters and Setters

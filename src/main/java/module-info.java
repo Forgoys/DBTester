@@ -11,6 +11,7 @@ module org.example.dbtester {
     requires eu.hansolo.tilesfx;
     requires jsch;
     requires java.sql;
+    requires rt;
 //    requires jsch;
 
     opens org.example.dbtester to javafx.fxml;
