@@ -3,25 +3,33 @@ package backend.dataset;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestArguments {
-    public List<DataPair> testArgs;
+/**
+ * 测试参数抽象类，需要定义测试参数子类继承该类
+ */
+public abstract class TestArguments extends AbstractDataSet{
 
-    public static final TestArguments TPCC_ARGUMENTS = new TestArguments();
-
-    {
-        TPCC_ARGUMENTS.testArgs = new ArrayList<>();
-        TPCC_ARGUMENTS.testArgs.add(new DataPair("测试规模"));
+    /**
+     * TPCC测试参数名
+     */
+    public static final ArrayList<String> TPCC_ARGS_NAMES = new ArrayList<>();
+    static {
+        TPCC_ARGS_NAMES.add("数据规模");
     }
 
-    public static final TestArguments TPCH_ARGUMENTS = TPCC_ARGUMENTS;
-
-
-
-
-
-    public TestArguments(){}
-
-    public TestArguments(List<DataPair> testArgs) {
-        this.testArgs = testArgs;
+    /**
+     * TPCH测试参数名
+     */
+    public static final ArrayList<String> TPCH_ARGS_NAMES = new ArrayList<>();
+    static {
+        TPCH_ARGS_NAMES.add("数据规模");
     }
+
+    /**
+     * 可靠性测试参数名
+     */
+
+    /**
+     * 此处设置其余测试参数名
+     */
+
 }
