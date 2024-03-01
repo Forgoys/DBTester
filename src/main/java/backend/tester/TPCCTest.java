@@ -1,10 +1,20 @@
 package backend.tester;
 
+import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
 import backend.dataset.TestTimeData;
+import org.example.dbtester.DBConnection;
+import org.example.dbtester.SSHConnection;
 
 public class TPCCTest extends TestItem{
 
+    public TPCCTest(String testName, SSHConnection sshStmt, DBConnection DBStmt) {
+        super(testName, sshStmt, DBStmt);
+    }
+
+    public TPCCTest(String testName, SSHConnection sshStmt, DBConnection DBStmt, TestArguments testArgs) {
+        super(testName, sshStmt, DBStmt, testArgs);
+    }
 
     @Override
     public void dataPrepare() {

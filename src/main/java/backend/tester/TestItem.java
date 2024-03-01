@@ -40,7 +40,7 @@ public abstract class TestItem implements Testable, Writable{
     /**
      * 当前测试项的状态。你需要处理该状态的切换。
      */
-    private Status status = Status.UNPREPARED;
+    Status status = Status.UNPREPARED;
 
     /**
      * ssh远程连接句柄，通过该句柄与远程服务器进行交互。
@@ -63,6 +63,21 @@ public abstract class TestItem implements Testable, Writable{
      * 保存测试过程中的时序数据
      */
     private List<TestTimeData> timeDataList;
+
+//    public TestItem(){}
+
+    public TestItem(String testName, SSHConnection sshStmt, DBConnection DBStmt) {
+        this.testName = testName;
+        this.sshStmt = sshStmt;
+        this.DBStmt = DBStmt;
+    }
+
+    public TestItem(String testName, SSHConnection sshStmt, DBConnection DBStmt, TestArguments testArgs) {
+        this.testName = testName;
+        this.sshStmt = sshStmt;
+        this.DBStmt = DBStmt;
+        this.testArgs = testArgs;
+    }
 
     /**
      * 返回测试过程中的时序数据
