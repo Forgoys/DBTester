@@ -21,5 +21,9 @@ public interface Testable {
      */
     public void generateTimeData();
 
+    /**
+     * 该方法返回格式化的结果
+     * @return
+     */
     public TestResult getTestResults();
 }
