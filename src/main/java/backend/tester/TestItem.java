@@ -4,8 +4,8 @@ package backend.tester;
 import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
 import backend.dataset.TestTimeData;
-import org.example.dbtester.DBConnection;
-import org.example.dbtester.SSHConnection;
+import frontend.connection.DBConnection;
+import frontend.connection.SSHConnection;
 
 import java.util.List;
 
