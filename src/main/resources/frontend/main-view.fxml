@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
@@ -8,6 +10,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
@@ -19,7 +22,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.MainAppController">
+<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.controller.MainAppController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
@@ -93,8 +96,8 @@
                                      <Label text="用户名" GridPane.rowIndex="2" />
                                      <TextField fx:id="sshUserNameInput" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                     <Label text="密码" GridPane.rowIndex="3" />
-                                    <TextField fx:id="sshPasswordInput" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                     <Button fx:id="sshConnectButton" mnemonicParsing="false" onAction="#sshConnectButtonClick" text="连接" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                                    <PasswordField fx:id="sshPasswordInput" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                  </children>
                               </GridPane>
                            </children>
@@ -119,7 +122,20 @@
                                       </rowConstraints>
                                        <children>
                                           <Label text=" 测试对象:" />
-                                          <ComboBox fx:id="testObjectSelectBox" onAction="#onTestObjectSelect" promptText="选择对象" GridPane.columnIndex="1" GridPane.halignment="CENTER" />
+                                          <ComboBox fx:id="testObjectSelectBox" onAction="#onTestObjectSelect" promptText="选择对象" GridPane.columnIndex="1" GridPane.halignment="CENTER">
+                                               <items>
+                                                   <FXCollections fx:factory="observableArrayList">
+                                                       <String fx:value="PolarDB" />
+                                                       <String fx:value="神通数据库" />
+                                                       <String fx:value="OpenGauss" />
+                                                       <String fx:value="TDengine" />
+                                                       <String fx:value="InfluxDB" />
+                                                       <String fx:value="Lindorm" />
+                                                       <String fx:value="GlusterFS" />
+                                                       <String fx:value="OceanFS" />
+                                                   </FXCollections>
+                                               </items>
+                                           </ComboBox>
                                        </children>
                                     </GridPane>
                                  </children>

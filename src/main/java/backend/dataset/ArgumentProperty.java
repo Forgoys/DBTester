@@ -11,6 +11,15 @@ public class ArgumentProperty {
      */
     public String[] candidateValues = null;
 
+    public ArgumentProperty(String argNames) {
+        this.argNames = argNames;
+    }
+
+    public ArgumentProperty(String argNames, String[] candidateValues) {
+        this.argNames = argNames;
+        this.candidateValues = candidateValues;
+    }
+
     /**
      * 判断该参数是否有候选项
      */
@@ -21,12 +30,12 @@ public class ArgumentProperty {
         return candidateValues.length != 0;
     }
 
-    public ArgumentProperty(String argNames) {
-        this.argNames = argNames;
+
+    public String getName() {
+        return argNames;
     }
 
-    public ArgumentProperty(String argNames, String[] candidateValues) {
-        this.argNames = argNames;
-        this.candidateValues = candidateValues;
+    public String[] getOptions() {
+        return candidateValues;
     }
 }

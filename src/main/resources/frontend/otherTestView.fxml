@@ -12,7 +12,7 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.geometry.Insets?>
 <VBox fillWidth="true" spacing="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10"
-      AnchorPane.topAnchor="10" xmlns:fx="http://javafx.com/fxml/1">
+      AnchorPane.topAnchor="10" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.controller.OtherTestController">
     <padding>
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>

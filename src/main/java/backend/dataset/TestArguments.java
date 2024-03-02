@@ -40,4 +40,22 @@ public class TestArguments {
      */
     public List<String> values;
 
+    /**
+     *
+     * @param testProject 测试项目中文名
+     * @return 返回测试项目中文名对应TestArguments里面的静态参数数组名
+     */
+    public static ArgumentProperty[] getArgPropertiesForTest(String testProject) {
+        switch (testProject) {
+            case "TPC-C":
+                return TPCC_ARG_PROPERTIES;
+            case "TPC-H":
+                return TPCH_ARG_PROPERTIES;
+            // 补全这里补全这里补全这里补全这里补全这里补全这里补全这里
+            // 补全这里补全这里补全这里补全这里补全这里补全这里补全这里
+            // 补全这里补全这里补全这里补全这里补全这里补全这里补全这里
+            default:
+                return new ArgumentProperty[]{}; // 返回空数组表示没有找到匹配的测试项目
+        }
+    }
 }

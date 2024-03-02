@@ -43,13 +43,13 @@ public abstract class TestItem implements Testable, Writable{
     Status status = Status.UNPREPARED;
 
     /**
-     * ssh远程连接句柄，通过该句柄与远程服务器进行交互。
+     * ssh远程连接句柄，通过该句柄与远程服务器进行交互。。直接使用MainAppController.sshConnection
      * 如果某项测试需要用到该句柄，则需在子类中初始化该句柄。
      */
     private SSHConnection sshStmt;
 
     /**
-     * 数据库连接句柄，通过该句柄与远程数据库进行交互。
+     * 数据库连接句柄，通过该句柄与远程数据库进行交互。直接使用MainAppController.dbConnection
      * 如果某项测试需要用到该句柄，则需在子类中初始化该句柄。
      */
     private DBConnection DBStmt;

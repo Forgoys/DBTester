@@ -4,6 +4,9 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+
 import java.io.InputStream;
 
 public class SSHConnection {
@@ -41,6 +44,30 @@ public class SSHConnection {
         }
     }
 
+    /**
+     * 根据ssh连接参数连接到新服务器
+     * @param ip
+     * @param port
+     * @param userName
+     * @param password
+     */
+    public void connectToNewSSH(String ip, int port, String userName, String password) {
+        this.ip = ip;
+        this.port = port;
+        this.userName = userName;
+        this.password = password;
+        boolean isConnected = this.sshConnect();
+        Alert alert;
+        if (isConnected) {
+            alert = new Alert(Alert.AlertType.INFORMATION, "成功连接到 " + ip, ButtonType.OK);
+            alert.setHeaderText("SSH连接成功");
+        } else {
+            alert = new Alert(Alert.AlertType.ERROR, "无法连接到 " + ip + "。请检查您的连接信息后再试。", ButtonType.OK);
+            alert.setHeaderText("SSH连接失败");
+        }
+        alert.showAndWait();
+    }
+
     public void sshDisconnect() {
         if (session != null && session.isConnected()) {
             session.disconnect();
@@ -50,6 +77,10 @@ public class SSHConnection {
 
     public Session getSession() {
         return session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 
     public String executeCommand(String command) {
@@ -136,9 +167,5 @@ public class SSHConnection {
 
     public void setStatus(boolean status) {
         this.status = status;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
     }
 }
