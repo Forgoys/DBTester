@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.geometry.Insets?>
+<VBox fillWidth="true" spacing="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10"
+      AnchorPane.topAnchor="10" xmlns:fx="http://javafx.com/fxml/1">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+    <children>
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <VBox spacing="5">
+                <Label text="测试进度:">
+                    <font>
+                        <Font size="18.0" />
+                    </font></Label>
+                <ProgressBar fx:id="progressBar" prefWidth="200" />
+            </VBox>
+            <VBox alignment="CENTER" spacing="5">
+                <Label fx:id="progressPercentLabel" text="0%" />
+                <Label fx:id="currentStepLabel" text="等待开始" />
+            </VBox>
+        </HBox>
+
+        <Label text="资源占用情况:">
+            <font>
+                <Font size="18.0" />
+            </font></Label>
+        <HBox spacing="10" VBox.vgrow="ALWAYS">
+            <LineChart fx:id="cpuUsageLineChart" prefHeight="200" prefWidth="200" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                <xAxis>
+                    <CategoryAxis fx:id="cpuTimeAxis" label="时间" />
+                </xAxis>
+                <yAxis>
+                    <NumberAxis fx:id="cpuAxis" label="CPU (%)" upperBound="90.0" />
+                </yAxis>
+            </LineChart>
+
+            <LineChart fx:id="memoryUsageLineChart" prefHeight="200" prefWidth="200" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                <xAxis>
+                    <CategoryAxis fx:id="memoryTimeAxis" label="时间" />
+                </xAxis>
+                <yAxis>
+                    <NumberAxis fx:id="memoryAxis" label="内存 (%)" upperBound="40.0" />
+                </yAxis>
+            </LineChart>
+
+            <LineChart fx:id="diskSpeedLineChart" prefHeight="200" prefWidth="200" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                <xAxis>
+                    <CategoryAxis fx:id="diskTimeAxis" label="时间" />
+                </xAxis>
+                <yAxis>
+                    <NumberAxis fx:id="speedAxis" label="速度 (MB/s)" upperBound="400.0" />
+                </yAxis>
+            </LineChart>
+        </HBox>
+
+        <Label text="测试结果:">
+            <font>
+                <Font size="18.0" />
+            </font></Label>
+        <TableView fx:id="resultsTableView" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="queryColumn" text="查询" />
+                <TableColumn fx:id="resultColumn" text="结果" />
+                <!-- 添加更多的列 -->
+            </columns>
+        </TableView>
+
+    </children>
+</VBox>
