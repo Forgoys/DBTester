@@ -16,10 +16,10 @@ public interface Testable {
     public void startTest();
 
     /**
-     * 当调用此方法时，返回此时采样得到的时序数据，并且将数据写入{@link TestItem#timeDataList}中。
+     * 当调用此方法时，此时采样得到的时序数据，并且将数据写入{@link TestItem#timeDataList}中。
      * 应检查测试状态 {@link TestItem#status}：只有运行中的测试可以返回当前时序数据
      */
-    public TestTimeData getCurTimeData();
+    public void generateTimeData();
 
     public TestResult getTestResults();
 }

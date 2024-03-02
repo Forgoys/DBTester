@@ -14,7 +14,7 @@ public abstract class TestTimeData extends AbstractDataSet{
         NORMAL_TIMEDATA_NAMES.add("日期时间");
         NORMAL_TIMEDATA_NAMES.add("CPU使用率");
         NORMAL_TIMEDATA_NAMES.add("内存使用率");
-        NORMAL_TIMEDATA_NAMES.add("测试速度");
+        NORMAL_TIMEDATA_NAMES.add("磁盘读写速度");
     }
 
     /**
