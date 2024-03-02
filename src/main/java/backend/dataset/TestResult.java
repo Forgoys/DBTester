@@ -21,9 +21,17 @@ public class TestResult{
      */
 
 
+
+
+
+    /**
+     * 数据名称
+     */
+    public static String[] names;
+
     /**
      * 各数据值，以String格式保存
      */
-    public List<String> values;
+    public String[] values;
 
 }

@@ -35,10 +35,12 @@ public class TestArguments {
      */
 
 
+
+
     /**
      * 各数据值，以String格式保存
      */
-    public List<String> values;
+    public String[] values;
 
     /**
      *
