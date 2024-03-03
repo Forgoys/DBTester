@@ -2,9 +2,7 @@ package frontend.controller;
 
 import backend.dataset.ArgumentProperty;
 import backend.dataset.TestArguments;
-import backend.dataset.TestResult;
 import backend.tester.TestItem;
-import eu.hansolo.tilesfx.Test;
 import frontend.connection.DBConnection;
 import frontend.connection.SSHConnection;
 import javafx.fxml.FXML;
@@ -18,7 +16,10 @@ import javafx.stage.Stage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class MainAppController {
     // ssh 连接参数
@@ -125,26 +126,22 @@ public class MainAppController {
         testProjectSelectBox.getItems().clear();
 
         int rowIndex = 1;
-        // 根据选定的测试对象更新测试项目下拉菜单，并配置相关UI
-        switch (selectedTestObject) {
-            case "PolarDB":
-            case "神通数据库":
-            case "OpenGauss":
+        rowIndex = switch (selectedTestObject) {
+            case "PolarDB", "神通数据库", "OpenGauss" -> {
                 testProjectSelectBox.getItems().addAll("TPC-C", "TPC-H", "可靠性", "适配性");
-                rowIndex = configureDBConnectUI(rowIndex);
-                break;
-            case "TDengine":
-            case "InfluxDB":
-            case "Lindorm":
+                yield configureDBConnectUI(rowIndex);
+            }
+            case "TDengine", "InfluxDB", "Lindorm" -> {
                 testProjectSelectBox.getItems().addAll("写入性能", "查询性能", "可靠性", "适配性");
-                rowIndex = configureDBConnectUI(rowIndex);
-                break;
-            case "GlusterFS":
-            case "OceanFS":
+                yield configureDBConnectUI(rowIndex);
+            }
+            case "GlusterFS", "OceanFS" -> {
                 testProjectSelectBox.getItems().addAll("读写速度测试", "并发度测试", "可靠性测试");
-                rowIndex = configureFSConnectUI(rowIndex);
-                break;
-        }
+                yield configureFSConnectUI(rowIndex);
+            }
+            default -> 1;
+            // 根据选定的测试对象更新测试项目下拉菜单，并配置相关UI
+        };
 
         // 添加确认按钮
         Button testObjectConnectConfirmButton = new Button("确认");
@@ -197,8 +194,6 @@ public class MainAppController {
      * @param rowIndex 从gridPane的第几行开始装参数配置的“参数名-输入框”对
      */
     private int configureDBConnectUI(int rowIndex) {
-        String[] databaseConfigParm = new String[]{"JDBC驱动选择", "数据库URL", "用户名", "密码"};
-
         Label jdbcDriverNameLabel = new Label("未选择驱动");
         testObjectConfigPane.add(new Label("JDBC驱动"), 0, rowIndex);
         testObjectConfigPane.add(jdbcDriverNameLabel, 1, rowIndex++);
@@ -246,7 +241,6 @@ public class MainAppController {
      * @param rowIndex 从gridPane的第几行开始装参数配置的“参数名-输入框”对
      */
     private int configureFSConnectUI(int rowIndex) {
-        String[] fileSystemConfigParm = new String[]{"服务器卷路径", "挂载目录"};
         Label fsServerPathLabel = new Label("服务器卷路径");
         TextField fsServerPathTextField = new TextField();
         fsServerPathTextField.setId("fsServerPathTextField");
@@ -342,14 +336,14 @@ public class MainAppController {
         int rowIndex = 1;
         switch (testProject) {
             case "TPC-C":
-                ComboBox<String> tpccWarehousesComboBox = new ComboBox<String>();
+                ComboBox<String> tpccWarehousesComboBox = new ComboBox<>();
                 tpccWarehousesComboBox.setId("tpccWarehousesComboBox");
                 tpccWarehousesComboBox.getItems().addAll("20", "50", "100", "500", "1000");
                 testProjectConfigPane.add(new Label("数据规模"), 0, rowIndex);
                 testProjectConfigPane.add(tpccWarehousesComboBox, 1, rowIndex++);
                 break;
             case "TPC-H":
-                ComboBox<String> tpchDataScaleComboBox = new ComboBox<String>();
+                ComboBox<String> tpchDataScaleComboBox = new ComboBox<>();
                 tpchDataScaleComboBox.setId("tpccWarehousesComboBox");
                 tpchDataScaleComboBox.getItems().addAll("5", "10", "20");
                 testProjectConfigPane.add(new Label("数据规模"), 0, rowIndex);
