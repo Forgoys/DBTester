@@ -14,9 +14,9 @@ public class TestArguments {
      */
     public static final ArgumentProperty[] TPCC_ARG_PROPERTIES = new ArgumentProperty[] {
             // 测试规模，有候选项
-            new ArgumentProperty("数据规模", new String[]{"5","10","20"}),
-            // 数据文件路径，没有候选项，需要输入
-            new ArgumentProperty("测试路径")
+            new ArgumentProperty("数据规模", new String[]{"20", "50", "100"}),
+            new ArgumentProperty("并发连接数", new String[]{"8","16","32","64","128","256"}),
+            new ArgumentProperty("加载进程数", new String[]{"1","2","4","8","16","32","64"})
     };
 
 

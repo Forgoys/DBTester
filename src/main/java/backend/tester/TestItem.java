@@ -16,7 +16,7 @@ public abstract class TestItem implements Testable, Writable{
     /**
      * 测试项目名称：TPC-C，TPC-H等
      */
-    private String testName;
+    protected String testName;
 
     public enum Status {
         /**
@@ -40,29 +40,29 @@ public abstract class TestItem implements Testable, Writable{
     /**
      * 当前测试项的状态。你需要处理该状态的切换。
      */
-    Status status = Status.UNPREPARED;
+    protected Status status = Status.UNPREPARED;
 
     /**
      * ssh远程连接句柄，通过该句柄与远程服务器进行交互。。直接使用MainAppController.sshConnection
      * 如果某项测试需要用到该句柄，则需在子类中初始化该句柄。
      */
-    private SSHConnection sshStmt;
+    protected SSHConnection sshStmt;
 
     /**
      * 数据库连接句柄，通过该句柄与远程数据库进行交互。直接使用MainAppController.dbConnection
      * 如果某项测试需要用到该句柄，则需在子类中初始化该句柄。
      */
-    private DBConnection DBStmt;
+    protected DBConnection DBStmt;
 
     /**
      * 测试参数
      */
-    private TestArguments testArgs;
+    protected TestArguments testArgs;
 
     /**
      * 保存测试过程中的时序数据
      */
-    private List<TestTimeData> timeDataList;
+    protected List<TestTimeData> timeDataList;
 
 //    public TestItem(){}
 
@@ -90,6 +90,6 @@ public abstract class TestItem implements Testable, Writable{
     /**
      * 保存测试结果
      */
-    private TestResult testResult;
+    protected TestResult testResult;
 
 }
