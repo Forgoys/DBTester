@@ -87,9 +87,13 @@ public class SSHConnection {
         this.session = session;
     }
 
-    public String executeCommand(String command) {
+    public String executeCommand(String command, boolean useSudo) {
         if (session == null || !session.isConnected()) {
             throw new IllegalStateException("SSH session is not connected. Please connect first.");
+        }
+
+        if (useSudo) {
+            command = "echo " + password + " | sudo -S " + command;
         }
 
         StringBuilder output = new StringBuilder();
@@ -129,8 +133,8 @@ public class SSHConnection {
     }
 
     // Method to execute a shell script located at a given path on the remote machine
-    public String executeShellScript(String scriptPath) {
-        return executeCommand("bash " + scriptPath);
+    public String executeShellScript(String scriptPath, boolean useSudo) {
+        return executeCommand("bash " + scriptPath, useSudo);
     }
 
     public String getIp() {
