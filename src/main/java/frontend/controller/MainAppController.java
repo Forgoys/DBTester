@@ -3,7 +3,6 @@ package frontend.controller;
 import backend.dataset.ArgumentProperty;
 import backend.dataset.TestArguments;
 import backend.tester.TestItem;
-import backend.tester.rdb.TPCCTester;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
 import frontend.connection.SSHConnection;
@@ -18,7 +17,6 @@ import javafx.stage.Stage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Objects;
 import java.util.Optional;
 
 public class MainAppController {
@@ -34,7 +32,7 @@ public class MainAppController {
     /**
      * SQL执行界面的控制器
      */
-    AdaptTestController adaptTestController;
+    DBAdaptTestController dbAdaptTestController;
     /**
      * 文件系统可靠性测试结果界面的控制器
      */
@@ -46,7 +44,7 @@ public class MainAppController {
     /**
      * 其他测试结果界面的控制器
      */
-    OtherTestController otherTestController;
+    DBOtherTestController dbOtherTestController;
 
     TestItem testItem;
     @FXML
@@ -332,7 +330,7 @@ public class MainAppController {
     @FXML
     private void onTestProjectSelect() {
         configureTestProjectParmUI();  // 设置参数配置UI
-        configureTestProjectResultUI(testProjectSelectBox.getValue());  // 设置结果显示UI，适配性显示SQL执行和结果框
+        loadTestProjectResultView(testProjectSelectBox.getValue());  // 设置结果显示UI，适配性显示SQL执行和结果框
     }
 
     /**
@@ -440,43 +438,64 @@ public class MainAppController {
     }
 
     /**
-     * 设置右侧的UI
+     * 根据测试项目名称动态加载视图到ScrollPane中，并更新对应的控制器引用
      *
      * @param testProject 测试项目名称
      */
-    private void configureTestProjectResultUI(String testProject) {
-        if (Objects.equals(testProject, "适配性")) {
-            loadView("adaptTestView.fxml");
-        } else {
-            loadView("otherTestView.fxml");
+    private void loadTestProjectResultView(String testProject) {
+        String fxmlFile;
+        Object controller;
+        // 确定要加载的视图和控制器
+        switch (testProject) {
+            case "TPC-C":
+            case "TPC-H":
+            case "写入性能":
+            case "查询性能":
+            case "可靠性":
+                if (testObjectSelectBox.getValue().equals("GlusterFS") || testObjectSelectBox.getValue().equals("OceanFS")) {
+                    fxmlFile = "fsReliabilityTestView.fxml";
+                } else {
+                    fxmlFile = "dbOtherTestView.fxml";
+                }
+                break;
+            case "适配性":
+                fxmlFile = "dbAdaptTestView.fxml";
+                break;
+            case "读写速度测试":
+            case "并发度测试":
+                fxmlFile = "fsOtherTestView.fxml";
+                break;
+            case "可靠性测试":
+                fxmlFile = "fsReliabilityTestView.fxml";
+                break;
+            default:
+                System.out.println("Unknown test project: " + testProject);
+                return; // 未知的测试项目，直接返回
         }
-    }
 
-    /**
-     * 根据FXML文件名动态加载视图到ScrollPane中
-     *
-     * @param fxmlFile fxml文件名
-     */
-    private void loadView(String fxmlFile) {
+        // 动态加载视图并设置控制器
         try {
-            FXMLLoader loader = new FXMLLoader();
-            URL fxmlUrl = getClass().getResource("/frontend/" + fxmlFile); // 注意路径的更改
-            if (fxmlUrl == null) {
-                throw new FileNotFoundException("FXML file not found: " + fxmlFile);
-            }
-            loader.setLocation(fxmlUrl);
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/frontend/" + fxmlFile));
             Node view = loader.load();
-            // 以下逻辑保持不变
-            if (fxmlFile.equals("adaptTestView.fxml")) {
-                adaptTestController = loader.getController();
-            } else if (fxmlFile.equals("otherTestView.fxml")) {
-                otherTestController = loader.getController();
+            controller = loader.getController();
+
+            // 更新控制器引用
+            if (fxmlFile.equals("dbAdaptTestView.fxml")) {
+                dbAdaptTestController = (DBAdaptTestController) controller;
+            } else if (fxmlFile.equals("dbOtherTestView.fxml")) {
+                dbOtherTestController = (DBOtherTestController) controller;
+            } else if (fxmlFile.equals("fsReliabilityTestView.fxml")) {
+                fsReliabilityTestController = (FSReliabilityTestController) controller;
+            } else if (fxmlFile.equals("fsOtherTestView.fxml")) {
+                fsOtherTestController = (FSOtherTestController) controller;
             }
+
             rightScrollPane.setContent(view);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     // ===============================结果文件导入和导出====================================
     @FXML
