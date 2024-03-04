@@ -3,6 +3,8 @@ package backend.tester;
 import backend.dataset.TestResult;
 import backend.dataset.TestTimeData;
 
+import java.io.IOException;
+
 public interface Testable {
 
     /**
@@ -14,7 +16,7 @@ public interface Testable {
      * 在该方法中开始测试。
      * 开始测试前应检查测试状态 {@link TestItem#status}：测试是否就绪、运行中的测试不能重复运行。
      */
-    public void startTest();
+    public void startTest() throws IOException, InterruptedException;
 
     /**
      * 当调用此方法时，此时采样得到的时序数据，并且将数据写入{@link TestItem#timeDataList}中。
