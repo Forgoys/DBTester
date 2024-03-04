@@ -94,13 +94,9 @@ public class MainAppController {
         if (currentSSHConnection != null && currentSSHConnection.getStatus()) {
             // 检查IP、端口、用户名是否相同
             if (currentSSHConnection.getIp().equals(ip) && currentSSHConnection.getPort() == port && currentSSHConnection.getUserName().equals(userName)) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "当前已连接到相同的服务器，无需重新连接。", ButtonType.OK);
-                alert.setHeaderText("SSH连接信息");
-                alert.showAndWait();
+                Util.popUpInfo("当前已连接到相同的服务器，无需重新连接。", "SSH连接信息");
             } else {
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "当前已有其他SSH连接，是否断开并重新连接到新的服务器？", ButtonType.YES, ButtonType.NO);
-                alert.setHeaderText("确认新的SSH连接");
-                Optional<ButtonType> result = alert.showAndWait();
+                Optional<ButtonType> result = Util.popUpChoose("当前已有其他SSH连接，是否断开并重新连接到新的服务器？", "确认新的SSH连接");
                 if (result.isPresent() && result.get() == ButtonType.YES) {
                     currentSSHConnection.sshDisconnect(); // 断开当前连接
                     currentSSHConnection.connectToNewSSH(ip, port, userName, password); // 连接到新的服务器
