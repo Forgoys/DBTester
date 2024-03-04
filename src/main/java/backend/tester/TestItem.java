@@ -64,7 +64,7 @@ public abstract class TestItem implements Testable, Writable{
      */
     protected List<TestTimeData> timeDataList;
 
-//    public TestItem(){}
+    public TestItem(){}
 
     public TestItem(String testName, SSHConnection sshStmt, DBConnection DBStmt) {
         this.testName = testName;
