@@ -51,7 +51,7 @@ public class DBConnection {
     private void analyzeURL(String url) {
         if (url.startsWith("jdbc:postgresql://")) {
             this.dbBrandName = "PostgreSQL";
-        } else if(url.startsWith("dbc:oscar://")) {
+        } else if(url.startsWith("jdbc:oscar://")) {
             this.dbBrandName = "oscar";
         } else if (url.startsWith("jdbc:mysql://")) {
             this.dbBrandName = "MySQL";
