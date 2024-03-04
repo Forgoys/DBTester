@@ -51,6 +51,8 @@ public class DBConnection {
     private void analyzeURL(String url) {
         if (url.startsWith("jdbc:postgresql://")) {
             this.dbBrandName = "PostgreSQL";
+        } else if(url.startsWith("dbc:oscar://")) {
+            this.dbBrandName = "oscar";
         } else if (url.startsWith("jdbc:mysql://")) {
             this.dbBrandName = "MySQL";
         } else if (url.startsWith("jdbc:oracle:thin:")) {
@@ -72,6 +74,16 @@ public class DBConnection {
         // 这个方法的实现需要根据实际情况来设计。
         // 在很多情况下，驱动类名需要从用户那里获取或者通过分析驱动文件来确定。
         // 这里只是提供一个示例接口，实际实现可能会更复杂。
+
+        // 尝试通过数据库品牌来获取驱动类名
+        if(dbBrandName.equals("oscar")) {
+            return "com.oscar.Driver";
+        } else if(dbBrandName.equals("opengauss")) {
+            return "org.opengauss.Driver";
+        } // 可以根据需要添加更多的数据库品牌
+
+
+
         return ""; // 返回空字符串或根据路径推断的类名
     }
 
