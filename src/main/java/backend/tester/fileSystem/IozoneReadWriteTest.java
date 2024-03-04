@@ -69,6 +69,11 @@ public class IozoneReadWriteTest extends TestItem {
         System.out.println("Iozone读写速度测试完成");
     }
 
+    @Override
+    public List<List<Double>> getTimeData() {
+        return null;
+    }
+
     private void iozoneResultSave(List<String> results) {
         String[] iozoneResult = new String[6];
         // 提取结果

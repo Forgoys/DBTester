@@ -1,6 +1,5 @@
 package backend.tester.fileSystem;
 
-import backend.dataset.ArgumentProperty;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
 
@@ -10,8 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-
-import static backend.dataset.TestArguments.getArgPropertiesForTest;
 
 public class FioReadWriteTest extends TestItem {
     // 用户参数 目录 文件块大小 文件大小 读写方式
@@ -79,6 +76,11 @@ public class FioReadWriteTest extends TestItem {
         fioResultSave(results);
 
         System.out.println("FIO读写速度测试完成");
+    }
+
+    @Override
+    public List<List<Double>> getTimeData() {
+        return null;
     }
 
     public void fioResultSave(List<String> results) {

@@ -6,6 +6,8 @@ import backend.tester.TestItem;
 import frontend.connection.DBConnection;
 import frontend.connection.SSHConnection;
 
+import java.util.List;
+
 // 文件系统适配性测试 通过挂载 暂时不写
 public class AdaptTester extends TestItem {
 
@@ -27,6 +29,11 @@ public class AdaptTester extends TestItem {
     @Override
     public void startTest() {
 
+    }
+
+    @Override
+    public List<List<Double>> getTimeData() {
+        return null;
     }
 
     @Override
