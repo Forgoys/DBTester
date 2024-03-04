@@ -11,10 +11,17 @@ public class FSConnection {
         this.mountPath = mountPath;
     }
 
+    /**
+     * 挂载文件系统
+     */
     public void mountFS() {
 
     }
 
+    /**
+     * 检查是否挂载
+     * @return
+     */
     public boolean isMounted() {
         return true;
     }

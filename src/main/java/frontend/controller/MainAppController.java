@@ -178,18 +178,46 @@ public class MainAppController {
     }
 
     private void connectDatabase() {
-        // 实现连接数据库的逻辑
-        System.out.println("连接数据库...");
-        currentDBConnection = new DBConnection();
-        // 根据之前设置的数据库配置参数进行数据库连接
-        // 可能需要访问保存这些参数的变量或控件
+        // 获取UI上的参数
+        String jdbcDriverPath = ((Label) testObjectConfigPane.lookup("#jdbcDriverNameLabel")).getText();
+        String jdbcDriverClassName = ((PasswordField) testObjectConfigPane.lookup("#jdbcDriverClassPasswordField")).getText();
+        String dbURL = ((TextField) testObjectConfigPane.lookup("#dbURLTextField")).getText();
+        String username = ((TextField) testObjectConfigPane.lookup("#dbUserTextField")).getText();
+        String password = ((TextField) testObjectConfigPane.lookup("#dbPasswordTextField")).getText();
+
+        // 创建DBConnection对象
+        DBConnection dbConnection = new DBConnection();
+        dbConnection.setJdbcDriverPath(jdbcDriverPath);
+        dbConnection.setJdbcDriverClassName(jdbcDriverClassName);
+        dbConnection.setDbURL(dbURL);
+        dbConnection.setUsername(username);
+        dbConnection.setPassword(password);
+
+        // 尝试连接数据库
+        if (dbConnection.connect()) {
+            Util.popUpInfo("数据库连接成功！", "连接成功");
+        } else {
+            Util.popUpInfo("数据库连接失败，请检查参数！", "连接失败");
+        }
     }
 
     private void mountFileSystem() {
-        // 实现挂载文件系统的逻辑
-        System.out.println("挂载文件系统...");
-        // 根据之前设置的文件系统配置参数进行文件系统挂载
-        // 可能需要访问保存这些参数的变量或控件
+        // 获取UI上的参数
+        String fsUrl = ((TextField) testObjectConfigPane.lookup("#fsServerPathTextField")).getText();
+        String mountPath = ((TextField) testObjectConfigPane.lookup("#fsMountPathTextField")).getText();
+
+        // 创建FSConnection对象
+        FSConnection fsConnection = new FSConnection(fsUrl, mountPath);
+
+        // 假设mountFS()方法实际执行挂载逻辑
+        fsConnection.mountFS();
+
+        // 检查是否挂载成功，这里需要在FSConnection的mountFS方法内实现具体的挂载逻辑和成功失败的检测
+        if (fsConnection.isMounted()) {
+            Util.popUpInfo("文件系统挂载成功！", "挂载成功");
+        } else {
+            Util.popUpInfo("文件系统挂载失败，请检查参数！", "挂载失败");
+        }
     }
 
     /**
@@ -217,6 +245,12 @@ public class MainAppController {
         });
 
         testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++);
+
+        Label jdbcDriverClassNameLabel = new Label("JDBC驱动类名");
+        PasswordField jdbcDriverClassPasswordField = new PasswordField();
+        jdbcDriverClassPasswordField.setId("jdbcDriverClassPasswordField");
+        testObjectConfigPane.add(jdbcDriverClassNameLabel, 0, rowIndex);
+        testObjectConfigPane.add(jdbcDriverClassPasswordField, 1, rowIndex++);
 
         Label dbURLLabel = new Label("数据库URL");
         TextField dbURLTextField = new TextField();
