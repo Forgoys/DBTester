@@ -46,6 +46,7 @@ public class TPCCTester extends TestItem {
      * 并发进程数
      */
     private int terminals = 8;
+
     /**
      * 加载进程数
      */
@@ -60,6 +61,12 @@ public class TPCCTester extends TestItem {
         this.testName = testName;
         this.sshStmt = sshStmt;
     }
+
+    @Override
+    public void generateTimeData() {
+
+    }
+
     public TPCCTester(String testName, SSHConnection sshStmt, DBConnection DBStmt) {
         super(testName, sshStmt, DBStmt);
     }
@@ -67,9 +74,6 @@ public class TPCCTester extends TestItem {
     public TPCCTester(String testName, SSHConnection sshStmt, DBConnection DBStmt, TestArguments testArgs) {
         super(testName, sshStmt, DBStmt, testArgs);
     }
-
-
-
 
     /**
      * 测试环境准备：软件部署、数据集导入
@@ -214,10 +218,6 @@ public class TPCCTester extends TestItem {
         return null;
     }
 
-    @Override
-    public void generateTimeData() {
-
-    }
 
     @Override
     public TestResult getTestResults() {
@@ -236,11 +236,18 @@ public class TPCCTester extends TestItem {
 
     public static void main(String[] args) {
         SSHConnection connection = new SSHConnection("10.181.8.216", 22, "wlx", "Admin@wlx");
-        if(connection.sshConnect()) {
-            connection.executeCommand("cd /home/wlx");
-            String out = connection.executeCommand("pwd");
-            System.out.println(out);
+        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
+                "conn=jdbc:oscar://10.181.8.146:2003/TPCC_20",
+                "SYSDBA",
+                "szoscar55");
+//        if(connection.sshConnect()) {
+//            connection.executeCommand("cd /home/wlx");
+//            String out = connection.executeCommand("pwd");
+//            System.out.println(out);
+//        }
+//        connection.sshDisconnect();
+        if(dbConnection.connect()) {
+            System.out.println("数据库成功连接");
         }
-        connection.sshDisconnect();
     }
 }
