@@ -9,6 +9,7 @@ import java.sql.*;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+
 public class DBConnection {
     private String jdbcDriverPath;
     private String jdbcDriverClassName;
@@ -16,18 +17,62 @@ public class DBConnection {
     private String username;
     private String password;
 
+    /**
+     * 这个数据库的名字，比如Postgresql等等
+     */
+    private String dbBrandName;
+
+    /**
+     * 要连接的数据库的名字
+     */
+    private String dbName;
+
     private Connection connection;
 
     public DBConnection() {
     }
 
-    public DBConnection(String jdbcDriverPath, String jdbcDriverClassName, String dbURL, String username, String password, Connection connection) {
+    public DBConnection(String jdbcDriverPath, String dbURL, String username, String password) {
         this.jdbcDriverPath = jdbcDriverPath;
-        this.jdbcDriverClassName = jdbcDriverClassName;
         this.dbURL = dbURL;
         this.username = username;
         this.password = password;
-        this.connection = connection;
+
+        analyzeURL(dbURL);
+        // 注意：实际设置jdbcDriverClassName的逻辑可能需要根据jdbcDriverPath来实现，
+        // 这里的实现可能需要你根据实际的JAR文件或其他逻辑来调整
+        this.jdbcDriverClassName = determineDriverClassName(jdbcDriverPath);
+    }
+
+    /**
+     * 根据数据库url分析数据库品牌名和数据库名
+     * @param url
+     */
+    private void analyzeURL(String url) {
+        if (url.startsWith("jdbc:postgresql://")) {
+            this.dbBrandName = "PostgreSQL";
+        } else if (url.startsWith("jdbc:mysql://")) {
+            this.dbBrandName = "MySQL";
+        } else if (url.startsWith("jdbc:oracle:thin:")) {
+            this.dbBrandName = "Oracle";
+        } else if (url.startsWith("jdbc:sqlserver://")) {
+            this.dbBrandName = "SQL Server";
+        } else if (url.startsWith("jdbc:sqlite:")) {
+            this.dbBrandName = "SQLite";
+        } // 可以根据需要添加更多的数据库品牌
+
+        // 尝试解析数据库名
+        int dbNameStart = url.lastIndexOf('/') + 1;
+        int dbNameEnd = url.indexOf('?', dbNameStart);
+        dbNameEnd = (dbNameEnd == -1) ? url.length() : dbNameEnd;
+        this.dbName = url.substring(dbNameStart, dbNameEnd);
+    }
+
+    private String determineDriverClassName(String jdbcDriverPath) {
+        // 这个方法的实现需要根据实际情况来设计。
+        // 在很多情况下，驱动类名需要从用户那里获取或者通过分析驱动文件来确定。
+        // 这里只是提供一个示例接口，实际实现可能会更复杂。
+        return ""; // 返回空字符串或根据路径推断的类名
     }
 
     public boolean connect() {
@@ -182,5 +227,20 @@ public class DBConnection {
         this.jdbcDriverClassName = jdbcDriverClassName;
     }
 
-}
 
+    public String getDbBrandName() {
+        return dbBrandName;
+    }
+
+    public void setDbBrandName(String dbBrandName) {
+        this.dbBrandName = dbBrandName;
+    }
+
+    public String getDBName() {
+        return dbName;
+    }
+
+    public void setDBName(String dbName) {
+        this.dbName = dbName;
+    }
+}
