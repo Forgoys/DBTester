@@ -6,6 +6,7 @@ import backend.tester.TestItem;
 import frontend.connection.DBConnection;
 import frontend.connection.SSHConnection;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +15,11 @@ public class TPCCTester extends TestItem {
 
     public static String testHomePath;
 
+    public static String toolPackagePath = "/home/wlx/cx";
 
-    public static final String toolName = "benchmarksql-5.0";
+    public static final String TOOLNAME = "benchmarksql-5.0";
 
-    private static String toolPath;
+    private String toolPath = toolPackagePath + "/" + TOOLNAME;
 
 
     // 指定要检查的文件名列表
@@ -79,10 +81,11 @@ public class TPCCTester extends TestItem {
      * 测试环境准备：软件部署、数据集导入
      */
     @Override
-    public void testEnvPrepare() {
+    public void testEnvPrepare() throws RuntimeException{
         // 创建测试目录
-        String testHomePath ="/home/" + sshStmt.getUserName() + "/RDB_test/tpcc";
-        sshStmt.executeCommand("mkdir -p " + testHomePath);
+        testHomePath ="/home/" + sshStmt.getUserName() + "/RDB_test/tpcc";
+        String out = sshStmt.executeCommand("mkdir -p " + testHomePath);
+        System.out.println(out);
         // 下载测试工具benchmark
         prepareTools();
         // 准备测试数据
@@ -95,21 +98,26 @@ public class TPCCTester extends TestItem {
      * 部署工具到testHomePath
      */
     private void prepareTools() {
-        toolPath = testHomePath + "/" + toolName;
+//        toolPath = testHomePath + "/" + toolName;
         // 部署benchmarksql到testHomePath/toolName
+
 
         // 检查是否存在工具包目录
         sshStmt.executeCommand("test -d " + toolPath);
-        String out = sshStmt.executeCommand("echo $?");
+        String out = sshStmt.executeCommand("echo $?").trim();
         if(out.equals("0")) {
-            sshStmt.executeCommand("cd " + toolPath);
+            out = sshStmt.executeCommand("cd " + toolPath);
+            System.out.println(out);
             out = sshStmt.executeCommand("ls");
             // 如果还未编译过工具
             if(!out.contains("hasCompiled.dat")) {
                 // 编译工具
-                sshStmt.executeCommand("ant");
+                out = sshStmt.executeCommand("ant");
 
                 // 检查工具是否编译成功
+//                if(!out.contains("BUILD SUCCESSFUL")) {
+//
+//                }
 
                 // 如果编译成功,则添加标志文件
                 sshStmt.executeCommand("touch hasCompiled.dat");
@@ -118,14 +126,16 @@ public class TPCCTester extends TestItem {
         }
     }
 
-    public void dataPrepare() {
+    public void dataPrepare() throws RuntimeException{
         if(this.testArgs == null) {
             throw new IllegalArgumentException("测试参数未配置");
         }
         dataSize =  Integer.parseInt(testArgs.values.get(0));
         terminals = Integer.parseInt(testArgs.values.get(1));
         loadWorkers = Integer.parseInt(testArgs.values.get(2));
-
+        if(dataSize * 10 <= terminals) {
+            throw new IllegalArgumentException("并发线程数需要小于10倍数据规模");
+        }
         // 不存在数据集则创建数据集
         dataSetPath = testHomePath + "/TPCC_Files/warehouses_" + dataSize;
         if(!existDataSetFile(dataSetPath)) {
@@ -235,19 +245,29 @@ public class TPCCTester extends TestItem {
     }
 
     public static void main(String[] args) {
-        SSHConnection connection = new SSHConnection("10.181.8.216", 22, "wlx", "Admin@wlx");
-        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
-                "conn=jdbc:oscar://10.181.8.146:2003/TPCC_20",
+        SSHConnection connection = new SSHConnection("10.181.8.146", 22, "wlx", "Admin@wlx");
+        DBConnection dbConnection = new DBConnection("/home/autotuning/cx/oscarJDBC.jar",
+                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
                 "SYSDBA",
                 "szoscar55");
-//        if(connection.sshConnect()) {
-//            connection.executeCommand("cd /home/wlx");
-//            String out = connection.executeCommand("pwd");
-//            System.out.println(out);
-//        }
-//        connection.sshDisconnect();
-        if(dbConnection.connect()) {
-            System.out.println("数据库成功连接");
+        TestArguments arguments = new TestArguments();
+        arguments.values = new ArrayList<>();
+        arguments.values.add("2");
+        arguments.values.add("128");
+        arguments.values.add("16");
+        arguments.values.add("1");
+
+        connection.sshConnect();
+        TPCCTester tpccTester = new TPCCTester("tpcc", connection, dbConnection, arguments);
+        try {
+            connection.executeCommand("cd /home/wlx/cx/benchmarksql-5.0");
+            System.out.println(connection.executeCommand("pwd"));
+            System.out.println(connection.executeCommand("ls"));
+            tpccTester.testEnvPrepare();
+            tpccTester.startTest();
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
         }
+
     }
 }
