@@ -18,9 +18,7 @@ public class TestArguments {
             new ArgumentProperty("并发连接数", new String[]{"8","16","32","64","128","256"}),
             new ArgumentProperty("加载进程数", new String[]{"1","2","4","8","16","32","64"}),
             new ArgumentProperty("运行时长(min)", new String[]{"1","5","10","20","30","40",
-                    "50","60","70","80","90","100","110","120"}),
-            new ArgumentProperty("并发连接数", new String[]{"8", "16", "32", "64", "128", "256"}),
-            new ArgumentProperty("加载进程数", new String[]{"1", "2", "4", "8", "16", "32", "64"}),
+                    "50","60","70","80","90","100","110","120"})
     };
 
 
