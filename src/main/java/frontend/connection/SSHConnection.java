@@ -51,7 +51,7 @@ public class SSHConnection {
      * @param userName
      * @param password
      */
-    public void connectToNewSSH(String ip, int port, String userName, String password) {
+    public boolean connectToNewSSH(String ip, int port, String userName, String password) {
         this.ip = ip;
         this.port = port;
         this.userName = userName;
@@ -61,11 +61,15 @@ public class SSHConnection {
         if (isConnected) {
             alert = new Alert(Alert.AlertType.INFORMATION, "成功连接到 " + ip, ButtonType.OK);
             alert.setHeaderText("SSH连接成功");
+            status = true;
         } else {
             alert = new Alert(Alert.AlertType.ERROR, "无法连接到 " + ip + "。请检查您的连接信息后再试。", ButtonType.OK);
             alert.setHeaderText("SSH连接失败");
+            status = false;
         }
         alert.showAndWait();
+
+        return status;
     }
 
     public void sshDisconnect() {
@@ -124,9 +128,57 @@ public class SSHConnection {
         return output.toString();
     }
 
+    public String executeCommand(String command, boolean useSudo) {
+        if (session == null || !session.isConnected()) {
+            throw new IllegalStateException("SSH session is not connected. Please connect first.");
+        }
+
+        if (useSudo) {
+            command = "echo " + password + " | sudo -S " + command;
+        }
+
+        StringBuilder output = new StringBuilder();
+        try {
+            Channel channel = session.openChannel("exec");
+            ((ChannelExec) channel).setCommand(command);
+
+            channel.setInputStream(null);
+            ((ChannelExec) channel).setErrStream(System.err);
+
+            InputStream in = channel.getInputStream();
+            channel.connect();
+
+            byte[] tmp = new byte[1024];
+            while (true) {
+                while (in.available() > 0) {
+                    int i = in.read(tmp, 0, 1024);
+                    if (i < 0) break;
+                    output.append(new String(tmp, 0, i));
+                }
+                if (channel.isClosed()) {
+                    if (in.available() > 0) continue;
+                    break;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            channel.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return output.toString();
+    }
+
     // Method to execute a shell script located at a given path on the remote machine
     public String executeShellScript(String scriptPath) {
         return executeCommand("bash " + scriptPath);
+    }
+    public String executeShellScript(String scriptPath, boolean useSudo) {
+        return executeCommand("bash " + scriptPath, useSudo);
     }
 
     public String getIp() {
