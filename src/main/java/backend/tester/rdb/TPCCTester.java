@@ -3,14 +3,11 @@ package backend.tester.rdb;
 import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
-import com.jcraft.jsch.ChannelExec;
 import frontend.connection.DBConnection;
 import frontend.connection.SSHConnection;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TPCCTester extends TestItem {
 
@@ -21,11 +18,24 @@ public class TPCCTester extends TestItem {
 
     private static String toolPath;
 
+
+    // 指定要检查的文件名列表
+    public static final String[] DATA_SET_FILE_NAMES = {"config.csv", "cust-hist.csv", "customer.csv", "district.csv", "item.csv",
+            "new-order.csv", "order.csv", "order-line.csv", "stock.csv", "warehouse.csv"};
+
+    /**
+     * 数据集路径
+     */
+    private String dataSetPath;
+
     /**
      * 模板配置文件名字
      */
-    public static final String tmpPropsFileName = "props";
+    public static final String TMP_PROPS_NAME = "props";
 
+    /**
+     * 配置文件名
+     */
     private String propsFileName;
     /**
      * 数据规模
@@ -34,11 +44,16 @@ public class TPCCTester extends TestItem {
     /**
      * 并发进程数
      */
-    private int paraThreadNum = 8;
+    private int terminals = 8;
     /**
      * 加载进程数
      */
-    private int loadThreadNum = 1;
+    private int loadWorkers = 1;
+
+    /**
+     * 运行时长，分钟数
+     */
+    private int runMins = 5;
 
     public TPCCTester(String testName, SSHConnection sshStmt) {
         this.testName = testName;
@@ -52,6 +67,24 @@ public class TPCCTester extends TestItem {
         super(testName, sshStmt, DBStmt, testArgs);
     }
 
+
+
+
+    /**
+     * 测试环境准备：软件部署、数据集导入
+     */
+    @Override
+    public void testEnvPrepare() {
+        // 创建测试目录
+        String testHomePath ="/home/" + sshStmt.getUserName() + "/RDB_test/tpcc";
+        sshStmt.executeCommand("mkdir -p " + testHomePath);
+        // 下载测试工具benchmark
+        prepareTools();
+        // 准备测试数据
+        dataPrepare();
+        // 导入测试数据到数据库
+        importDataSetToDB();
+    }
 
     /**
      * 部署工具到testHomePath
@@ -78,37 +111,18 @@ public class TPCCTester extends TestItem {
             }
 
         }
-
-
     }
-
-    /**
-     * 测试环境准备：软件部署、数据集导入
-     */
-    @Override
-    public void testEnvPrepare() {
-        // 创建测试目录
-        String testHomePath ="/home/" + sshStmt.getUserName() + "/RDB_test/tpcc";
-        sshStmt.executeCommand("mkdir -p " + testHomePath);
-        // 下载测试工具benchmark
-        prepareTools();
-        // 准备测试数据
-        dataPrepare();
-        // 导入测试数据到数据库
-        importDataSetToDB();
-    }
-
 
     public void dataPrepare() {
         if(this.testArgs == null) {
             throw new IllegalArgumentException("测试参数未配置");
         }
         dataSize =  Integer.parseInt(testArgs.values.get(0));
-        paraThreadNum = Integer.parseInt(testArgs.values.get(1));
-        loadThreadNum = Integer.parseInt(testArgs.values.get(2));
+        terminals = Integer.parseInt(testArgs.values.get(1));
+        loadWorkers = Integer.parseInt(testArgs.values.get(2));
 
         // 不存在数据集则创建数据集
-        String dataSetPath = testHomePath + "/TPCC_Files/warehouses_" + dataSize;
+        dataSetPath = testHomePath + "/TPCC_Files/warehouses_" + dataSize;
         if(!existDataSetFile(dataSetPath)) {
             createDataSet(dataSetPath);
         }
@@ -117,21 +131,18 @@ public class TPCCTester extends TestItem {
     /**
      * 检查测试数据集是否存在
      */
-    private boolean existDataSetFile(String remoteDirectory) {
-        // 指定要检查的文件名列表
-        String[] filenames = {"config.csv", "cust-hist.csv", "customer.csv", "district.csv", "item.csv",
-                "new-order.csv", "order.csv", "order-line.csv", "stock.csv", "warehouse.csv"};
+    private boolean existDataSetFile(String dataSetPath) {
         // 检查目录是否存在
         // 执行命令检查目录下是否存在文件
-        String execOut = sshStmt.executeCommand("ls " + remoteDirectory);
-        for(String name : filenames) {
+        String execOut = sshStmt.executeCommand("ls " + dataSetPath);
+        for(String name : DATA_SET_FILE_NAMES) {
             if(!execOut.contains(name)) {
                 return false;
             }
         }
 
         // 检查 config.csv 文件中warehousesSize是否为要测试的dataSize
-        String filePath = remoteDirectory + "/config.csv";
+        String filePath = dataSetPath + "/config.csv";
         execOut = sshStmt.executeCommand("head -n 1 " + filePath);
         return execOut.contains("warehouses," + dataSize);
     }
@@ -141,29 +152,52 @@ public class TPCCTester extends TestItem {
         sshStmt.executeCommand("mkdir -p " + fileDir);
         // 创建配置文件
         createPropsFile();
-        //
+        // 执行数据生成脚本
         sshStmt.executeCommand("cd " + toolPath + "/run");
-//        propsFileName = ""
         sshStmt.executeCommand("sh runDatabaseBuild.sh" + propsFileName);
-
     }
 
     /**
      * 根据模板配置文件创建配置文件
      */
     private void createPropsFile() {
-        propsFileName = "props_" + dataSize;
+        // 配置文件命名格式：“props_dbBrand_dataSize"
+        propsFileName = "props_" + DBStmt.getDbBrandName() + dataSize;
+        // 删除旧的配置文件
         sshStmt.executeCommand("cd " + toolPath + "/run");
         sshStmt.executeCommand("rm " + propsFileName);
-        // 根据模板文件创建新的配置文件
-
+        // 新建配置文件
+        sshStmt.executeCommand("cp " + TMP_PROPS_NAME + " " + propsFileName);
+        // 获取配置文件中各参数的实际值
+        HashMap<String, String> argsMap = getRealValueHashMap();
+        // 配置文件中值替换
+        for(Map.Entry<String, String> entry : argsMap.entrySet()) {
+            // 替换对应值的命令
+            String cmd = String.format("sed -i \"s/^%s=.*/%s=%s/\" %s", entry.getKey(), entry.getKey(), entry.getValue(), propsFileName);
+            sshStmt.executeCommand(cmd);
+        }
     }
 
+    private HashMap<String, String> getRealValueHashMap() {
+        HashMap<String, String> argsMap = new HashMap<>();
+        argsMap.put("db", DBStmt.getDbBrandName());
+        argsMap.put("driver", DBStmt.getJdbcDriverClassName());
+        argsMap.put("conn", DBStmt.getDbURL());
+        argsMap.put("user", DBStmt.getUsername());
+        argsMap.put("password", DBStmt.getPassword());
+        argsMap.put("warehouses", String.valueOf(dataSize));
+        argsMap.put("fileLocation", dataSetPath);
+        argsMap.put("terminals", String.valueOf(terminals));
+        argsMap.put("loadWorkers", String.valueOf(loadWorkers));
+        argsMap.put("runMins", String.valueOf(runMins));
+        return argsMap;
+    }
+
+    // 执行文件导入数据库的脚本
     private void importDataSetToDB() {
         sshStmt.executeCommand("cd " + toolPath + "/run");
         sshStmt.executeCommand("sh import_data_TPCC.sh " + propsFileName);
     }
-
 
 
     /**
