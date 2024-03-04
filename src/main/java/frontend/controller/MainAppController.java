@@ -23,6 +23,13 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class MainAppController {
+    @FXML
+    private TitledPane sshConnectionTitledPane;
+    @FXML
+    private TitledPane testObjectConfigTitledPane;
+    @FXML
+    private TitledPane testProjectConfigTitledPane;
+
     // ssh 连接参数
     @FXML
     private TextField sshIPInput;
@@ -84,6 +91,16 @@ public class MainAppController {
      */
     OtherTestController otherTestController;
 
+    @FXML
+    private void initialize() {
+        // 初始化时不允许展开
+//        sshConnectionTitledPane.setExpanded(true);
+//        testObjectConfigTitledPane.setDisable(false);
+//        testProjectConfigTitledPane.setDisable(false);
+        testObjectConfigTitledPane.setDisable(true);
+        testProjectConfigTitledPane.setDisable(true);
+    }
+
     // =================================== ssh连接服务器 =================================================
 
     /**
@@ -98,21 +115,31 @@ public class MainAppController {
 
         // 如果当前有连接，检查连接信息是否相同
         if (currentSSHConnection != null && currentSSHConnection.getStatus()) {
-            // 检查IP、端口、用户名是否相同
             if (currentSSHConnection.getIp().equals(ip) && currentSSHConnection.getPort() == port && currentSSHConnection.getUserName().equals(userName)) {
                 Util.popUpInfo("当前已连接到相同的服务器，无需重新连接。", "SSH连接信息");
+                return; // 早期返回，避免进一步的处理
             } else {
                 Optional<ButtonType> result = Util.popUpChoose("当前已有其他SSH连接，是否断开并重新连接到新的服务器？", "确认新的SSH连接");
                 if (result.isPresent() && result.get() == ButtonType.YES) {
                     currentSSHConnection.sshDisconnect(); // 断开当前连接
-                    currentSSHConnection.connectToNewSSH(ip, port, userName, password); // 连接到新的服务器
+                } else {
+                    return; // 用户选择不断开当前连接，直接返回
                 }
             }
+        }
+
+        // 尝试连接到新的服务器
+        if (currentSSHConnection == null) {
+            currentSSHConnection = new SSHConnection(ip, port, userName, password); // 假设SSHConnection有无参数的构造函数
+        }
+        boolean connected = currentSSHConnection.sshConnect(); // 假设这个方法返回一个boolean值表示是否连接成功
+
+        // 根据连接结果更新UI
+        if (connected) {
+            Util.popUpInfo("成功连接到服务器。", "SSH连接成功");
+            testObjectConfigTitledPane.setDisable(false);
         } else {
-            // 如果没有当前连接，直接连接
-            if (currentSSHConnection != null) {
-                currentSSHConnection.connectToNewSSH(ip, port, userName, password);
-            }
+            Util.popUpInfo("无法连接到服务器，请检查输入的参数。", "SSH连接失败");
         }
     }
 
@@ -196,6 +223,7 @@ public class MainAppController {
         // 尝试连接数据库
         if (dbConnection.connect()) {
             Util.popUpInfo("数据库连接成功！", "连接成功");
+            testProjectConfigTitledPane.setDisable(false);
         } else {
             Util.popUpInfo("数据库连接失败，请检查参数！", "连接失败");
         }
@@ -215,6 +243,7 @@ public class MainAppController {
         // 检查是否挂载成功，这里需要在FSConnection的mountFS方法内实现具体的挂载逻辑和成功失败的检测
         if (fsConnection.isMounted()) {
             Util.popUpInfo("文件系统挂载成功！", "挂载成功");
+            testProjectConfigTitledPane.setDisable(false);
         } else {
             Util.popUpInfo("文件系统挂载失败，请检查参数！", "挂载失败");
         }

@@ -51,7 +51,7 @@ public class SSHConnection {
      * @param userName
      * @param password
      */
-    public void connectToNewSSH(String ip, int port, String userName, String password) {
+    public boolean connectToNewSSH(String ip, int port, String userName, String password) {
         this.ip = ip;
         this.port = port;
         this.userName = userName;
@@ -61,11 +61,15 @@ public class SSHConnection {
         if (isConnected) {
             alert = new Alert(Alert.AlertType.INFORMATION, "成功连接到 " + ip, ButtonType.OK);
             alert.setHeaderText("SSH连接成功");
+            status = true;
         } else {
             alert = new Alert(Alert.AlertType.ERROR, "无法连接到 " + ip + "。请检查您的连接信息后再试。", ButtonType.OK);
             alert.setHeaderText("SSH连接失败");
+            status = false;
         }
         alert.showAndWait();
+
+        return status;
     }
 
     public void sshDisconnect() {
