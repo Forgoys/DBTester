@@ -52,20 +52,6 @@ public class TPCCTester extends TestItem {
         super(testName, sshStmt, DBStmt, testArgs);
     }
 
-    /**
-     * 测试环境准备：软件部署、数据集导入
-     */
-    public void testEnvPrepare() {
-        // 创建测试目录
-        String testHomePath ="/home/" + sshStmt.getUserName() + "/RDB_test/tpcc";
-        sshStmt.executeCommand("mkdir -p " + testHomePath);
-        // 下载测试工具benchmark
-        prepareTools();
-        // 准备测试数据
-        dataPrepare();
-        // 导入测试数据到数据库
-        importDataSetToDB();
-    }
 
     /**
      * 部署工具到testHomePath
@@ -96,7 +82,23 @@ public class TPCCTester extends TestItem {
 
     }
 
+    /**
+     * 测试环境准备：软件部署、数据集导入
+     */
     @Override
+    public void testEnvPrepare() {
+        // 创建测试目录
+        String testHomePath ="/home/" + sshStmt.getUserName() + "/RDB_test/tpcc";
+        sshStmt.executeCommand("mkdir -p " + testHomePath);
+        // 下载测试工具benchmark
+        prepareTools();
+        // 准备测试数据
+        dataPrepare();
+        // 导入测试数据到数据库
+        importDataSetToDB();
+    }
+
+
     public void dataPrepare() {
         if(this.testArgs == null) {
             throw new IllegalArgumentException("测试参数未配置");

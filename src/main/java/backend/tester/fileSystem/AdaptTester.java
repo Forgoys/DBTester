@@ -17,7 +17,7 @@ public class AdaptTester extends TestItem {
     }
 
     @Override
-    public void dataPrepare() {
+    public void testEnvPrepare() {
 
     }
 

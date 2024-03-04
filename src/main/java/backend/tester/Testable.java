@@ -4,10 +4,11 @@ import backend.dataset.TestResult;
 import backend.dataset.TestTimeData;
 
 public interface Testable {
+
     /**
-     * 数据准备步骤，如果没有该步骤则不用实现
+     * 测试工具或相关测试环境的部署、数据集的生成、数据导入数据库
      */
-    public void dataPrepare();
+    public void testEnvPrepare();
 
     /**
      * 在该方法中开始测试。
