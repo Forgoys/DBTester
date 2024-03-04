@@ -5,13 +5,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 
 
-public class AdaptTestController {
+public class DBAdaptTestController {
     @FXML
     TextArea sqlTextField;
     @FXML
     TextArea sqlOutputTextArea;
 
-    public AdaptTestController() {}
+    public DBAdaptTestController() {}
 
     public void onExecuteSqlButtonClick(ActionEvent actionEvent) {
         // 清空输出文本区域

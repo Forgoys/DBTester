@@ -7,6 +7,7 @@ import frontend.connection.DBConnection;
 import frontend.connection.SSHConnection;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TPCCTester extends TestItem {
@@ -206,6 +207,11 @@ public class TPCCTester extends TestItem {
     @Override
     public void startTest() {
 
+    }
+
+    @Override
+    public List<List<Double>> getTimeData() {
+        return null;
     }
 
     @Override

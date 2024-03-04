@@ -403,11 +403,6 @@ public class MainAppController {
 //                testItem.startTest();
 //                testItem.getTimeData();
 //                testItem.getTestResults();
-
-
-
-
-
                 break;
             case "TPC-H":
                 break;

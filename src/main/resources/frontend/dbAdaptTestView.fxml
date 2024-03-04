@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="sqlExecutionVBox" spacing="10" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.controller.AdaptTestController">
+<VBox fx:id="sqlExecutionVBox" spacing="10" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.controller.DBAdaptTestController">
     <padding>
         <Insets bottom="10" left="10" right="10" top="10" />
     </padding>
