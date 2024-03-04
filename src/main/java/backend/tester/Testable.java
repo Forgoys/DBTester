@@ -3,8 +3,11 @@ package backend.tester;
 import backend.dataset.TestResult;
 import backend.dataset.TestTimeData;
 
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public interface Testable {
 
@@ -17,7 +20,7 @@ public interface Testable {
      * 在该方法中开始测试。
      * 开始测试前应检查测试状态 {@link TestItem#status}：测试是否就绪、运行中的测试不能重复运行。
      */
-    public void startTest();
+    public void startTest() throws IOException, InterruptedException;
 
     /**
      * 当调用此方法时，将采样到的CPU利用率、内存占用率、磁盘读速度、磁盘写速度（数据库）或者IOPS、读带宽、写带宽、读延迟、写延迟（文件系统的可靠性测试）
