@@ -3,6 +3,7 @@ package frontend.controller;
 import backend.dataset.ArgumentProperty;
 import backend.dataset.TestArguments;
 import backend.tester.TestItem;
+import backend.tester.rdb.TPCCTester;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
 import frontend.connection.SSHConnection;
@@ -17,19 +18,43 @@ import javafx.stage.Stage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 public class MainAppController {
+    public static SSHConnection currentSSHConnection;
+    /**
+     * 数据库连接
+     */
+    public static DBConnection currentDBConnection;
+    /**
+     * 文件系统连接
+     */
+    public static FSConnection currentFSConnection;
+    /**
+     * SQL执行界面的控制器
+     */
+    AdaptTestController adaptTestController;
+    /**
+     * 文件系统可靠性测试结果界面的控制器
+     */
+    FSReliabilityTestController fsReliabilityTestController;
+    /**
+     * 文件系统其他测试结果界面的控制器
+     */
+    FSOtherTestController fsOtherTestController;
+    /**
+     * 其他测试结果界面的控制器
+     */
+    OtherTestController otherTestController;
+
+    TestItem testItem;
     @FXML
     private TitledPane sshConnectionTitledPane;
     @FXML
     private TitledPane testObjectConfigTitledPane;
     @FXML
     private TitledPane testProjectConfigTitledPane;
-
     // ssh 连接参数
     @FXML
     private TextField sshIPInput;
@@ -39,19 +64,6 @@ public class MainAppController {
     private TextField sshUserNameInput;
     @FXML
     private TextField sshPasswordInput;
-    public static SSHConnection currentSSHConnection;
-
-    /**
-     * 数据库连接
-     */
-    public static DBConnection currentDBConnection;
-
-    /**
-     * 文件系统连接
-     */
-    public static FSConnection currentFSConnection;
-
-    private TestItem testItem;
 
     /**
      * 测试对象选择下拉列表
@@ -63,7 +75,6 @@ public class MainAppController {
      */
     @FXML
     private GridPane testObjectConfigPane;
-
     /**
      * 测试项目选择下拉列表
      */
@@ -74,22 +85,11 @@ public class MainAppController {
      */
     @FXML
     private GridPane testProjectConfigPane;
-
     /**
      * 右侧测试结果UI
      */
     @FXML
     private ScrollPane rightScrollPane;
-
-    /**
-     * SQL执行界面的控制器
-     */
-    AdaptTestController adaptTestController;
-
-    /**
-     * 其他测试结果界面的控制器
-     */
-    OtherTestController otherTestController;
 
     @FXML
     private void initialize() {
@@ -151,7 +151,7 @@ public class MainAppController {
     @FXML
     private void onTestObjectSelect() {
         String selectedTestObject = testObjectSelectBox.getValue();
-        clearGridPaneRowsAfterFirst(testObjectConfigPane);
+        Util.clearGridPaneRowsAfterFirst(testObjectConfigPane);
         testProjectSelectBox.getItems().clear();
 
         int rowIndex = 1;
@@ -207,7 +207,7 @@ public class MainAppController {
     private void connectDatabase() {
         // 获取UI上的参数
         String jdbcDriverPath = ((Label) testObjectConfigPane.lookup("#jdbcDriverNameLabel")).getText();
-        String jdbcDriverClassName = ((PasswordField) testObjectConfigPane.lookup("#jdbcDriverClassPasswordField")).getText();
+//        String jdbcDriverClassName = ((PasswordField) testObjectConfigPane.lookup("#jdbcDriverClassPasswordField")).getText();
         String dbURL = ((TextField) testObjectConfigPane.lookup("#dbURLTextField")).getText();
         String username = ((TextField) testObjectConfigPane.lookup("#dbUserTextField")).getText();
         String password = ((TextField) testObjectConfigPane.lookup("#dbPasswordTextField")).getText();
@@ -215,7 +215,7 @@ public class MainAppController {
         // 创建DBConnection对象
         DBConnection dbConnection = new DBConnection();
         dbConnection.setJdbcDriverPath(jdbcDriverPath);
-        dbConnection.setJdbcDriverClassName(jdbcDriverClassName);
+//        dbConnection.setJdbcDriverClassName(jdbcDriverClassName);
         dbConnection.setDbURL(dbURL);
         dbConnection.setUsername(username);
         dbConnection.setPassword(password);
@@ -251,6 +251,7 @@ public class MainAppController {
 
     /**
      * 设置数据库连接参数配置的相关UI
+     *
      * @param rowIndex 从gridPane的第几行开始装参数配置的“参数名-输入框”对
      */
     private int configureDBConnectUI(int rowIndex) {
@@ -275,11 +276,11 @@ public class MainAppController {
 
         testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++);
 
-        Label jdbcDriverClassNameLabel = new Label("JDBC驱动类名");
-        PasswordField jdbcDriverClassPasswordField = new PasswordField();
-        jdbcDriverClassPasswordField.setId("jdbcDriverClassPasswordField");
-        testObjectConfigPane.add(jdbcDriverClassNameLabel, 0, rowIndex);
-        testObjectConfigPane.add(jdbcDriverClassPasswordField, 1, rowIndex++);
+//        Label jdbcDriverClassNameLabel = new Label("JDBC驱动类名");
+//        PasswordField jdbcDriverClassPasswordField = new PasswordField();
+//        jdbcDriverClassPasswordField.setId("jdbcDriverClassPasswordField");
+//        testObjectConfigPane.add(jdbcDriverClassNameLabel, 0, rowIndex);
+//        testObjectConfigPane.add(jdbcDriverClassPasswordField, 1, rowIndex++);
 
         Label dbURLLabel = new Label("数据库URL");
         TextField dbURLTextField = new TextField();
@@ -304,6 +305,7 @@ public class MainAppController {
 
     /**
      * 设置文件系统挂载参数配置的相关UI
+     *
      * @param rowIndex 从gridPane的第几行开始装参数配置的“参数名-输入框”对
      */
     private int configureFSConnectUI(int rowIndex) {
@@ -337,7 +339,7 @@ public class MainAppController {
      * 根据TestArguments自动设置参数配置UI
      */
     private void configureTestProjectParmUI() {
-        clearGridPaneRowsAfterFirst(testProjectConfigPane);
+        Util.clearGridPaneRowsAfterFirst(testProjectConfigPane);
         String testProject = testProjectSelectBox.getValue();
         ArgumentProperty[] properties = TestArguments.getArgPropertiesForTest(testProject);
 
@@ -361,11 +363,13 @@ public class MainAppController {
             rowIndex++;
         }
 
-        // 添加确认按钮
-        Button confirmButton = new Button("确认");
-        confirmButton.setId("testProjectParmConfirmButton");
-        confirmButton.setOnAction(event -> onTestProjectParmConfirmButtonClicked());
-        testProjectConfigPane.add(confirmButton, 1, rowIndex);
+        // 添加确认按钮，适配性不用这个按钮
+        if (!testProject.equals("适配性")) {
+            Button confirmButton = new Button("开始测试");
+            confirmButton.setId("testProjectParmConfirmButton");
+            confirmButton.setOnAction(event -> onTestProjectParmConfirmButtonClicked());
+            testProjectConfigPane.add(confirmButton, 1, rowIndex);
+        }
     }
 
     /**
@@ -377,8 +381,7 @@ public class MainAppController {
 
         for (Node node : testProjectConfigPane.getChildren()) {
             // 只处理TextField和ComboBox
-            if (node instanceof TextField) {
-                TextField textField = (TextField) node;
+            if (node instanceof TextField textField) {
                 testArguments.values.add(textField.getText()); // 添加TextField的值
             } else if (node instanceof ComboBox) {
                 @SuppressWarnings("unchecked")
@@ -394,105 +397,52 @@ public class MainAppController {
 
         // testItem = new TPCCTest(....., testArguments)
 
-    }
-
-    private void configureTestProjectParmUI_backup() {
-        clearGridPaneRowsAfterFirst(testProjectConfigPane);
         String testProject = testProjectSelectBox.getValue();
-        int rowIndex = 1;
-        switch (testProject) {
+        switch (testProjectSelectBox.getValue()) {
             case "TPC-C":
-                ComboBox<String> tpccWarehousesComboBox = new ComboBox<>();
-                tpccWarehousesComboBox.setId("tpccWarehousesComboBox");
-                tpccWarehousesComboBox.getItems().addAll("20", "50", "100", "500", "1000");
-                testProjectConfigPane.add(new Label("数据规模"), 0, rowIndex);
-                testProjectConfigPane.add(tpccWarehousesComboBox, 1, rowIndex++);
+//                testItem = new TPCCTester();
+//                testItem.testEnvPrepare();
+//                testItem.startTest();
+//                testItem.getTimeData();
+//                testItem.getTestResults();
+
+
+
+
+
                 break;
             case "TPC-H":
-                ComboBox<String> tpchDataScaleComboBox = new ComboBox<>();
-                tpchDataScaleComboBox.setId("tpccWarehousesComboBox");
-                tpchDataScaleComboBox.getItems().addAll("5", "10", "20");
-                testProjectConfigPane.add(new Label("数据规模"), 0, rowIndex);
-                testProjectConfigPane.add(tpchDataScaleComboBox, 1, rowIndex++);
                 break;
-            case "可靠性测试":
-                String testObject = testObjectSelectBox.getValue();
-                switch (testObject) {
-                    case "PolarDB":
-                    case "神通数据库":
-                    case "OpenGauss":
-                        testProjectConfigPane.add(new Label("CSV数据文件设置："), 0, rowIndex++);
-                        // 在这里补充代码
-                        // CSV数据文件设置部分
-                        Label fileNameLabel = new Label("未选择文件");
-                        testProjectConfigPane.add(new Label("CSV数据文件"), 0, rowIndex);
-                        testProjectConfigPane.add(fileNameLabel, 1, rowIndex++);
-                        Button fileChooserButton = new Button("选择文件");
-                        fileChooserButton.setOnAction(e -> {
-                            FileChooser fileChooser = new FileChooser();
-                            fileChooser.setTitle("选择CSV数据文件");
-                            // 设置初始目录为程序的当前工作目录
-                            fileChooser.setInitialDirectory(new java.io.File(System.getProperty("user.dir")));
-                            // 设置文件过滤器，只允许CSV文件
-                            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV 文件 (*.csv)", "*.csv"));
-
-                            // 显示文件选择器，并获取选择的文件
-                            Stage stage = (Stage) testObjectSelectBox.getScene().getWindow(); // 获取当前窗口作为父窗口
-                            java.io.File selectedFile = fileChooser.showOpenDialog(stage);
-                            if (selectedFile != null) {
-                                fileNameLabel.setText(selectedFile.getAbsolutePath());
-                            }
-                        });
-                        testProjectConfigPane.add(fileChooserButton, 1, rowIndex++);
-
-                        // 文件编码设置
-                        ComboBox<String> encodingComboBox = new ComboBox<>();
-                        encodingComboBox.getItems().addAll("UTF-8", "GBK", "ISO-8859-1", "UTF-16");
-                        encodingComboBox.setValue("UTF-8"); // 默认选择UTF-8
-                        testProjectConfigPane.add(new Label("文件编码"), 0, rowIndex);
-                        testProjectConfigPane.add(encodingComboBox, 1, rowIndex++);
-
-                        // 变量名称设置
-                        TextField variableNameTextField = new TextField("query");
-                        testProjectConfigPane.add(new Label("变量名称"), 0, rowIndex);
-                        testProjectConfigPane.add(variableNameTextField, 1, rowIndex++);
-
-                        // 分隔符设置
-                        TextField delimiterTextField = new TextField("!");
-                        testProjectConfigPane.add(new Label("分隔符"), 0, rowIndex);
-                        testProjectConfigPane.add(delimiterTextField, 1, rowIndex++);
-
-                        // 是否允许带引号设置
-                        CheckBox allowQuotesCheckBox = new CheckBox();
-                        allowQuotesCheckBox.setSelected(true); // 默认允许
-                        testProjectConfigPane.add(new Label("是否允许带引号"), 0, rowIndex);
-                        testProjectConfigPane.add(allowQuotesCheckBox, 1, rowIndex++);
-
-                        break;
-                    case "涛思数据库":
-                    case "Lindorm":
-
-                        break;
-                    case "GlusterFS":
-                    case "OceanFS":
-
-                        break;
+            case "写入性能":
+                break;
+            case "查询性能":
+                break;
+            case "可靠性":
+                if (testObjectSelectBox.getValue().equals("InfluxDB") || testObjectSelectBox.getValue().equals("Lindorm") || testObjectSelectBox.getValue().equals("TDengine")) {
+                    ;
+                } else {
+                    ;
                 }
-            case "适配性测试":
+                break;
+            case "适配性":
+
+
                 break;
             case "读写速度测试":
-            case "并发度测试":
 
+                break;
+            case "并发度测试":
+                break;
+            case "可靠性测试":
+                break;
         }
-        // 添加确认按钮
-        Button testProjectParmConfirmButton = new Button("确认");
-        testProjectParmConfirmButton.setOnAction(event -> onTestProjectParmConfirmButtonClicked());
-        testProjectConfigPane.add(testProjectParmConfirmButton, 1, rowIndex, 1, 2);
+
     }
 
     /**
      * 设置右侧的UI
-     * @param testProject
+     *
+     * @param testProject 测试项目名称
      */
     private void configureTestProjectResultUI(String testProject) {
         if (Objects.equals(testProject, "适配性")) {
@@ -504,7 +454,8 @@ public class MainAppController {
 
     /**
      * 根据FXML文件名动态加载视图到ScrollPane中
-     * @param fxmlFile
+     *
+     * @param fxmlFile fxml文件名
      */
     private void loadView(String fxmlFile) {
         try {
@@ -524,37 +475,6 @@ public class MainAppController {
             rightScrollPane.setContent(view);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    /**
-     * 清除gridPane第一行之后的所有行，第一行是测试对象或项目的下拉列表，后面是相关的参数配置
-     * @param gridPane 装了测试对象或项目的gridPane
-     */
-    public void clearGridPaneRowsAfterFirst(GridPane gridPane) {
-        // 创建一个列表来收集所有第一行之后的节点
-        List<Node> nodesToRemove = new ArrayList<>();
-
-        // 遍历GridPane中的所有节点
-        for (Node child : gridPane.getChildren()) {
-            // GridPane.getRowIndex(node)可能返回null，所以使用默认值0
-            Integer rowIndex = GridPane.getRowIndex(child);
-            if (rowIndex == null) {
-                rowIndex = 0;
-            }
-
-            // 如果节点的行索引大于0，则将其添加到待移除列表中
-            if (rowIndex > 0) {
-                nodesToRemove.add(child);
-            }
-        }
-
-        // 移除所有第一行之后的节点
-        gridPane.getChildren().removeAll(nodesToRemove);
-
-        // 可选：清除所有除第一行之外的行约束
-        if (gridPane.getRowConstraints().size() > 1) {
-            gridPane.getRowConstraints().subList(1, gridPane.getRowConstraints().size()).clear();
         }
     }
 
