@@ -4,6 +4,7 @@ import backend.dataset.ArgumentProperty;
 import backend.dataset.TestArguments;
 import backend.tester.TestItem;
 import frontend.connection.DBConnection;
+import frontend.connection.FSConnection;
 import frontend.connection.SSHConnection;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -37,6 +38,11 @@ public class MainAppController {
      * 数据库连接
      */
     public static DBConnection currentDBConnection;
+
+    /**
+     * 文件系统连接
+     */
+    public static FSConnection currentFSConnection;
 
     private TestItem testItem;
 
@@ -174,6 +180,7 @@ public class MainAppController {
     private void connectDatabase() {
         // 实现连接数据库的逻辑
         System.out.println("连接数据库...");
+        currentDBConnection = new DBConnection();
         // 根据之前设置的数据库配置参数进行数据库连接
         // 可能需要访问保存这些参数的变量或控件
     }
