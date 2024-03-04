@@ -87,6 +87,47 @@ public class SSHConnection {
         this.session = session;
     }
 
+    public String executeCommand(String command) {
+        if (session == null || !session.isConnected()) {
+            throw new IllegalStateException("SSH session is not connected. Please connect first.");
+        }
+
+        StringBuilder output = new StringBuilder();
+        try {
+            Channel channel = session.openChannel("exec");
+            ((ChannelExec) channel).setCommand(command);
+
+            channel.setInputStream(null);
+            ((ChannelExec) channel).setErrStream(System.err);
+
+            InputStream in = channel.getInputStream();
+            channel.connect();
+
+            byte[] tmp = new byte[1024];
+            while (true) {
+                while (in.available() > 0) {
+                    int i = in.read(tmp, 0, 1024);
+                    if (i < 0) break;
+                    output.append(new String(tmp, 0, i));
+                }
+                if (channel.isClosed()) {
+                    if (in.available() > 0) continue;
+                    break;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            channel.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return output.toString();
+    }
+
     public String executeCommand(String command, boolean useSudo) {
         if (session == null || !session.isConnected()) {
             throw new IllegalStateException("SSH session is not connected. Please connect first.");
@@ -133,6 +174,9 @@ public class SSHConnection {
     }
 
     // Method to execute a shell script located at a given path on the remote machine
+    public String executeShellScript(String scriptPath) {
+        return executeCommand("bash " + scriptPath);
+    }
     public String executeShellScript(String scriptPath, boolean useSudo) {
         return executeCommand("bash " + scriptPath, useSudo);
     }

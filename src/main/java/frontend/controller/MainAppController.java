@@ -95,10 +95,10 @@ public class MainAppController {
     private void initialize() {
         // 初始化时不允许展开
 //        sshConnectionTitledPane.setExpanded(true);
-//        testObjectConfigTitledPane.setDisable(false);
-//        testProjectConfigTitledPane.setDisable(false);
-        testObjectConfigTitledPane.setDisable(true);
-        testProjectConfigTitledPane.setDisable(true);
+        testObjectConfigTitledPane.setDisable(false);
+        testProjectConfigTitledPane.setDisable(false);
+//        testObjectConfigTitledPane.setDisable(true);
+//        testProjectConfigTitledPane.setDisable(true);
     }
 
     // =================================== ssh连接服务器 =================================================
