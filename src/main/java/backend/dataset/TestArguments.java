@@ -8,6 +8,16 @@ import java.util.List;
  */
 public class TestArguments {
 
+
+    /**
+     * 各数据值，以String格式保存
+     */
+    public ArrayList<String> values;
+
+    public TestArguments() {
+        values = new ArrayList<>();
+    }
+
     //*************************************常量值************************************************
     /**
      * TPCC测试参数属性
@@ -15,10 +25,10 @@ public class TestArguments {
     public static final ArgumentProperty[] TPCC_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试规模，有候选项
             new ArgumentProperty("数据规模", new String[]{"20", "50", "100"}),
-            new ArgumentProperty("并发连接数", new String[]{"8","16","32","64","128","256"}),
-            new ArgumentProperty("加载进程数", new String[]{"1","2","4","8","16","32","64"}),
-            new ArgumentProperty("运行时长(min)", new String[]{"1","5","10","20","30","40",
-                    "50","60","70","80","90","100","110","120"})
+            new ArgumentProperty("并发连接数", new String[]{"8", "16", "32", "64", "128", "256"}),
+            new ArgumentProperty("加载进程数", new String[]{"1", "2", "4", "8", "16", "32", "64"}),
+            new ArgumentProperty("运行时长(min)", new String[]{"1", "5", "10", "20", "30", "40",
+                    "50", "60", "70", "80", "90", "100", "110", "120"})
     };
 
 
@@ -42,24 +52,24 @@ public class TestArguments {
     public static final ArgumentProperty[] FIO_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
-            // 读写方式，有候选项
-            new ArgumentProperty("读写方式", new String[]{"随机读", "随机写", "顺序读", "顺序写", "%70顺序读,%70顺序写", "%70随机读,%30随机写"}),
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项
-            new ArgumentProperty("文件大小", new String[]{"1G", "4G", "8G"}),
+            new ArgumentProperty("文件大小", new String[]{"8K", "1G", "4G", "8G"}),
+            // 读写方式，有候选项
+            new ArgumentProperty("读写方式", new String[]{"随机读", "随机写", "顺序读", "顺序写", "%70顺序读,%30顺序写", "%70随机读,%30随机写"}),
     };
 
     /*
-    * IOZone读写速度测试参数属性
-    * */
+     * IOZone读写速度测试参数属性
+     * */
     public static final ArgumentProperty[] IOZONE_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项
-            new ArgumentProperty("文件大小", new String[]{"1G", "4G", "8G"}),
+            new ArgumentProperty("文件大小", new String[]{"8k", "1G", "4G", "8G"}),
     };
 
     // fio并发度测试参数属性
@@ -76,10 +86,6 @@ public class TestArguments {
             new ArgumentProperty("测试目录"),
     };
 
-    /**
-     * 各数据值，以String格式保存
-     */
-    public ArrayList<String> values;
 
     /**
      * @param testProject 测试项目中文名

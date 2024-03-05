@@ -8,7 +8,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FioReadWriteTest extends TestItem {
     // 用户参数 目录 文件块大小 文件大小 读写方式
@@ -20,13 +23,35 @@ public class FioReadWriteTest extends TestItem {
     // 指令运行结果
     TestResult fioRWTestResult = new TestResult();
 
-    public FioReadWriteTest() {}
+    public FioReadWriteTest() {
+    }
 
-    public FioReadWriteTest(String directory, String bs, String size, String rwIndex) {
+    public FioReadWriteTest(String directory, String bs, String size, String rwOption) {
         this.directory = directory;
         this.bs = bs;
         this.size = size;
-        this.rwIndex = rwIndex;
+        switch (rwOption) {
+            case "随机读":
+                rwIndex = "0";
+                break;
+            case "随机写":
+                rwIndex = "1";
+                break;
+            case "顺序读":
+                rwIndex = "2";
+                break;
+            case "顺序写":
+                rwIndex = "3";
+                break;
+            case "%70顺序读,%30顺序写":
+                rwIndex = "4";
+                break;
+            case "%70随机读,%30随机写":
+                rwIndex = "5";
+                break;
+            default:
+                rwIndex = "0";
+        }
     }
 
     // 安装FIO测试工具
@@ -59,6 +84,8 @@ public class FioReadWriteTest extends TestItem {
         // 设置 fio 测试指令
         String fioCommand = "fio -directory=" + directory + " -ioengine=libaio -direct=1 -iodepth=1 -thread=1 -numjobs=2 -group_reporting -allow_mounted_write=1" + rwList.get(Integer.parseInt(rwIndex)) + " -bs=" + bs + " -size=" + size + " -runtime=60 -name=fioTest";
 
+        System.out.println(fioCommand);
+
         // 创建一个 ProcessBuilder 对象
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command("bash", "-c", fioCommand);
@@ -81,6 +108,8 @@ public class FioReadWriteTest extends TestItem {
         int exitCode = process.waitFor();
         System.out.println("Exit code: " + exitCode);
 
+        System.out.println("指令运行结束");
+
         // 提取出结果并保存到TestResult
         fioResultSave(results);
 
@@ -93,25 +122,61 @@ public class FioReadWriteTest extends TestItem {
     }
 
     public void fioResultSave(List<String> results) {
-        String iops = "";
-        String bw = "";
-        String lat = "";
-        // 提取 iops、bw 和 lat 指标
+        StringBuilder textBuilder = new StringBuilder();
         for (String result : results) {
-            if (result.contains("iops")) {
-                iops = result.split(":")[1].trim();
-                System.out.println("IOPS: " + iops);
-            } else if (result.contains("bw")) {
-                bw = result.split(":")[1].trim();
-                System.out.println("Bandwidth: " + bw);
-            } else if (result.contains("lat")) {
-                lat = result.split(":")[1].trim();
-                System.out.println("Latency: " + lat);
-            }
+            textBuilder.append(result);
         }
+        String text = textBuilder.toString();
+        System.out.println(text);
+
+        // 分别定义read和write的正则表达式
+        String regexRead = "read: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
+        String regexWrite = "write: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
+
+        // 对读的部分处理
+        Pattern pattern = Pattern.compile(regexRead, Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(text);
+        String readIops = "0";
+        String readBw = "0";
+        String readLat = "0";
+        while (matcher.find()) {
+            readIops = matcher.group(1);
+            readBw = matcher.group(2);
+            String unit = matcher.group(3); // 保留带宽单位
+            String latUnit = matcher.group(4);
+            double avgLat = Double.parseDouble(matcher.group(5));
+            if ("msec".equals(latUnit)) {
+                avgLat *= 1000; // 如果单位是msec，则乘以1000
+            }
+            readLat = String.valueOf(avgLat);
+            // 打印结果
+            System.out.println("read:IOPS=" + readIops + ", BW=" + readBw + unit + ", Avg Latency=" + readLat + "usec");
+        }
+
+        // 对写的部分处理
+        pattern = Pattern.compile(regexWrite, Pattern.DOTALL);
+        matcher = pattern.matcher(text);
+        String writeIops = "0";
+        String writeBw = "0";
+        String writeLat = "0";
+        while (matcher.find()) {
+            writeIops = matcher.group(1);
+            writeBw = matcher.group(2);
+            String unit = matcher.group(3); // 保留带宽单位
+            String latUnit = matcher.group(4);
+            double avgLat = Double.parseDouble(matcher.group(5));
+            if ("msec".equals(latUnit)) {
+                avgLat *= 1000; // 如果单位是msec，则乘以1000
+            }
+            writeLat = String.valueOf(avgLat);
+            // 打印结果
+            System.out.println("write:IOPS=" + writeIops + ", BW=" + writeBw + unit + ", Avg Latency=" + writeLat + "usec");
+        }
+
         // 添加结果到TestResult类
         fioRWTestResult.names = TestResult.FIO_RW_TEST;
-        fioRWTestResult.values = new String[]{iops, bw, lat};
+        fioRWTestResult.values = new String[]{readIops, readBw, readLat, writeIops, writeBw, writeLat};
+        System.out.println(Arrays.toString(fioRWTestResult.values));
     }
 
     @Override

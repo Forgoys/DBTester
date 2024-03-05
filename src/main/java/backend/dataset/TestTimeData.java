@@ -26,6 +26,6 @@ public class TestTimeData {
      * 各数据值，以String格式保存
      */
 //    public String[] values;
-    public List<List<String>> values;
+    public List<List<Double>> values;
 }
 

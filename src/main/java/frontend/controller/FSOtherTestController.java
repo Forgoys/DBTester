@@ -13,16 +13,18 @@ public class FSOtherTestController {
     @FXML
     private TableView<DisplayResult> fioResultsTableView;
     @FXML
-    private TableColumn<DisplayResult, String> queryColumn;
+    private TableColumn<DisplayResult, String> metricsColumn;
     @FXML
     private TableColumn<DisplayResult, String> resultColumn;
+    @FXML
+    public TextArea currentStepTextArea;
 
     private ObservableList<DisplayResult> displayResultsData = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
         // 为TableView的列设置如何从DisplayResult对象获取其值
-        queryColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        metricsColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         resultColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
 
         // 将ObservableList与TableView绑定

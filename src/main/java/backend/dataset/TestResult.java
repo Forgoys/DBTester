@@ -21,16 +21,16 @@ public class TestResult {
      */
 
     // FIO读写速度测试结果名
-    public static final String[] FIO_RW_TEST = new String[]{"IOPS", "Bandwidth", "Latency"};
+    public static final String[] FIO_RW_TEST = new String[]{"readIOPS", "readBandwidth", "readLatency","writeIOPS", "writeBandwidth", "writeLatency"};
 
     // IOZONE读写速度测试结果名
     public static final String[] IOZONE_RW_TEST = new String[]{"write", "rewrite", "read", "reread", "read (backward)", "write (random)"};
 
     // FIO并发度测试结果名
-    public static final String[] FIO_PARALLEL_TEST = new String[]{"IOPS", "Bandwidth", "Latency"};
+    public static final String[] FIO_PARALLEL_TEST = new String[]{"readIOPS", "readBandwidth", "readLatency","writeIOPS", "writeBandwidth", "writeLatency"};
 
     // FIO小文件测试结果名
-    public static final String[] FIO_MINIFILE_TEST = new String[]{"IOPS", "Bandwidth", "Latency"};
+    public static final String[] FIO_MINIFILE_TEST = new String[]{"readIOPS", "readBandwidth", "readLatency","writeIOPS", "writeBandwidth", "writeLatency"};
 
     /**
      * 数据名称

@@ -3,10 +3,12 @@ package frontend.controller;
 import backend.dataset.ArgumentProperty;
 import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
+import backend.dataset.TestTimeData;
 import backend.tester.TestItem;
 import backend.tester.fileSystem.FioParallelTest;
 import backend.tester.fileSystem.FioReadWriteTest;
 import backend.tester.fileSystem.MiniFileTest;
+import backend.tester.fileSystem.ReliableTest;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
 import frontend.connection.SSHConnection;
@@ -20,8 +22,12 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MainAppController {
     public static SSHConnection currentSSHConnection;
@@ -98,6 +104,7 @@ public class MainAppController {
     private ScrollPane rightScrollPane;
 
     TestResult testResult;
+    List<List<Double>> testTimeData;
 
     @FXML
     private void initialize() {
@@ -271,12 +278,12 @@ public class MainAppController {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("选择文件");
             // 设置初始目录为程序的当前工作目录
-            fileChooser.setInitialDirectory(new java.io.File(System.getProperty("user.dir")));
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
             // 设置文件过滤器
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR 文件 (*.jar)", "*.jar"));
             // 通过从任何一个组件获取Stage
             Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
-            java.io.File selectedFile = fileChooser.showOpenDialog(stage);
+            File selectedFile = fileChooser.showOpenDialog(stage);
             if (selectedFile != null) {
                 jdbcDriverNameLabel.setText(selectedFile.getAbsolutePath());
             }
@@ -411,10 +418,16 @@ public class MainAppController {
             }
         }
 
+        for (int i = 0; i < testArguments.values.size(); i++) {
+            System.out.println(testArguments.values.get(i));
+        }
+
         // testItem = new TPCCTest(....., testArguments)
 
         String testProject = testProjectSelectBox.getValue();
-        StringBuilder statusText = new StringBuilder();
+        String message;
+        Task<Void> task;
+//        StringBuilder statusText = new StringBuilder();
         switch (testProjectSelectBox.getValue()) {
             case "TPC-C":
 //                testItem = new TPCCTester();
@@ -441,20 +454,29 @@ public class MainAppController {
 //
 //                break;
             case "读写速度测试":
-                Task<Void> task = new Task<Void>() {
+                StringBuilder message2Update = new StringBuilder();
+                task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        updateMessage(statusText + "开始fio读写性能测试\n");
-                        updateMessage(statusText + "测试中....\n");
+                        TextArea currentStepTextArea = fsReadWriteTestController.currentStepTextArea;
+//                        Platform.runLater(() -> currentStepTextArea.appendText("开始fio读写性能测试\n"));
+                        updateMessage(message2Update.append("开始fio读写性能测试\n").toString());
+//                        System.out.println("开始fio读写性能测试\n");
+
+//                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
+                        updateMessage(message2Update.append("测试中....\n").toString());
                         testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
+                        System.out.println("开始fio读写性能测试1\n");
                         testItem.startTest();
-                        updateMessage(statusText + "测试完成\n");
-                        updateMessage(statusText + "开始生成测试结果\n");
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
+                        System.out.println("开始fio读写性能测试2\n");
                         Platform.runLater(() -> {
+                            currentStepTextArea.appendText("开始生成测试结果\n");
                             testResult = testItem.getTestResults();
+//                            System.out.println(testResult.values);
                             fsReadWriteTestController.displayTestResults(testResult);
+                            currentStepTextArea.appendText("生成完毕\n");
                         });
-                        updateMessage(statusText + "生成完毕\n");
                         return null;
                     }
                 };
@@ -466,21 +488,82 @@ public class MainAppController {
                 new Thread(task).start();
                 break;
             case "并发度测试":
-                testItem = new FioParallelTest(testArguments.values.get(0), testArguments.values.get(1));
-                testItem.startTest();
-                testResult = testItem.getTestResults();
-                fsOtherTestController.displayTestResults(testResult);
+                task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        TextArea currentStepTextArea = fsOtherTestController.currentStepTextArea;
+                        Platform.runLater(() -> currentStepTextArea.appendText("开始并发度测试\n"));
+
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
+                        testItem = new FioParallelTest(testArguments.values.get(0), testArguments.values.get(1));
+                        testItem.startTest();
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
+                        Platform.runLater(() -> {
+                            currentStepTextArea.appendText("开始生成测试结果\n");
+                            testResult = testItem.getTestResults();
+                            fsOtherTestController.displayTestResults(testResult);
+                            currentStepTextArea.appendText("生成完毕\n");
+                        });
+                        return null;
+                    }
+                };
+
+                // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
+                    fsOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+                // 在新线程中执行任务
+                new Thread(task).start();
                 break;
             case "小文件测试":
-                testItem = new MiniFileTest(testArguments.values.get(0));
-                testItem.startTest();
-                testResult = testItem.getTestResults();
-                fsOtherTestController.displayTestResults(testResult);
+                task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        TextArea currentStepTextArea = fsOtherTestController.currentStepTextArea;
+                        Platform.runLater(() -> currentStepTextArea.appendText("开始小文件测试\n"));
+
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
+                        testItem = new MiniFileTest(testArguments.values.get(0));
+                        testItem.startTest();
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
+                        Platform.runLater(() -> {
+                            currentStepTextArea.appendText("开始生成测试结果\n");
+                            testResult = testItem.getTestResults();
+                            fsOtherTestController.displayTestResults(testResult);
+                            currentStepTextArea.appendText("生成完毕\n");
+                        });
+                        return null;
+                    }
+                };
+
+                // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
+                fsOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+                // 在新线程中执行任务
+                new Thread(task).start();
                 break;
             case "可靠性测试":
-//                testItem = new FioParallelTest()
+                task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        TextArea currentStepTextArea = fsReliabilityTestController.currentStepTextArea;
+                        Platform.runLater(() -> currentStepTextArea.appendText("开始可靠性测试\n"));
 
-                break;
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
+                        testItem = new ReliableTest(testArguments.values.get(0), testArguments.values.get(0));
+                        testItem.startTest();
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
+                        Platform.runLater(() -> {
+                            currentStepTextArea.appendText("开始生成测试结果\n");
+                            testTimeData = testItem.getTimeData();
+                            fsReliabilityTestController.setTimeData(testTimeData);
+                            currentStepTextArea.appendText("生成完毕\n");
+                        });
+                        return null;
+                    }
+                };
+
+                // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
+                fsReliabilityTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+                // 在新线程中执行任务
+                new Thread(task).start();
         }
 
     }

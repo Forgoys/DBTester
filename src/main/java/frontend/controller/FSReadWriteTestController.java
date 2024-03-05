@@ -11,7 +11,9 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldListCell;
 
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class FSReadWriteTestController {
     private LineChart<String, Number> memoryUsageLineChart;
 
     @FXML
-    public Label currentStepTextArea;
+    public TextArea currentStepTextArea;
 
     private List<List<Double>> timeData;
 

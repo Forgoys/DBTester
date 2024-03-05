@@ -118,15 +118,15 @@ public class ReliableTest extends TestItem {
         }
 
         // 转换下格式
-        List<String> IOPSList = new ArrayList<>();
-        List<String> BWList = new ArrayList<>();
-        List<String> LatList = new ArrayList<>();
+        List<Double> IOPSList = new ArrayList<>();
+        List<Double> BWList = new ArrayList<>();
+        List<Double> LatList = new ArrayList<>();
         for (List<String> row : csvData) {
-            IOPSList.add(row.get(0));
-            BWList.add(row.get(1));
-            LatList.add(row.get(2));
+            IOPSList.add(Double.valueOf(row.get(0)));
+            BWList.add(Double.valueOf(row.get(1)));
+            LatList.add(Double.valueOf(row.get(2)));
         }
-        List<List<String>> reliableResult = new ArrayList<>();
+        List<List<Double>> reliableResult = new ArrayList<>();
         reliableResult.add(IOPSList);
         reliableResult.add(BWList);
         reliableResult.add(LatList);
@@ -139,7 +139,7 @@ public class ReliableTest extends TestItem {
 
     @Override
     public List<List<Double>> getTimeData() {
-        return null;
+        return reliableTimeData.values;
     }
 
     @Override
