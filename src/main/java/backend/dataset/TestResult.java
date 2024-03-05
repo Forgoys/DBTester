@@ -9,7 +9,7 @@ public class TestResult {
     /**
      * TPCC测试结果名
      */
-    public static final String[] TPCC_RES_NAMES = new String[]{"QpH"};
+    public static final String[] TPCC_RES_NAMES = new String[]{"tpmC"};
 
     /**
      * TPCH测试结果名
