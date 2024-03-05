@@ -1,12 +1,13 @@
 package frontend.connection;
 
 import com.jcraft.jsch.*;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.file.Paths;
+import java.util.Vector;
 
 public class SSHConnection {
     private String ip;
@@ -16,6 +17,7 @@ public class SSHConnection {
     private boolean status;
     private Session session;
     private ChannelShell shellChannel;
+    private ChannelSftp sftpChannel;
     private OutputStream shellOutputStream;
     private InputStream shellInputStream;
     private PrintStream shellPrintStream;
@@ -52,6 +54,10 @@ public class SSHConnection {
         // 首先，检查shell通道是否打开，如果是，则关闭它
         if (shellChannel != null && shellChannel.isConnected()) {
             shellChannel.disconnect();
+        }
+        // 关闭sftp通道
+        if (sftpChannel != null && sftpChannel.isConnected()) {
+            sftpChannel.disconnect();
         }
 
         // 接下来，关闭输入输出流
@@ -96,8 +102,11 @@ public class SSHConnection {
         shellOutputStream = shellChannel.getOutputStream();
         shellInputStream = shellChannel.getInputStream();
         shellPrintStream = new PrintStream(shellOutputStream, true);
-
         shellChannel.connect();
+
+        // 连接sftp通道
+        sftpChannel = (ChannelSftp) session.openChannel("sftp");
+        sftpChannel.connect();
     }
 
     public String executeCommand(String command) throws Exception {
@@ -194,6 +203,69 @@ public class SSHConnection {
 
     public String executeShellScript(String scriptPath, boolean useSudo) throws Exception {
         return executeCommand("bash " + scriptPath, useSudo);
+    }
+
+    /**
+     * 从服务器下载指定路径的文件到本地目录下
+     * @param remoteFilePath
+     * @param localDirPath
+     * @throws SftpException
+     */
+    public void downloadFile(String remoteFilePath, String localDirPath) throws SftpException {
+        File localDir = new File(localDirPath);
+        if (!localDir.exists()) {
+            localDir.mkdirs();
+        }
+        sftpChannel.get(remoteFilePath, localDirPath + File.separator + new File(remoteFilePath).getName());
+    }
+
+    /**
+     * 将服务器上指定目录下载到本地指定目录下
+     * @param remoteDirPath
+     * @param localDirPath
+     * @throws SftpException
+     */
+    public void downloadDirectory(String remoteDirPath, String localDirPath) throws SftpException {
+        String remoteDirName = Paths.get(remoteDirPath).getFileName().toString();
+        File localDir = new File(localDirPath, remoteDirName);
+        if(!localDir.exists()) {
+            localDir.mkdirs();
+        }
+        downloadDirectoryRecursively(remoteDirPath, localDir.getAbsolutePath());
+    }
+
+    private void downloadDirectoryRecursively(String remoteDirPath, String localDirPath) throws SftpException {
+        File localDir = new File(localDirPath);
+        if (!localDir.exists()) {
+            localDir.mkdirs();
+        }
+        @SuppressWarnings("unchecked")
+        Vector<ChannelSftp.LsEntry> fileList = sftpChannel.ls(remoteDirPath);
+        for (ChannelSftp.LsEntry entry : fileList) {
+            String fileName = entry.getFilename();
+            if (!fileName.equals(".") && !fileName.equals("..")) {
+                if (entry.getAttrs().isDir()) {
+                    downloadDirectoryRecursively(remoteDirPath + "/" + fileName, localDirPath + File.separator + fileName);
+                } else {
+                    sftpChannel.get(remoteDirPath + "/" + fileName, localDirPath + File.separator + fileName);
+                }
+            }
+        }
+    }
+
+    /**
+     * 上传本地文件到服务器指定路径下
+     * @param localFilePath
+     * @param remoteDirPath
+     * @throws SftpException
+     */
+    public void uploadFile(String localFilePath, String remoteDirPath) throws SftpException {
+        File localFile = new File(localFilePath);
+        if (!localFile.exists() || !localFile.isFile()) {
+            System.out.println("Local file does not exist: " + localFilePath);
+            return;
+        }
+        sftpChannel.put(localFilePath, remoteDirPath + "/" + localFile.getName());
     }
 
     public String getIp() {
