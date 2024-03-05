@@ -17,7 +17,12 @@ import javafx.stage.Stage;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class MainAppController {
     public static SSHConnection currentSSHConnection;
@@ -375,23 +380,23 @@ public class MainAppController {
      */
     private void onTestProjectParmConfirmButtonClicked() {
         // 首先清空旧的参数值
-        TestArguments testArguments = new TestArguments();
-
-        for (Node node : testProjectConfigPane.getChildren()) {
-            // 只处理TextField和ComboBox
-            if (node instanceof TextField textField) {
-                testArguments.values.add(textField.getText()); // 添加TextField的值
-            } else if (node instanceof ComboBox) {
-                @SuppressWarnings("unchecked")
-                ComboBox<String> comboBox = (ComboBox<String>) node;
-                String selected = comboBox.getSelectionModel().getSelectedItem();
-                if (selected != null) {
-                    testArguments.values.add(selected); // 添加ComboBox选中的值
-                } else {
-                    testArguments.values.add(""); // 或者处理未选择的情况
-                }
-            }
-        }
+//        TestArguments testArguments = new TestArguments();
+//
+//        for (Node node : testProjectConfigPane.getChildren()) {
+//            // 只处理TextField和ComboBox
+//            if (node instanceof TextField textField) {
+//                testArguments.values.add(textField.getText()); // 添加TextField的值
+//            } else if (node instanceof ComboBox) {
+//                @SuppressWarnings("unchecked")
+//                ComboBox<String> comboBox = (ComboBox<String>) node;
+//                String selected = comboBox.getSelectionModel().getSelectedItem();
+//                if (selected != null) {
+//                    testArguments.values.add(selected); // 添加ComboBox选中的值
+//                } else {
+//                    testArguments.values.add(""); // 或者处理未选择的情况
+//                }
+//            }
+//        }
 
         // testItem = new TPCCTest(....., testArguments)
 
@@ -427,6 +432,17 @@ public class MainAppController {
             case "并发度测试":
                 break;
             case "可靠性测试":
+                // 开始测试
+
+
+                // 展示结果
+                List<List<Double>> testTimeData = IntStream.range(0, 5) // 5个指标
+                        .mapToObj(i -> new Random().doubles(10, 0, 100) // 生成10个0-100之间的随机双精度数
+                                .boxed()
+                                .collect(Collectors.toList()))
+                        .collect(Collectors.toList());
+                fsReliabilityTestController.setTimeData(testTimeData);
+
                 break;
         }
 
@@ -501,5 +517,9 @@ public class MainAppController {
     @FXML
     private void importTestResultClick() {
 
+    }
+
+    public void closeSSH() {
+        currentSSHConnection.sshDisconnect();
     }
 }
