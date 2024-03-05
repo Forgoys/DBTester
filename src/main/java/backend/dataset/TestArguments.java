@@ -102,8 +102,6 @@ public class TestArguments {
                 return FIO_MINIFILE_ARG_PROPERTIES;
             case "并发度测试":
                 return FIO_PARALLEL_ARG_PROPERTIES;
-            case "小文件测试":
-                return FIO_MINIFILE_ARG_PROPERTIES;
             default:
                 return new ArgumentProperty[]{}; // 返回空数组表示没有找到匹配的测试项目
         }
