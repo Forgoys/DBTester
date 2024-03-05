@@ -70,6 +70,12 @@ public class TestArguments {
             new ArgumentProperty("并发线程数", new String[]{"16", "64", "128", "256"}),
     };
 
+    // fio小文件测试参数属性
+    public static final ArgumentProperty[] FIO_MINIFILE_ARG_PROPERTIES = new ArgumentProperty[]{
+            // 测试目录，用户输入
+            new ArgumentProperty("测试目录"),
+    };
+
     /**
      * 各数据值，以String格式保存
      */

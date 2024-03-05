@@ -29,6 +29,8 @@ public class TestResult {
     // FIO并发度测试结果名
     public static final String[] FIO_PARALLEL_TEST = new String[]{"IOPS", "Bandwidth", "Latency"};
 
+    // FIO小文件测试结果名
+    public static final String[] FIO_MINIFILE_TEST = new String[]{"IOPS", "Bandwidth", "Latency"};
 
     /**
      * 数据名称
