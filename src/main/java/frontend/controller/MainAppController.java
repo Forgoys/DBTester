@@ -4,8 +4,9 @@ import backend.dataset.ArgumentProperty;
 import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
+import backend.tester.fileSystem.FioParallelTest;
 import backend.tester.fileSystem.FioReadWriteTest;
-import eu.hansolo.tilesfx.Test;
+import backend.tester.fileSystem.MiniFileTest;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
 import frontend.connection.SSHConnection;
@@ -18,11 +19,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class MainAppController {
     public static SSHConnection currentSSHConnection;
@@ -49,11 +46,11 @@ public class MainAppController {
     /**
      * 文件系统并发度结果界面的控制器
      */
-    FSConcurrencyTestController fsConcurrencyTestController;
+    FSReadWriteTestController fsReadWriteTestController;
     /**
      * 文件系统读写速度测试结果界面的控制器
      */
-    FSReadWriteTestController fsReadWriteTestController;
+    FSOtherTestController fsOtherTestController;
 
     TestItem testItem;
     @FXML
@@ -97,6 +94,8 @@ public class MainAppController {
      */
     @FXML
     private ScrollPane rightScrollPane;
+
+    TestResult testResult;
 
     @FXML
     private void initialize() {
@@ -172,7 +171,7 @@ public class MainAppController {
                 yield configureDBConnectUI(rowIndex);
             }
             case "GlusterFS", "OceanFS" -> {
-                testProjectSelectBox.getItems().addAll("读写速度测试", "并发度测试", "可靠性测试");
+                testProjectSelectBox.getItems().addAll("读写速度测试", "并发度测试", "小文件测试", "可靠性测试");
                 yield configureFSConnectUI(rowIndex);
             }
             default -> 1;
@@ -434,29 +433,30 @@ public class MainAppController {
                     ;
                 }
                 break;
-            case "适配性":
-
-
-                break;
+//            case "适配性":
+//
+//
+//                break;
             case "读写速度测试":
                 testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
                 testItem.startTest();
-                TestResult testResult = testItem.getTestResults();
+                testResult = testItem.getTestResults();
                 fsReadWriteTestController.displayTestResults(testResult);
                 break;
             case "并发度测试":
+                testItem = new FioParallelTest(testArguments.values.get(0), testArguments.values.get(1));
+                testItem.startTest();
+                testResult = testItem.getTestResults();
+                fsOtherTestController.displayTestResults(testResult);
+                break;
+            case "小文件测试":
+                testItem = new MiniFileTest(testArguments.values.get(0));
+                testItem.startTest();
+                testResult = testItem.getTestResults();
+                fsOtherTestController.displayTestResults(testResult);
                 break;
             case "可靠性测试":
-                // 开始测试
-
-
-                // 展示结果
-//                List<List<Double>> testTimeData = IntStream.range(0, 5) // 5个指标
-//                        .mapToObj(i -> new Random().doubles(10, 0, 100) // 生成10个0-100之间的随机双精度数
-//                                .boxed()
-//                                .collect(Collectors.toList()))
-//                        .collect(Collectors.toList());
-//                fsReliabilityTestController.setTimeData(testTimeData);
+//                testItem = new FioParallelTest()
 
                 break;
         }
@@ -488,8 +488,11 @@ public class MainAppController {
                 fxmlFile = "dbAdaptTestView.fxml";
                 break;
             case "读写速度测试":
+                fxmlFile = "fsReadWriteTestView.fxml";
+                break;
             case "并发度测试":
-                fxmlFile = "fsConcurrencyTestView.fxml";
+            case "小文件测试":
+                fxmlFile = "fsOtherTestView.fxml";
                 break;
             case "可靠性测试":
                 fxmlFile = "fsReliabilityTestView.fxml";
@@ -512,8 +515,10 @@ public class MainAppController {
                 dbOtherTestController = (DBOtherTestController) controller;
             } else if (fxmlFile.equals("fsReliabilityTestView.fxml")) {
                 fsReliabilityTestController = (FSReliabilityTestController) controller;
-            } else if (fxmlFile.equals("fsConcurrencyTestView.fxml")) {
-                fsConcurrencyTestController = (FSConcurrencyTestController) controller;
+            } else if (fxmlFile.equals("fsReadWriteTestView.fxml")) {
+                fsReadWriteTestController = (FSReadWriteTestController) controller;
+            } else if (fxmlFile.equals("fsOtherTestView.fxml")) {
+                fsOtherTestController = (FSOtherTestController) controller;
             }
 
             rightScrollPane.setContent(view);

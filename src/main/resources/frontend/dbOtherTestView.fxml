@@ -32,6 +32,15 @@
             </VBox>
         </HBox>
 
+<!--        <HBox alignment="CENTER_LEFT" spacing="10">-->
+<!--                <Label text="测试进度:">-->
+<!--                    <font>-->
+<!--                        <Font size="18.0"/>-->
+<!--                    </font>-->
+<!--                </Label>-->
+<!--                <Label fx:id="currentStepLabel" text="等待开始"/>-->
+<!--        </HBox>-->
+
         <!-- Test Results section moved up -->
         <Label text="测试结果:">
             <font>

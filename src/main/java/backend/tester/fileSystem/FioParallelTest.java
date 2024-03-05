@@ -19,6 +19,13 @@ public class FioParallelTest extends TestItem {
     // 指令运行结果
     TestResult fioParallelTestResult = new TestResult();
 
+    public FioParallelTest() {}
+
+    public FioParallelTest(String directory, String numjobs) {
+        this.directory = directory;
+        this.numjobs = numjobs;
+    }
+
     @Override
     public void generateTimeData() {
 

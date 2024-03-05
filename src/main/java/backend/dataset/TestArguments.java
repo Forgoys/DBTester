@@ -98,6 +98,8 @@ public class TestArguments {
                 return FIO_ARG_PROPERTIES;
             case "IOZONE读写速度测试":
                 return IOZONE_ARG_PROPERTIES;
+            case "小文件测试":
+                return FIO_MINIFILE_ARG_PROPERTIES;
             case "并发度测试":
                 return FIO_PARALLEL_ARG_PROPERTIES;
             default:
