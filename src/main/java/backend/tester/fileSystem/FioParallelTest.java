@@ -29,11 +29,6 @@ public class FioParallelTest extends TestItem {
         this.numjobs = numjobs;
     }
 
-    @Override
-    public void generateTimeData() {
-
-    }
-
     // 并发测试环境 安装fio
     @Override
     public void testEnvPrepare() throws RuntimeException {

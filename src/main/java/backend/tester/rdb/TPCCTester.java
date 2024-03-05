@@ -74,10 +74,7 @@ public class TPCCTester extends TestItem {
     }
 
 
-    @Override
-    public void generateTimeData() {
 
-    }
 
     public TPCCTester(String testName, DBConnection DBStmt, TestArguments testArgs) {
         this.testName = testName;

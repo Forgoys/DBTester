@@ -33,10 +33,6 @@ public class MiniFileTest extends TestItem {
     }
 
 
-    @Override
-    public void generateTimeData() {
-
-    }
 
     // 准备测试数据 准备测试工具 准备测试脚本 配置文件.ini
     @Override
