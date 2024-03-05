@@ -9,5 +9,8 @@
         <module name="DBTester" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="DBTester" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>

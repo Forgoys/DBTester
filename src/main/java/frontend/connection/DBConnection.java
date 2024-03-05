@@ -49,17 +49,15 @@ public class DBConnection {
      * @param url
      */
     private void analyzeURL(String url) {
-        if (url.startsWith("jdbc:postgresql://")) {
+        if (url.startsWith("jdbc:postgresql")) {
             this.dbBrandName = "PostgreSQL";
-        } else if(url.startsWith("jdbc:oscar://")) {
+        } else if(url.startsWith("jdbc:oscar")) {
             this.dbBrandName = "oscar";
-        } else if (url.startsWith("jdbc:mysql://")) {
+        } else if (url.startsWith("jdbc:mysql")) {
             this.dbBrandName = "MySQL";
-        } else if (url.startsWith("jdbc:oracle:thin:")) {
-            this.dbBrandName = "Oracle";
-        } else if (url.startsWith("jdbc:sqlserver://")) {
+        } else if (url.startsWith("jdbc:sqlserver")) {
             this.dbBrandName = "SQL Server";
-        } else if (url.startsWith("jdbc:sqlite:")) {
+        } else if (url.startsWith("jdbc:sqlite")) {
             this.dbBrandName = "SQLite";
         } // 可以根据需要添加更多的数据库品牌
 

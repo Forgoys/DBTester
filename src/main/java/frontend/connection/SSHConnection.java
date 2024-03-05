@@ -188,11 +188,11 @@ public class SSHConnection {
     }
 
     // Method to execute a shell script located at a given path on the remote machine
-    public String executeShellScript(String scriptPath) {
+    public String executeShellScript(String scriptPath) throws Exception {
         return executeCommand("bash " + scriptPath);
     }
 
-    public String executeShellScript(String scriptPath, boolean useSudo) {
+    public String executeShellScript(String scriptPath, boolean useSudo) throws Exception {
         return executeCommand("bash " + scriptPath, useSudo);
     }
 

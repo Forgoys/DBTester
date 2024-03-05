@@ -13,8 +13,8 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApp.class.getResource("main-view.fxml"));
-        MainAppController controller = fxmlLoader.getController();
         Scene scene = new Scene(fxmlLoader.load(), 900, 600);
+        MainAppController controller = fxmlLoader.getController();
 
 //        Font font = Font.loadFont(getClass().getResourceAsStream("/fonts/SourceHanSansTC-Normal.ttf"), 13);
 //        System.out.println(font);

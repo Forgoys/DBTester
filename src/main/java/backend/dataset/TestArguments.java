@@ -94,7 +94,7 @@ public class TestArguments {
             // 补全这里补全这里补全这里补全这里补全这里补全这里补全这里
             // 补全这里补全这里补全这里补全这里补全这里补全这里补全这里
             // 补全这里补全这里补全这里补全这里补全这里补全这里补全这里
-            case "FIO读写速度测试":
+            case "读写速度测试":
                 return FIO_ARG_PROPERTIES;
             case "IOZONE读写速度测试":
                 return IOZONE_ARG_PROPERTIES;
