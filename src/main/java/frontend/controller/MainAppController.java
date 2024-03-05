@@ -473,6 +473,7 @@ public class MainAppController {
                         Platform.runLater(() -> {
                             currentStepTextArea.appendText("开始生成测试结果\n");
                             testResult = testItem.getTestResults();
+//                            System.out.println(testResult.values);
                             fsReadWriteTestController.displayTestResults(testResult);
                             currentStepTextArea.appendText("生成完毕\n");
                         });
