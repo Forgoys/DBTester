@@ -108,7 +108,7 @@ public class MiniFileTest extends TestItem {
 
     @Override
     public TestResult getTestResults() {
-        return null;
+        return fioMiniFileTestResult;
     }
 
     @Override

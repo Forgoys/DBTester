@@ -233,10 +233,6 @@ public class TPCCTester extends TestItem {
         sshStmt.executeCommand("sh import_data_TPCC.sh " + propsFileName);
     }
 
-
-
-
-
     @Override
     public List<List<Double>> getTimeData() {
         return null;
@@ -259,34 +255,39 @@ public class TPCCTester extends TestItem {
     }
 
     public static void main(String[] args) {
-//        SSHConnection connection = new SSHConnection("10.181.8.146", 22, "wlx", "Admin@wlx");
-//        DBConnection dbConnection = new DBConnection("/home/autotuning/cx/oscarJDBC.jar",
-//                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
-//                "SYSDBA",
-//                "szoscar55");
-//        TestArguments arguments = new TestArguments();
-//        arguments.values = new ArrayList<>();
-//        arguments.values.add("2");
-//        arguments.values.add("128");
-//        arguments.values.add("16");
-//        arguments.values.add("1");
-//
-//        connection.sshConnect();
-//        TPCCTester tpccTester = new TPCCTester("tpcc", connection, dbConnection, arguments);
-//        try {
-////            connection.executeCommand("cd /home/wlx/cx/benchmarksql-5.0");
-////            System.out.println(connection.executeCommand("pwd"));
-////            System.out.println(connection.executeCommand("ls"));
+        SSHConnection connection = new SSHConnection("10.181.8.146", 22, "wlx", "Admin@wlx");
+        DBConnection dbConnection = new DBConnection("/home/autotuning/cx/oscarJDBC.jar",
+                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
+                "SYSDBA",
+                "szoscar55");
+        TestArguments arguments = new TestArguments();
+        arguments.values = new ArrayList<>();
+        arguments.values.add("2");
+        arguments.values.add("128");
+        arguments.values.add("16");
+        arguments.values.add("1");
+
+        connection.sshConnect();
+        TPCCTester tpccTester = new TPCCTester("tpcc", connection, dbConnection, arguments);
+        try {
+//            connection.executeCommand("cd /home/wlx/cx/benchmarksql-5.0");
+//            System.out.println(connection.executeCommand("pwd"));
+//            System.out.println(connection.executeCommand("ls"));
+
+//            connection.downloadFile("/home/wlx/cx/benchmarksql-5.0/run/props","C:\\Users\\CX\\Desktop");
+//            connection.downloadDirectory("/home/wlx/cx/benchmarksql-5.0/run/","C:\\Users\\CX\\Desktop");
+            connection.uploadFile("C:\\Users\\CX\\Desktop\\run\\props", "/home/wlx/cx");
+
 //            tpccTester.testEnvPrepare();
 //
 //            tpccTester.startTest();
-//
-//
-//        } catch (RuntimeException | IOException | InterruptedException e) {
-//            System.out.println(e.getMessage());
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
 
+
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        connection.sshDisconnect();
     }
 }
