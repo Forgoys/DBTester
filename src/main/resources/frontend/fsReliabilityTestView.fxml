@@ -11,25 +11,20 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.control.TextArea?>
 <VBox fillWidth="true" maxHeight="1.7976931348623157E308" spacing="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.controller.FSReliabilityTestController">
     <padding>
         <Insets bottom="10" left="10" right="10" top="10" />
     </padding>
     <children>
-        <HBox alignment="CENTER_LEFT" spacing="10">
-            <VBox spacing="5">
-                <Label text="测试进度:">
-                    <font>
-                        <Font size="18.0" />
-                    </font>
-                </Label>
-                <ProgressBar fx:id="progressBar" prefWidth="200" />
-            </VBox>
-            <VBox alignment="CENTER" spacing="5">
-                <Label fx:id="progressPercentLabel" text="0%" />
-                <Label fx:id="currentStepLabel" text="等待开始" />
-            </VBox>
-        </HBox>
+        <VBox alignment="CENTER_LEFT" spacing="10">
+            <Label text="测试进度:">
+                <font>
+                    <Font size="18.0" />
+                </font>
+            </Label>
+            <TextArea fx:id="currentStepTextArea" prefHeight="200.0" prefWidth="200.0" />
+        </VBox>
 
         <!-- 移除了资源占用情况部分 -->
 
