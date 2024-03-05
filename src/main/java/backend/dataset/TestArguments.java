@@ -47,7 +47,7 @@ public class TestArguments {
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项
-            new ArgumentProperty("文件大小", new String[]{"1G", "4G", "8G"}),
+            new ArgumentProperty("文件大小", new String[]{"8k", "1G", "4G", "8G"}),
     };
 
     /*
