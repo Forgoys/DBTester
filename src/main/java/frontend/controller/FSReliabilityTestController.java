@@ -7,6 +7,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import java.util.List;
 import javafx.geometry.Side;
+import javafx.scene.control.TextArea;
 
 public class FSReliabilityTestController {
 
@@ -16,6 +17,8 @@ public class FSReliabilityTestController {
     private LineChart<String, Number> bandwidthLineChart;
     @FXML
     private LineChart<String, Number> latencyLineChart;
+    @FXML
+    public TextArea currentStepTextArea;
 
     // 假设这是从某处获取的timeData数据
     private List<List<Double>> timeData;
