@@ -43,7 +43,7 @@ public class TestArguments {
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
             // 读写方式，有候选项
-            new ArgumentProperty("读写方式", new String[]{"随机读", "随机写", "顺序读", "顺序写", "%70顺序读,%70顺序写", "%70随机读,%30随机写"}),
+            new ArgumentProperty("读写方式", new String[]{"随机读", "随机写", "顺序读", "顺序写", "%70顺序读,%30顺序写", "%70随机读,%30随机写"}),
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项

@@ -25,11 +25,32 @@ public class FioReadWriteTest extends TestItem {
     public FioReadWriteTest() {
     }
 
-    public FioReadWriteTest(String directory, String bs, String size, String rwIndex) {
+    public FioReadWriteTest(String directory, String bs, String size, String rwOption) {
         this.directory = directory;
         this.bs = bs;
         this.size = size;
-        this.rwIndex = rwIndex;
+        switch (rwOption) {
+            case "随机读":
+                rwIndex = "0";
+                break;
+            case "随机写":
+                rwIndex = "1";
+                break;
+            case "顺序读":
+                rwIndex = "2";
+                break;
+            case "顺序写":
+                rwIndex = "3";
+                break;
+            case "%70顺序读,%30顺序写":
+                rwIndex = "4";
+                break;
+            case "%70随机读,%30随机写":
+                rwIndex = "5";
+                break;
+            default:
+                rwIndex = "0";
+        }
     }
 
     // 安装FIO测试工具
@@ -61,6 +82,8 @@ public class FioReadWriteTest extends TestItem {
 
         // 设置 fio 测试指令
         String fioCommand = "fio -directory=" + directory + " -ioengine=libaio -direct=1 -iodepth=1 -thread=1 -numjobs=2 -group_reporting -allow_mounted_write=1" + rwList.get(Integer.parseInt(rwIndex)) + " -bs=" + bs + " -size=" + size + " -runtime=60 -name=fioTest";
+
+        System.out.println(fioCommand);
 
         // 创建一个 ProcessBuilder 对象
         ProcessBuilder processBuilder = new ProcessBuilder();
