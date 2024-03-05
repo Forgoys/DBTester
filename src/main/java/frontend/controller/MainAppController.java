@@ -535,6 +535,8 @@ public class MainAppController {
     }
 
     public void closeSSH() {
-        currentSSHConnection.sshDisconnect();
+        if (currentSSHConnection != null && !currentSSHConnection.getStatus()) {
+            currentSSHConnection.sshDisconnect();
+        }
     }
 }
