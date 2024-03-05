@@ -418,6 +418,10 @@ public class MainAppController {
             }
         }
 
+        for (int i = 0; i < testArguments.values.size(); i++) {
+            System.out.println(testArguments.values.get(i));
+        }
+
         // testItem = new TPCCTest(....., testArguments)
 
         String testProject = testProjectSelectBox.getValue();
@@ -450,16 +454,22 @@ public class MainAppController {
 //
 //                break;
             case "读写速度测试":
+                StringBuilder message2Update = new StringBuilder();
                 task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
                         TextArea currentStepTextArea = fsReadWriteTestController.currentStepTextArea;
-                        Platform.runLater(() -> currentStepTextArea.appendText("开始fio读写性能测试\n"));
+//                        Platform.runLater(() -> currentStepTextArea.appendText("开始fio读写性能测试\n"));
+                        updateMessage(message2Update.append("开始fio读写性能测试\n").toString());
+//                        System.out.println("开始fio读写性能测试\n");
 
-                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
+//                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
+                        updateMessage(message2Update.append("测试中....\n").toString());
                         testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
+                        System.out.println("开始fio读写性能测试1\n");
                         testItem.startTest();
                         Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
+                        System.out.println("开始fio读写性能测试2\n");
                         Platform.runLater(() -> {
                             currentStepTextArea.appendText("开始生成测试结果\n");
                             testResult = testItem.getTestResults();
