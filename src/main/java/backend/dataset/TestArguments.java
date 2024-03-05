@@ -15,10 +15,10 @@ public class TestArguments {
     public static final ArgumentProperty[] TPCC_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试规模，有候选项
             new ArgumentProperty("数据规模", new String[]{"20", "50", "100"}),
-            new ArgumentProperty("并发连接数", new String[]{"8","16","32","64","128","256"}),
-            new ArgumentProperty("加载进程数", new String[]{"1","2","4","8","16","32","64"}),
-            new ArgumentProperty("运行时长(min)", new String[]{"1","5","10","20","30","40",
-                    "50","60","70","80","90","100","110","120"})
+            new ArgumentProperty("并发连接数", new String[]{"8", "16", "32", "64", "128", "256"}),
+            new ArgumentProperty("加载进程数", new String[]{"1", "2", "4", "8", "16", "32", "64"}),
+            new ArgumentProperty("运行时长(min)", new String[]{"1", "5", "10", "20", "30", "40",
+                    "50", "60", "70", "80", "90", "100", "110", "120"})
     };
 
 
@@ -51,15 +51,15 @@ public class TestArguments {
     };
 
     /*
-    * IOZone读写速度测试参数属性
-    * */
+     * IOZone读写速度测试参数属性
+     * */
     public static final ArgumentProperty[] IOZONE_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项
-            new ArgumentProperty("文件大小", new String[]{"1G", "4G", "8G"}),
+            new ArgumentProperty("文件大小", new String[]{"8k", "1G", "4G", "8G"}),
     };
 
     // fio并发度测试参数属性
