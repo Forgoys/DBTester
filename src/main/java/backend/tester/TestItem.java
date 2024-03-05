@@ -70,7 +70,7 @@ public abstract class TestItem implements Testable, Writable{
     /**
      * 保存测试过程中的时序数据
      */
-    protected List<TestTimeData> timeDataList;
+    protected List<List<Double>> timeDataList;
 
     public TestItem(){}
 

@@ -124,15 +124,7 @@ public class FioReadWriteTest extends TestItem {
         return fioRWTestResult;
     }
 
-    @Override
-    public void writeToFile() {
 
-    }
-
-    @Override
-    public void readFromFile() {
-
-    }
 
     public String getDirectory() {
         return directory;
@@ -166,11 +158,13 @@ public class FioReadWriteTest extends TestItem {
         this.rwIndex = rwIndex;
     }
 
-    public TestResult getFioRWTestResult() {
-        return fioRWTestResult;
+    @Override
+    public void writeToFile(String resultPath) {
+
     }
 
-    public void setFioRWTestResult(TestResult fioRWTestResult) {
-        this.fioRWTestResult = fioRWTestResult;
+    @Override
+    public void readFromFile(String resultPath) {
+
     }
 }

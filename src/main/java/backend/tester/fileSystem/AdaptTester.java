@@ -47,12 +47,12 @@ public class AdaptTester extends TestItem {
     }
 
     @Override
-    public void writeToFile() {
+    public void writeToFile(String resultPath) {
 
     }
 
     @Override
-    public void readFromFile() {
+    public void readFromFile(String resultPath) {
 
     }
 }
