@@ -422,6 +422,7 @@ public class MainAppController {
 
         String testProject = testProjectSelectBox.getValue();
         String message;
+        Task<Void> task;
 //        StringBuilder statusText = new StringBuilder();
         switch (testProjectSelectBox.getValue()) {
             case "TPC-C":
@@ -449,22 +450,22 @@ public class MainAppController {
 //
 //                break;
             case "读写速度测试":
-                Task<Void> task = new Task<Void>() {
+                task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        message = "开始fio读写性能测试\n";
-                        Platform.runLater(() -> currentStepTextArea.appendText(message));
-                        updateMessage(statusText + "开始fio读写性能测试\n");
-                        updateMessage(statusText + "测试中....\n");
+                        TextArea currentStepTextArea = fsReadWriteTestController.currentStepTextArea;
+                        Platform.runLater(() -> currentStepTextArea.appendText("开始fio读写性能测试\n"));
+
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
                         testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
                         testItem.startTest();
-                        updateMessage(statusText + "测试完成\n");
-                        updateMessage(statusText + "开始生成测试结果\n");
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
                         Platform.runLater(() -> {
+                            currentStepTextArea.appendText("开始生成测试结果\n");
                             testResult = testItem.getTestResults();
                             fsReadWriteTestController.displayTestResults(testResult);
+                            currentStepTextArea.appendText("生成完毕\n");
                         });
-                        updateMessage(statusText + "生成完毕\n");
                         return null;
                     }
                 };
@@ -476,20 +477,22 @@ public class MainAppController {
                 new Thread(task).start();
                 break;
             case "并发度测试":
-                Task<Void> task = new Task<Void>() {
+                task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        updateMessage(statusText + "开始并发度测试\n");
-                        updateMessage(statusText + "测试中....\n");
+                        TextArea currentStepTextArea = fsOtherTestController.currentStepTextArea;
+                        Platform.runLater(() -> currentStepTextArea.appendText("开始并发度测试\n"));
+
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
                         testItem = new FioParallelTest(testArguments.values.get(0), testArguments.values.get(1));
                         testItem.startTest();
-                        updateMessage(statusText + "测试完成\n");
-                        updateMessage(statusText + "开始生成测试结果\n");
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
                         Platform.runLater(() -> {
+                            currentStepTextArea.appendText("开始生成测试结果\n");
                             testResult = testItem.getTestResults();
                             fsOtherTestController.displayTestResults(testResult);
+                            currentStepTextArea.appendText("生成完毕\n");
                         });
-                        updateMessage(statusText + "生成完毕\n");
                         return null;
                     }
                 };
@@ -500,20 +503,22 @@ public class MainAppController {
                 new Thread(task).start();
                 break;
             case "小文件测试":
-                Task<Void> task = new Task<Void>() {
+                task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        updateMessage(statusText + "开始小文件测试\n");
-                        updateMessage(statusText + "测试中....\n");
+                        TextArea currentStepTextArea = fsOtherTestController.currentStepTextArea;
+                        Platform.runLater(() -> currentStepTextArea.appendText("开始小文件测试\n"));
+
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
                         testItem = new MiniFileTest(testArguments.values.get(0));
                         testItem.startTest();
-                        updateMessage(statusText + "测试完成\n");
-                        updateMessage(statusText + "开始生成测试结果\n");
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
                         Platform.runLater(() -> {
+                            currentStepTextArea.appendText("开始生成测试结果\n");
                             testResult = testItem.getTestResults();
                             fsOtherTestController.displayTestResults(testResult);
+                            currentStepTextArea.appendText("生成完毕\n");
                         });
-                        updateMessage(statusText + "生成完毕\n");
                         return null;
                     }
                 };
@@ -524,20 +529,22 @@ public class MainAppController {
                 new Thread(task).start();
                 break;
             case "可靠性测试":
-                Task<Void> task = new Task<Void>() {
+                task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        updateMessage(statusText + "开始可靠性测试\n");
-                        updateMessage(statusText + "测试中....\n");
+                        TextArea currentStepTextArea = fsReliabilityTestController.currentStepTextArea;
+                        Platform.runLater(() -> currentStepTextArea.appendText("开始可靠性测试\n"));
+
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
                         testItem = new ReliableTest(testArguments.values.get(0), testArguments.values.get(0));
                         testItem.startTest();
-                        updateMessage(statusText + "测试完成\n");
-                        updateMessage(statusText + "开始生成测试结果\n");
+                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
                         Platform.runLater(() -> {
+                            currentStepTextArea.appendText("开始生成测试结果\n");
                             testTimeData = testItem.getTimeData();
                             fsReliabilityTestController.setTimeData(testTimeData);
+                            currentStepTextArea.appendText("生成完毕\n");
                         });
-                        updateMessage(statusText + "生成完毕\n");
                         return null;
                     }
                 };
