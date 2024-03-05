@@ -13,7 +13,8 @@ public class TestTimeData {
     public static final String[] NORMAL_TIMEDATA_NAMES = new String[]{"日期时间", "CPU使用率", "内存使用率", "磁盘读写速度"};
 
     /**
-     * 添加其余测试过程中的时序数据名称
+     * 添加其余测试过程中的时序数据名称，保持一致
+     * NORMAL_TIMEDATA_NAMES
      */
 
     // 文件系统可靠性测试的时序数据
