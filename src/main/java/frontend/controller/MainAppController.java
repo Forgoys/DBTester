@@ -2,7 +2,10 @@ package frontend.controller;
 
 import backend.dataset.ArgumentProperty;
 import backend.dataset.TestArguments;
+import backend.dataset.TestResult;
 import backend.tester.TestItem;
+import backend.tester.fileSystem.FioReadWriteTest;
+import eu.hansolo.tilesfx.Test;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
 import frontend.connection.SSHConnection;
@@ -14,10 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -35,21 +35,25 @@ public class MainAppController {
      */
     public static FSConnection currentFSConnection;
     /**
-     * SQL执行界面的控制器
+     * 数据库适配性测试界面的控制器
      */
     DBAdaptTestController dbAdaptTestController;
+    /**
+     * 数据库其他测试结果界面的控制器
+     */
+    DBOtherTestController dbOtherTestController;
     /**
      * 文件系统可靠性测试结果界面的控制器
      */
     FSReliabilityTestController fsReliabilityTestController;
     /**
-     * 文件系统其他测试结果界面的控制器
+     * 文件系统并发度结果界面的控制器
      */
-    FSOtherTestController fsOtherTestController;
+    FSConcurrencyTestController fsConcurrencyTestController;
     /**
-     * 其他测试结果界面的控制器
+     * 文件系统读写速度测试结果界面的控制器
      */
-    DBOtherTestController dbOtherTestController;
+    FSReadWriteTestController fsReadWriteTestController;
 
     TestItem testItem;
     @FXML
@@ -370,7 +374,15 @@ public class MainAppController {
         if (!testProject.equals("适配性")) {
             Button confirmButton = new Button("开始测试");
             confirmButton.setId("testProjectParmConfirmButton");
-            confirmButton.setOnAction(event -> onTestProjectParmConfirmButtonClicked());
+            confirmButton.setOnAction(event -> {
+                try {
+                    onTestProjectParmConfirmButtonClicked();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
             testProjectConfigPane.add(confirmButton, 1, rowIndex);
         }
     }
@@ -378,25 +390,25 @@ public class MainAppController {
     /**
      * 测试对象参数确认按钮点击
      */
-    private void onTestProjectParmConfirmButtonClicked() {
+    private void onTestProjectParmConfirmButtonClicked() throws IOException, InterruptedException {
         // 首先清空旧的参数值
-//        TestArguments testArguments = new TestArguments();
-//
-//        for (Node node : testProjectConfigPane.getChildren()) {
-//            // 只处理TextField和ComboBox
-//            if (node instanceof TextField textField) {
-//                testArguments.values.add(textField.getText()); // 添加TextField的值
-//            } else if (node instanceof ComboBox) {
-//                @SuppressWarnings("unchecked")
-//                ComboBox<String> comboBox = (ComboBox<String>) node;
-//                String selected = comboBox.getSelectionModel().getSelectedItem();
-//                if (selected != null) {
-//                    testArguments.values.add(selected); // 添加ComboBox选中的值
-//                } else {
-//                    testArguments.values.add(""); // 或者处理未选择的情况
-//                }
-//            }
-//        }
+        TestArguments testArguments = new TestArguments();
+
+        for (Node node : testProjectConfigPane.getChildren()) {
+            // 只处理TextField和ComboBox
+            if (node instanceof TextField textField) {
+                testArguments.values.add(textField.getText()); // 添加TextField的值
+            } else if (node instanceof ComboBox) {
+                @SuppressWarnings("unchecked")
+                ComboBox<String> comboBox = (ComboBox<String>) node;
+                String selected = comboBox.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    testArguments.values.add(selected); // 添加ComboBox选中的值
+                } else {
+                    testArguments.values.add(""); // 或者处理未选择的情况
+                }
+            }
+        }
 
         // testItem = new TPCCTest(....., testArguments)
 
@@ -427,7 +439,10 @@ public class MainAppController {
 
                 break;
             case "读写速度测试":
-
+                testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
+                testItem.startTest();
+                TestResult testResult = testItem.getTestResults();
+                fsReadWriteTestController.displayTestResults(testResult);
                 break;
             case "并发度测试":
                 break;
@@ -436,12 +451,12 @@ public class MainAppController {
 
 
                 // 展示结果
-                List<List<Double>> testTimeData = IntStream.range(0, 5) // 5个指标
-                        .mapToObj(i -> new Random().doubles(10, 0, 100) // 生成10个0-100之间的随机双精度数
-                                .boxed()
-                                .collect(Collectors.toList()))
-                        .collect(Collectors.toList());
-                fsReliabilityTestController.setTimeData(testTimeData);
+//                List<List<Double>> testTimeData = IntStream.range(0, 5) // 5个指标
+//                        .mapToObj(i -> new Random().doubles(10, 0, 100) // 生成10个0-100之间的随机双精度数
+//                                .boxed()
+//                                .collect(Collectors.toList()))
+//                        .collect(Collectors.toList());
+//                fsReliabilityTestController.setTimeData(testTimeData);
 
                 break;
         }
@@ -474,7 +489,7 @@ public class MainAppController {
                 break;
             case "读写速度测试":
             case "并发度测试":
-                fxmlFile = "fsOtherTestView.fxml";
+                fxmlFile = "fsConcurrencyTestView.fxml";
                 break;
             case "可靠性测试":
                 fxmlFile = "fsReliabilityTestView.fxml";
@@ -497,8 +512,8 @@ public class MainAppController {
                 dbOtherTestController = (DBOtherTestController) controller;
             } else if (fxmlFile.equals("fsReliabilityTestView.fxml")) {
                 fsReliabilityTestController = (FSReliabilityTestController) controller;
-            } else if (fxmlFile.equals("fsOtherTestView.fxml")) {
-                fsOtherTestController = (FSOtherTestController) controller;
+            } else if (fxmlFile.equals("fsConcurrencyTestView.fxml")) {
+                fsConcurrencyTestController = (FSConcurrencyTestController) controller;
             }
 
             rightScrollPane.setContent(view);

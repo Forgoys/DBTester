@@ -20,6 +20,15 @@ public class FioReadWriteTest extends TestItem {
     // 指令运行结果
     TestResult fioRWTestResult = new TestResult();
 
+    public FioReadWriteTest() {}
+
+    public FioReadWriteTest(String directory, String bs, String size, String rwIndex) {
+        this.directory = directory;
+        this.bs = bs;
+        this.size = size;
+        this.rwIndex = rwIndex;
+    }
+
     // 安装FIO测试工具
     @Override
     public void testEnvPrepare() {
@@ -123,5 +132,45 @@ public class FioReadWriteTest extends TestItem {
     @Override
     public void readFromFile() {
 
+    }
+
+    public String getDirectory() {
+        return directory;
+    }
+
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
+
+    public String getBs() {
+        return bs;
+    }
+
+    public void setBs(String bs) {
+        this.bs = bs;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getRwIndex() {
+        return rwIndex;
+    }
+
+    public void setRwIndex(String rwIndex) {
+        this.rwIndex = rwIndex;
+    }
+
+    public TestResult getFioRWTestResult() {
+        return fioRWTestResult;
+    }
+
+    public void setFioRWTestResult(TestResult fioRWTestResult) {
+        this.fioRWTestResult = fioRWTestResult;
     }
 }

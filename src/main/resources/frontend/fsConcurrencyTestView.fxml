@@ -9,7 +9,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
 <VBox fillWidth="true" spacing="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10"
-      AnchorPane.topAnchor="10" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.controller.FSOtherTestController">
+      AnchorPane.topAnchor="10" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.controller.FSConcurrencyTestController">
     <padding>
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
@@ -38,7 +38,7 @@
         </Label>
         <TableView fx:id="resultsTableView" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="queryColumn" text="性能指标"/>
+                <TableColumn fx:id="metricsColumn" text="性能指标"/>
                 <TableColumn fx:id="resultColumn" text="结果"/>
                 <!-- Additional columns as needed -->
             </columns>
