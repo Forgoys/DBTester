@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FioParallelTest extends TestItem {
 
@@ -19,7 +21,8 @@ public class FioParallelTest extends TestItem {
     // 指令运行结果
     TestResult fioParallelTestResult = new TestResult();
 
-    public FioParallelTest() {}
+    public FioParallelTest() {
+    }
 
     public FioParallelTest(String directory, String numjobs) {
         this.directory = directory;
@@ -72,25 +75,59 @@ public class FioParallelTest extends TestItem {
     }
 
     public void fioResultSave(List<String> results) {
-        String iops = "";
-        String bw = "";
-        String lat = "";
-        // 提取 iops、bw 和 lat 指标
+        StringBuilder textBuilder = new StringBuilder();
         for (String result : results) {
-            if (result.contains("iops")) {
-                iops = result.split(":")[1].trim();
-                System.out.println("IOPS: " + iops);
-            } else if (result.contains("bw")) {
-                bw = result.split(":")[1].trim();
-                System.out.println("Bandwidth: " + bw);
-            } else if (result.contains("lat")) {
-                lat = result.split(":")[1].trim();
-                System.out.println("Latency: " + lat);
-            }
+            textBuilder.append(result);
         }
+        String text = textBuilder.toString();
+
+        // 分别定义read和write的正则表达式
+        String regexRead = "read: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
+        String regexWrite = "write: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
+
+        // 对读的部分处理
+        Pattern pattern = Pattern.compile(regexRead, Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(text);
+        String readIops = "0";
+        String readBw = "0";
+        String readLat = "0";
+        while (matcher.find()) {
+            readIops = matcher.group(1);
+            readBw = matcher.group(2);
+            String unit = matcher.group(3); // 保留带宽单位
+            String latUnit = matcher.group(4);
+            double avgLat = Double.parseDouble(matcher.group(5));
+            if ("msec".equals(latUnit)) {
+                avgLat *= 1000; // 如果单位是msec，则乘以1000
+            }
+            readLat = String.valueOf(avgLat);
+            // 打印结果
+            System.out.println("read:IOPS=" + readIops + ", BW=" + readBw + unit + ", Avg Latency=" + readLat + "usec");
+        }
+
+        // 对写的部分处理
+        pattern = Pattern.compile(regexWrite, Pattern.DOTALL);
+        matcher = pattern.matcher(text);
+        String writeIops = "0";
+        String writeBw = "0";
+        String writeLat = "0";
+        while (matcher.find()) {
+            writeIops = matcher.group(1);
+            writeBw = matcher.group(2);
+            String unit = matcher.group(3); // 保留带宽单位
+            String latUnit = matcher.group(4);
+            double avgLat = Double.parseDouble(matcher.group(5));
+            if ("msec".equals(latUnit)) {
+                avgLat *= 1000; // 如果单位是msec，则乘以1000
+            }
+            writeLat = String.valueOf(avgLat);
+            // 打印结果
+            System.out.println("write:IOPS=" + writeIops + ", BW=" + writeBw + unit + ", Avg Latency=" + writeLat + "usec");
+        }
+
         // 添加结果到TestResult类
         fioParallelTestResult.names = TestResult.FIO_PARALLEL_TEST;
-        fioParallelTestResult.values = new String[]{iops, bw, lat};
+        fioParallelTestResult.values = new String[]{readIops, readBw, readLat, writeIops, writeBw, writeLat};
     }
 
     @Override
