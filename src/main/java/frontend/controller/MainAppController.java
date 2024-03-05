@@ -10,6 +10,8 @@ import backend.tester.fileSystem.MiniFileTest;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
 import frontend.connection.SSHConnection;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -412,6 +414,7 @@ public class MainAppController {
         // testItem = new TPCCTest(....., testArguments)
 
         String testProject = testProjectSelectBox.getValue();
+        StringBuilder statusText = new StringBuilder();
         switch (testProjectSelectBox.getValue()) {
             case "TPC-C":
 //                testItem = new TPCCTester();
@@ -438,10 +441,29 @@ public class MainAppController {
 //
 //                break;
             case "读写速度测试":
-                testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
-                testItem.startTest();
-                testResult = testItem.getTestResults();
-                fsReadWriteTestController.displayTestResults(testResult);
+                Task<Void> task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        updateMessage(statusText + "开始fio读写性能测试\n");
+                        updateMessage(statusText + "测试中....\n");
+                        testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
+                        testItem.startTest();
+                        updateMessage(statusText + "测试完成\n");
+                        updateMessage(statusText + "开始生成测试结果\n");
+                        Platform.runLater(() -> {
+                            testResult = testItem.getTestResults();
+                            fsReadWriteTestController.displayTestResults(testResult);
+                        });
+                        updateMessage(statusText + "生成完毕\n");
+                        return null;
+                    }
+                };
+
+                // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
+                fsReadWriteTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+
+                // 在新线程中执行任务
+                new Thread(task).start();
                 break;
             case "并发度测试":
                 testItem = new FioParallelTest(testArguments.values.get(0), testArguments.values.get(1));

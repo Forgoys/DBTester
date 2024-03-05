@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -27,6 +28,9 @@ public class FSReadWriteTestController {
     private LineChart<String, Number> cpuUsageLineChart;
     @FXML
     private LineChart<String, Number> memoryUsageLineChart;
+
+    @FXML
+    public Label currentStepTextArea;
 
     private List<List<Double>> timeData;
 
