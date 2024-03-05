@@ -28,35 +28,9 @@
       <menus>
         <Menu mnemonicParsing="false" text="File">
           <items>
-            <MenuItem mnemonicParsing="false" text="New" />
-            <MenuItem mnemonicParsing="false" text="Open…" />
-            <Menu mnemonicParsing="false" text="Open Recent" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Close" />
-            <MenuItem mnemonicParsing="false" text="Save" />
-            <MenuItem mnemonicParsing="false" text="Save As…" />
-            <MenuItem mnemonicParsing="false" text="Revert" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Preferences…" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem fx:id="exportTestResult" mnemonicParsing="false" onAction="#exportTestResultClick" text="导出测试结果" />
-                  <MenuItem fx:id="importTestResult" mnemonicParsing="false" onAction="#importTestResultClick" text="导入测试结果" />
-                  <SeparatorMenuItem mnemonicParsing="false" />
+              <MenuItem fx:id="exportTestResult" mnemonicParsing="false" onAction="#exportTestResultClick" text="导出测试结果" />
+              <MenuItem fx:id="importTestResult" mnemonicParsing="false" onAction="#importTestResultClick" text="导入测试结果" />
             <MenuItem mnemonicParsing="false" text="Quit" />
-          </items>
-        </Menu>
-        <Menu mnemonicParsing="false" text="Edit">
-          <items>
-            <MenuItem mnemonicParsing="false" text="Undo" />
-            <MenuItem mnemonicParsing="false" text="Redo" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Cut" />
-            <MenuItem mnemonicParsing="false" text="Copy" />
-            <MenuItem mnemonicParsing="false" text="Paste" />
-            <MenuItem mnemonicParsing="false" text="Delete" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Select All" />
-            <MenuItem mnemonicParsing="false" text="Unselect All" />
           </items>
         </Menu>
         <Menu mnemonicParsing="false" text="帮助">
@@ -66,18 +40,21 @@
         </Menu>
       </menus>
     </MenuBar>
-    <SplitPane dividerPositions="0.2505567928730512" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+    <SplitPane dividerPositions="0.3" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
       <items>
-            <Accordion>
+            <Accordion minWidth="200.0">
               <panes>
                   <TitledPane fx:id="sshConnectionTitledPane" animated="false" expanded="true" text="服务器连接">
                      <content>
-                        <VBox prefHeight="200.0" prefWidth="100.0">
+                        <VBox>
+<!--                            <padding>-->
+<!--                                <Insets top="10" right="10" bottom="10" left="10" />-->
+<!--                            </padding>-->
                            <children>
-                              <GridPane vgap="4.0">
+                              <GridPane hgap="10" vgap="10">
                                 <columnConstraints>
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="97.0" minWidth="10.0" prefWidth="76.0" />
-                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="133.0" minWidth="10.0" prefWidth="125.0" />
+                                    <ColumnConstraints minWidth="80" prefWidth="100" hgrow="SOMETIMES"/>
+                                    <ColumnConstraints minWidth="150" prefWidth="200" hgrow="SOMETIMES"/>
                                 </columnConstraints>
                                 <rowConstraints>
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -106,13 +83,13 @@
                   </TitledPane>
                 <TitledPane fx:id="testObjectConfigTitledPane" animated="false" text="测试对象与配置">
                   <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="493.0" prefWidth="300.0">
                            <children>
-                              <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <VBox layoutX="21.5" layoutY="20.5" prefHeight="200.0" prefWidth="201.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="11.0" AnchorPane.rightAnchor="11.0" AnchorPane.topAnchor="0.0">
                                  <children>
                                     <GridPane fx:id="testObjectConfigPane" alignment="CENTER_LEFT" hgap="10.0" nodeOrientation="LEFT_TO_RIGHT" vgap="4.0">
                                       <columnConstraints>
-                                        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                         <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="10.0" />
                                       </columnConstraints>
                                       <rowConstraints>
@@ -122,7 +99,7 @@
                                       </rowConstraints>
                                        <children>
                                           <Label text=" 测试对象:" />
-                                          <ComboBox fx:id="testObjectSelectBox" onAction="#onTestObjectSelect" promptText="选择对象" GridPane.columnIndex="1" GridPane.halignment="CENTER">
+                                          <ComboBox fx:id="testObjectSelectBox" onAction="#onTestObjectSelect" promptText="选择对象" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.vgrow="ALWAYS">
                                                <items>
                                                    <FXCollections fx:factory="observableArrayList">
                                                        <String fx:value="PolarDB" />
@@ -150,8 +127,8 @@
                            <children>
                               <GridPane fx:id="testProjectConfigPane" alignment="CENTER_LEFT" hgap="10.0" vgap="4.0">
                                  <columnConstraints>
-                                    <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                     <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                    <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
                                  </columnConstraints>
                                  <rowConstraints>
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -160,7 +137,7 @@
                                  </rowConstraints>
                                  <children>
                                     <Label text=" 测试项目:" />
-                                    <ComboBox fx:id="testProjectSelectBox" onAction="#onTestProjectSelect" prefHeight="26.0" prefWidth="108.0" promptText="选择项目" GridPane.columnIndex="1" />
+                                    <ComboBox fx:id="testProjectSelectBox" onAction="#onTestProjectSelect" prefHeight="26.0" prefWidth="108.0" promptText="选择项目" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
                                  </children>
                               </GridPane>
                            </children>
@@ -169,7 +146,7 @@
                 </TitledPane>
               </panes>
             </Accordion>
-          <ScrollPane fx:id="rightScrollPane" fitToWidth="true" prefHeight="-1.0" prefWidth="-1.0">
+          <ScrollPane fx:id="rightScrollPane" fitToWidth="true" fitToHeight="true">
               <opaqueInsets>
                   <Insets />
               </opaqueInsets>
