@@ -82,7 +82,7 @@ public class TPCCTester extends TestItem {
      * 测试环境准备：软件部署、数据集导入
      */
     @Override
-    public void testEnvPrepare() throws RuntimeException{
+    public void testEnvPrepare() throws Exception {
         // 创建测试目录
         testHomePath ="/home/" + sshStmt.getUserName() + "/RDB_test/tpcc";
         String out = sshStmt.executeCommand("mkdir -p " + testHomePath);
@@ -109,7 +109,7 @@ public class TPCCTester extends TestItem {
             throw new InterruptedException("测试正在进行，请勿重复启动");
         }
 
-        
+
 
     }
 
@@ -259,32 +259,34 @@ public class TPCCTester extends TestItem {
     }
 
     public static void main(String[] args) {
-        SSHConnection connection = new SSHConnection("10.181.8.146", 22, "wlx", "Admin@wlx");
-        DBConnection dbConnection = new DBConnection("/home/autotuning/cx/oscarJDBC.jar",
-                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
-                "SYSDBA",
-                "szoscar55");
-        TestArguments arguments = new TestArguments();
-        arguments.values = new ArrayList<>();
-        arguments.values.add("2");
-        arguments.values.add("128");
-        arguments.values.add("16");
-        arguments.values.add("1");
-
-        connection.sshConnect();
-        TPCCTester tpccTester = new TPCCTester("tpcc", connection, dbConnection, arguments);
-        try {
-//            connection.executeCommand("cd /home/wlx/cx/benchmarksql-5.0");
-//            System.out.println(connection.executeCommand("pwd"));
-//            System.out.println(connection.executeCommand("ls"));
-            tpccTester.testEnvPrepare();
-
-            tpccTester.startTest();
-
-
-        } catch (RuntimeException | IOException | InterruptedException e) {
-            System.out.println(e.getMessage());
-        }
+//        SSHConnection connection = new SSHConnection("10.181.8.146", 22, "wlx", "Admin@wlx");
+//        DBConnection dbConnection = new DBConnection("/home/autotuning/cx/oscarJDBC.jar",
+//                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
+//                "SYSDBA",
+//                "szoscar55");
+//        TestArguments arguments = new TestArguments();
+//        arguments.values = new ArrayList<>();
+//        arguments.values.add("2");
+//        arguments.values.add("128");
+//        arguments.values.add("16");
+//        arguments.values.add("1");
+//
+//        connection.sshConnect();
+//        TPCCTester tpccTester = new TPCCTester("tpcc", connection, dbConnection, arguments);
+//        try {
+////            connection.executeCommand("cd /home/wlx/cx/benchmarksql-5.0");
+////            System.out.println(connection.executeCommand("pwd"));
+////            System.out.println(connection.executeCommand("ls"));
+//            tpccTester.testEnvPrepare();
+//
+//            tpccTester.startTest();
+//
+//
+//        } catch (RuntimeException | IOException | InterruptedException e) {
+//            System.out.println(e.getMessage());
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
 
     }
 }
