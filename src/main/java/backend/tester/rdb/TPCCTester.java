@@ -6,6 +6,7 @@ import backend.tester.TestItem;
 import frontend.connection.DBConnection;
 import frontend.connection.SSHConnection;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,6 +93,24 @@ public class TPCCTester extends TestItem {
         dataPrepare();
         // 导入测试数据到数据库
         importDataSetToDB();
+        // 测试准备就绪
+        status = Status.READY;
+    }
+
+
+    /**
+     * 开始测试
+     */
+    @Override
+    public void startTest() throws IOException, InterruptedException {
+        if(status == Status.UNPREPARED) {
+            throw new InterruptedException("测试尚未就绪，请先调用环境配置函数");
+        } else if(status == Status.RUNNING) {
+            throw new InterruptedException("测试正在进行，请勿重复启动");
+        }
+
+        
+
     }
 
     /**
@@ -215,13 +234,8 @@ public class TPCCTester extends TestItem {
     }
 
 
-    /**
-     * 开始测试
-     */
-    @Override
-    public void startTest() {
 
-    }
+
 
     @Override
     public List<List<Double>> getTimeData() {
@@ -260,12 +274,15 @@ public class TPCCTester extends TestItem {
         connection.sshConnect();
         TPCCTester tpccTester = new TPCCTester("tpcc", connection, dbConnection, arguments);
         try {
-            connection.executeCommand("cd /home/wlx/cx/benchmarksql-5.0");
-            System.out.println(connection.executeCommand("pwd"));
-            System.out.println(connection.executeCommand("ls"));
+//            connection.executeCommand("cd /home/wlx/cx/benchmarksql-5.0");
+//            System.out.println(connection.executeCommand("pwd"));
+//            System.out.println(connection.executeCommand("ls"));
             tpccTester.testEnvPrepare();
+
             tpccTester.startTest();
-        } catch (RuntimeException e) {
+
+
+        } catch (RuntimeException | IOException | InterruptedException e) {
             System.out.println(e.getMessage());
         }
 
