@@ -7,6 +7,12 @@ import backend.dataset.TestTimeData;
 import frontend.connection.DBConnection;
 import frontend.connection.SSHConnection;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -81,6 +87,86 @@ public abstract class TestItem implements Testable, Writable{
         this.testArgs = testArgs;
     }
 
+    public static void execCommands(String... commands) {
+        execCommands(null, commands);
+    }
+
+    public static String execCommandsWithReturn(String... commands) {
+        return execCommandsWithReturn(null, commands);
+    }
+
+    public static void execCommands(File workDir, String... commands) {
+        if(workDir != null && (!workDir.exists() || !workDir.isDirectory())) {
+            System.out.println("工作路径设置不正确");
+        }
+        // 执行数据生成脚本
+        try {
+            // 构建进程
+            ProcessBuilder builder = new ProcessBuilder();
+            if(workDir != null)
+                builder.directory(workDir);
+
+            ArrayList<String> cmdList = new ArrayList<>();
+            cmdList.add("bash");
+            cmdList.add("-c");
+            cmdList.addAll(Arrays.asList(commands));
+            builder.command(cmdList);
+            // 启动进程
+            Process process = builder.start();
+            // 读取进程输出
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+            // 等待进程结束
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                System.err.println("Command execution failed with error code " + exitCode);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String execCommandsWithReturn(File workDir, String... commands) {
+        if(workDir != null && (!workDir.exists() || !workDir.isDirectory())) {
+            System.out.println("工作路径设置不正确");
+        }
+        StringBuilder output = new StringBuilder();
+        // 执行数据生成脚本
+        try {
+            // 构建进程
+            ProcessBuilder builder = new ProcessBuilder();
+            if(workDir != null)
+                builder.directory(workDir);
+
+            ArrayList<String> cmdList = new ArrayList<>();
+            cmdList.add("bash");
+            cmdList.add("-c");
+            cmdList.addAll(Arrays.asList(commands));
+            builder.command(cmdList);
+            // 启动进程
+            Process process = builder.start();
+            // 读取进程输出
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+                output.append(line).append("\n");
+            }
+            // 等待进程结束
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                System.err.println("Command execution failed with error code " + exitCode);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return output.toString().trim();
+    }
+
+
     /**
      * 返回测试过程中的时序数据
      * @return 返回一个存有时序数据的List
@@ -93,5 +179,8 @@ public abstract class TestItem implements Testable, Writable{
      * 保存测试结果
      */
     protected TestResult testResult;
+
+
+
 
 }
