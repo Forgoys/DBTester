@@ -1,4 +1,5 @@
 ### Mac OS ###
-.idea
+.idea/
+.mvn/
 target/
 out/
