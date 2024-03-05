@@ -1,6 +1,4 @@
 ### Mac OS ###
-.DS_Store
-*.class
 .idea
 target/
 out/
