@@ -116,7 +116,7 @@ public class TPCCTester extends TestItem {
     /**
      * 部署工具到testHomePath
      */
-    private void prepareTools() {
+    private void prepareTools() throws Exception {
 //        toolPath = testHomePath + "/" + toolName;
         // 部署benchmarksql到testHomePath/toolName
 
@@ -145,7 +145,7 @@ public class TPCCTester extends TestItem {
         }
     }
 
-    public void dataPrepare() throws RuntimeException{
+    public void dataPrepare() throws Exception {
         if(this.testArgs == null) {
             throw new IllegalArgumentException("测试参数未配置");
         }
@@ -165,7 +165,7 @@ public class TPCCTester extends TestItem {
     /**
      * 检查测试数据集是否存在
      */
-    private boolean existDataSetFile(String dataSetPath) {
+    private boolean existDataSetFile(String dataSetPath) throws Exception {
         // 检查目录是否存在
         // 执行命令检查目录下是否存在文件
         String execOut = sshStmt.executeCommand("ls " + dataSetPath);
@@ -181,7 +181,7 @@ public class TPCCTester extends TestItem {
         return execOut.contains("warehouses," + dataSize);
     }
 
-    private void createDataSet(String fileDir) {
+    private void createDataSet(String fileDir) throws Exception {
         // 创建数据集目录
         sshStmt.executeCommand("mkdir -p " + fileDir);
         // 创建配置文件
@@ -194,7 +194,7 @@ public class TPCCTester extends TestItem {
     /**
      * 根据模板配置文件创建配置文件
      */
-    private void createPropsFile() {
+    private void createPropsFile() throws Exception {
         // 配置文件命名格式：“props_dbBrand_dataSize"
         propsFileName = "props_" + DBStmt.getDbBrandName() + dataSize;
         // 删除旧的配置文件
@@ -228,7 +228,7 @@ public class TPCCTester extends TestItem {
     }
 
     // 执行文件导入数据库的脚本
-    private void importDataSetToDB() {
+    private void importDataSetToDB() throws Exception {
         sshStmt.executeCommand("cd " + toolPath + "/run");
         sshStmt.executeCommand("sh import_data_TPCC.sh " + propsFileName);
     }
