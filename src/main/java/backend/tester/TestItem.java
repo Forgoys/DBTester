@@ -168,19 +168,7 @@ public abstract class TestItem implements Testable, Writable{
 
 
     /**
-     * 返回测试过程中的时序数据
-     * @return 返回一个存有时序数据的List
-     */
-    public List<TestTimeData> getTimeDataList() {
-        return timeDataList;
-    }
-
-    /**
      * 保存测试结果
      */
     protected TestResult testResult;
-
-
-
-
 }
