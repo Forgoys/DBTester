@@ -26,6 +26,9 @@ public class TestResult {
     // IOZONE读写速度测试结果名
     public static final String[] IOZONE_RW_TEST = new String[]{"write", "rewrite", "read", "reread", "read (backward)", "write (random)"};
 
+    // FIO并发度测试结果名
+    public static final String[] FIO_PARALLEL_TEST = new String[]{"IOPS", "Bandwidth", "Latency"};
+
 
     /**
      * 数据名称

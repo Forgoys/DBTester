@@ -62,6 +62,13 @@ public class TestArguments {
             new ArgumentProperty("文件大小", new String[]{"1G", "4G", "8G"}),
     };
 
+    // fio并发度测试参数属性
+    public static final ArgumentProperty[] FIO_PARALLEL_ARG_PROPERTIES = new ArgumentProperty[]{
+            // 测试目录，用户输入
+            new ArgumentProperty("测试目录"),
+            // 并发度设置，有候选项
+            new ArgumentProperty("并发线程数", new String[]{"16", "64", "128", "256"}),
+    };
 
     /**
      * 各数据值，以String格式保存
@@ -85,6 +92,8 @@ public class TestArguments {
                 return FIO_ARG_PROPERTIES;
             case "IOZONE读写速度测试":
                 return IOZONE_ARG_PROPERTIES;
+            case "并发度测试":
+                return FIO_PARALLEL_ARG_PROPERTIES;
             default:
                 return new ArgumentProperty[]{}; // 返回空数组表示没有找到匹配的测试项目
         }
