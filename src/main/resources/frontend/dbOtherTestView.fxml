@@ -17,20 +17,6 @@
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
     <children>
-<!--        <HBox alignment="CENTER_LEFT" spacing="10">-->
-<!--            <VBox spacing="5">-->
-<!--                <Label text="测试进度:">-->
-<!--                    <font>-->
-<!--                        <Font size="18.0"/>-->
-<!--                    </font>-->
-<!--                </Label>-->
-<!--                <ProgressBar fx:id="progressBar" prefWidth="200"/>-->
-<!--            </VBox>-->
-<!--            <VBox alignment="CENTER" spacing="5">-->
-<!--                <Label fx:id="progressPercentLabel" text="0%"/>-->
-<!--                <Label fx:id="currentStepLabel" text="等待开始"/>-->
-<!--            </VBox>-->
-<!--        </HBox>-->
 
         <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label text="测试进度:">
@@ -49,7 +35,7 @@
         </Label>
         <TableView fx:id="resultsTableView" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="queryColumn" text="查询"/>
+                <TableColumn fx:id="metricsColumn" text="性能指标"/>
                 <TableColumn fx:id="resultColumn" text="结果"/>
                 <!-- Additional columns as needed -->
             </columns>

@@ -9,6 +9,8 @@ import backend.tester.fileSystem.FioParallelTest;
 import backend.tester.fileSystem.FioReadWriteTest;
 import backend.tester.fileSystem.MiniFileTest;
 import backend.tester.fileSystem.ReliableTest;
+import backend.tester.rdb.TPCCTester;
+import eu.hansolo.tilesfx.Test;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
 import frontend.connection.SSHConnection;
@@ -430,11 +432,39 @@ public class MainAppController {
 //        StringBuilder statusText = new StringBuilder();
         switch (testProjectSelectBox.getValue()) {
             case "TPC-C":
-//                testItem = new TPCCTester();
-//                testItem.testEnvPrepare();
-//                testItem.startTest();
-//                testItem.getTimeData();
-//                testItem.getTestResults();
+                message2Update = new StringBuilder();
+                task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        updateMessage(message2Update.append("开始TPC-C测试\n").toString());
+                        testItem = new TPCCTester("TPC-C测试", currentDBConnection, testArguments);
+                        updateMessage(message2Update.append("准备测试环境...\n").toString());
+                        testItem.testEnvPrepare();
+                        updateMessage(message2Update.append("完成\n").toString());
+                        updateMessage(message2Update.append("测试中....\n").toString());
+                        try {
+                            testItem.startTest();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        updateMessage(message2Update.append("测试完成\n").toString());
+                        updateMessage(message2Update.append("开始生成测试结果\n").toString());
+                        Platform.runLater(() -> {
+                            testResult = testItem.getTestResults();
+                            dbOtherTestController.displayTestResults(testResult);
+                            testTimeData = testItem.getTimeData();
+                            dbOtherTestController.setTimeData(testTimeData);
+
+                        });
+                        updateMessage(message2Update.append("生成完毕\n").toString());
+                        return null;
+                    }
+                };
+                // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
+                dbOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+
+                    // 在新线程中执行任务
+                new Thread(task).start();
                 break;
             case "TPC-H":
                 break;
@@ -458,8 +488,6 @@ public class MainAppController {
                 task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-
-                        TextArea currentStepTextArea = fsReadWriteTestController.currentStepTextArea;
                         updateMessage(message2Update.append("开始fio读写性能测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
                         testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
@@ -487,7 +515,6 @@ public class MainAppController {
                 task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        TextArea currentStepTextArea = fsOtherTestController.currentStepTextArea;
                         updateMessage(message2Update.append("开始并发度测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
 
@@ -514,7 +541,6 @@ public class MainAppController {
                 task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        TextArea currentStepTextArea = fsOtherTestController.currentStepTextArea;
                         updateMessage(message2Update.append("开始小文件测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
 
@@ -541,7 +567,6 @@ public class MainAppController {
                 task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        TextArea currentStepTextArea = fsReliabilityTestController.currentStepTextArea;
                         updateMessage(message2Update.append("开始可靠性测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
 
