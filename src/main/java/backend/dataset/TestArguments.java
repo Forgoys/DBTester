@@ -60,7 +60,7 @@ public class TestArguments {
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
             // sudo密码，用户输入
-            new ArgumentProperty("密码"),
+            new ArgumentProperty("本机sudo密码"),
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项
@@ -75,6 +75,8 @@ public class TestArguments {
     public static final ArgumentProperty[] IOZONE_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
+            // sudo密码，用户输入
+            new ArgumentProperty("本机sudo密码"),
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项
@@ -87,6 +89,8 @@ public class TestArguments {
             new ArgumentProperty("测试目录"),
             // 并发度设置，有候选项
             new ArgumentProperty("并发线程数", new String[]{"16", "64", "128", "256"}),
+            // sudo密码，用户输入
+            new ArgumentProperty("本机sudo密码"),
     };
 
     // fio小文件测试参数属性
