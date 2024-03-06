@@ -64,7 +64,7 @@ public class TestArguments {
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项
-            new ArgumentProperty("文件大小", new String[]{"8K", "1G", "4G", "8G"}),
+            new ArgumentProperty("文件大小", new String[]{"16k","1G", "4G", "8G"}),
             // 读写方式，有候选项
             new ArgumentProperty("读写方式", new String[]{"随机读", "随机写", "顺序读", "顺序写", "%70顺序读,%30顺序写", "%70随机读,%30随机写"}),
     };
