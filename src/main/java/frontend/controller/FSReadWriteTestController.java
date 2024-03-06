@@ -113,4 +113,13 @@ public class FSReadWriteTestController {
         cpuUsageLineChart.requestLayout();
         memoryUsageLineChart.requestLayout();
     }
+
+    public void clearAll() {
+        cpuUsageLineChart.getData().clear();
+        memoryUsageLineChart.getData().clear();
+
+        currentStepTextArea.clear();
+
+        fioResultsTableView.getItems().clear();
+    }
 }

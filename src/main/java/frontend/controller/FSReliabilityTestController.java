@@ -101,4 +101,12 @@ public class FSReliabilityTestController {
         latencyLineChart.requestLayout();
     }
 
+    public void clearAll() {
+        iopsLineChart.getData().clear();
+        bandwidthLineChart.getData().clear();
+        latencyLineChart.getData().clear();
+
+        currentStepTextArea.clear();
+    }
+
 }

@@ -119,8 +119,8 @@ public class DBOtherTestController {
         XYChart.Series<String, Number> writeSpeedSeries = new XYChart.Series<>();
         writeSpeedSeries.setName("写速度");
         for (int i = 0; i < timeData.get(3).size(); i++) {
-            readSpeedSeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(3).get(i)));
-            writeSpeedSeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(4).get(i)));
+            readSpeedSeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(2).get(i)));
+            writeSpeedSeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(3).get(i)));
         }
         diskSpeedLineChart.getData().addAll(readSpeedSeries, writeSpeedSeries);
 
@@ -128,5 +128,15 @@ public class DBOtherTestController {
         cpuUsageLineChart.requestLayout();
         memoryUsageLineChart.requestLayout();
         diskSpeedLineChart.requestLayout();
+    }
+
+    public void clearAll() {
+        cpuUsageLineChart.getData().clear();
+        memoryUsageLineChart.getData().clear();
+        diskSpeedLineChart.getData().clear();
+
+        currentStepTextArea.clear();
+
+        resultsTableView.getItems().clear();
     }
 }

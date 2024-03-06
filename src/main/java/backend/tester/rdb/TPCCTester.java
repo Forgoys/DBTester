@@ -107,7 +107,7 @@ public class TPCCTester extends TestItem {
         // 检查测试工具benchmarks是否存在
         toolHomePath = "/home/wlx/cx/benchmarksql-5.0/";
         toolPath = toolHomePath + "run/";
-        prepareTools();
+//        prepareTools();
 
         // 测试结果目录
         LocalDateTime localDateTime = LocalDateTime.now();

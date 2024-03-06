@@ -13,7 +13,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApp.class.getResource("main-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 900, 600);
+        Scene scene = new Scene(fxmlLoader.load(), 900, 1000);
         MainAppController controller = fxmlLoader.getController();
 
 //        Font font = Font.loadFont(getClass().getResourceAsStream("/fonts/SourceHanSansTC-Normal.ttf"), 13);
@@ -24,7 +24,7 @@ public class MainApp extends Application {
         Image appIcon = new Image(MainApp.class.getResourceAsStream("/icons/appIcon32.jpg"));
         stage.getIcons().add(appIcon);
 
-        stage.setOnCloseRequest(event -> controller.closeSSH());
+        stage.setOnCloseRequest(event -> controller.closeAll());
 
         stage.show();
     }
