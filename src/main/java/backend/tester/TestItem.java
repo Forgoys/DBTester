@@ -24,8 +24,6 @@ public abstract class TestItem implements Testable, Writable{
      */
     protected String testName;
 
-    public abstract void generateTimeData();
-
     public enum Status {
         /**
          * 准备阶段，例如参数未配置

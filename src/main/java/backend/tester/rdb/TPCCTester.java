@@ -74,10 +74,7 @@ public class TPCCTester extends TestItem {
     }
 
 
-    @Override
-    public void generateTimeData() {
 
-    }
 
     public TPCCTester(String testName, DBConnection DBStmt, TestArguments testArgs) {
         this.testName = testName;
@@ -98,20 +95,19 @@ public class TPCCTester extends TestItem {
      */
     @Override
     public void testEnvPrepare() throws Exception {
-
         // 创建测试目录
         String userName = execCommandsWithReturn("whoami");
         testHomePath = "/home/" + userName + "/RDB_test/tpcc/";
         File testHomePathFile = new File(testHomePath);
         testHomePathFile.mkdirs();
 
+        // 测试文件目录
+        dataSetPath = testHomePath + "TPCC_Files/warehouses_" + dataSize + "/";
+
         // 检查测试工具benchmarks是否存在
         toolHomePath = "/home/wlx/cx/benchmarksql-5.0/";
         toolPath = toolHomePath + "run/";
         prepareTools();
-
-        // 测试文件目录
-        dataSetPath = testHomePath + "TPCC_Files/warehouses_" + dataSize + "/";
 
         // 测试结果目录
         LocalDateTime localDateTime = LocalDateTime.now();

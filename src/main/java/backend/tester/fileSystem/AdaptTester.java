@@ -36,10 +36,6 @@ public class AdaptTester extends TestItem {
         return null;
     }
 
-    @Override
-    public void generateTimeData() {
-
-    }
 
     @Override
     public TestResult getTestResults() {

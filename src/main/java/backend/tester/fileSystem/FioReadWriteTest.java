@@ -179,10 +179,6 @@ public class FioReadWriteTest extends TestItem {
         System.out.println(Arrays.toString(fioRWTestResult.values));
     }
 
-    @Override
-    public void generateTimeData() {
-
-    }
 
     @Override
     public TestResult getTestResults() {
