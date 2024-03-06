@@ -10,6 +10,8 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -91,8 +93,32 @@ public class Util {
         return testArguments;
     }
 
+    public static boolean checkSudoPassword(String password) {
+        String command = "sudo -S ls /root"; // 示例命令，需要sudo权限
+        try {
+            Process process = Runtime.getRuntime().exec(new String[] {"sh", "-c", command});
+            OutputStream os = process.getOutputStream();
+            os.write((password + "\n").getBytes()); // 向进程输出流写入密码
+            os.flush();
+            os.close();
 
+            // 等待命令执行完成
+            int exitValue = process.waitFor();
 
+            // 根据退出值判断命令是否成功执行
+            return exitValue == 0;
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static void main(String[] args) {
+        // 示例密码，实际使用中应从用户输入或其他安全方式获取
+        String sudoPassword = "lhjlhj";
+        boolean isCorrect = checkSudoPassword(sudoPassword);
+        System.out.println("Is sudo password correct? " + isCorrect);
+    }
 //    public Task<Void> getTask(Object contorller, String testProject) {
 //        return new Task<>() {
 //            @Override
