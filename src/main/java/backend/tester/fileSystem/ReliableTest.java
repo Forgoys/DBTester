@@ -41,6 +41,10 @@ public class ReliableTest extends TestItem {
         reliableScriptName = "fiotest" + "_" + timeChoose + ".sh";
     }
 
+    public ReliableTest() {
+
+    }
+
     // 安装fio
     @Override
     public void testEnvPrepare() throws Exception {
@@ -142,6 +146,11 @@ public class ReliableTest extends TestItem {
         return null;
     }
 
+
+    @Override
+    public String getResultDicName() {
+        return null;
+    }
 
     @Override
     public void writeToFile(String resultPath) {

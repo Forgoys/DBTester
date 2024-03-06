@@ -248,6 +248,11 @@ public class FioReadWriteTest extends TestItem {
     }
 
     @Override
+    public String getResultDicName() {
+        return null;
+    }
+
+    @Override
     public void writeToFile(String resultPath) {
 
     }

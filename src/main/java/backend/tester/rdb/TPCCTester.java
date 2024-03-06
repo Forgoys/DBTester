@@ -91,6 +91,10 @@ public class TPCCTester extends TestItem {
         super(testName, sshStmt, DBStmt, testArgs);
     }
 
+    public TPCCTester() {
+
+    }
+
     /**
      * 测试环境准备：软件部署、数据集导入
      */
@@ -379,6 +383,11 @@ public class TPCCTester extends TestItem {
         return testResult;
     }
 
+
+    @Override
+    public String getResultDicName() {
+        return null;
+    }
 
     @Override
     public void writeToFile(String resultPath) {
