@@ -1,5 +1,9 @@
 package frontend.controller;
 
+import backend.dataset.TestArguments;
+import backend.tester.fileSystem.FioReadWriteTest;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -57,6 +61,56 @@ public class Util {
             gridPane.getRowConstraints().subList(1, gridPane.getRowConstraints().size()).clear();
         }
     }
+
+    public static TestArguments getTestArgFromGridPane(GridPane gridPane) {
+        TestArguments testArguments = new TestArguments();
+
+        for (Node node : gridPane.getChildren()) {
+            // 只处理TextField和ComboBox
+            if (node instanceof TextField textField) {
+                testArguments.values.add(textField.getText()); // 添加TextField的值
+            } else if (node instanceof ComboBox) {
+                @SuppressWarnings("unchecked")
+                ComboBox<String> comboBox = (ComboBox<String>) node;
+                String selected = comboBox.getSelectionModel().getSelectedItem();
+                if (selected != null) {
+                    testArguments.values.add(selected); // 添加ComboBox选中的值
+                } else {
+                    testArguments.values.add(""); // 或者处理未选择的情况
+                }
+            }
+        }
+
+        return testArguments;
+    }
+
+
+//    public Task<Void> getTask(Object contorller, String testProject) {
+//        return new Task<>() {
+//            @Override
+//            protected Void call() throws Exception {
+//                TextArea currentStepTextArea;
+//                if (testProject.equals("读写速度测试")) {
+//                    currentStepTextArea = (FSReadWriteTestController)contorller.currentStepTextArea;
+//                }
+//                updateMessage(message2Update.append("开始fio读写性能测试\n").toString());
+//                updateMessage(message2Update.append("测试中....\n").toString());
+//                testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
+//                System.out.println("开始fio读写性能测试1\n");
+//                testItem.startTest();
+//                Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
+//                System.out.println("开始fio读写性能测试2\n");
+//                Platform.runLater(() -> {
+//                    currentStepTextArea.appendText("开始生成测试结果\n");
+//                    testResult = testItem.getTestResults();
+////                            System.out.println(testResult.values);
+//                    fsReadWriteTestController.displayTestResults(testResult);
+//                    currentStepTextArea.appendText("生成完毕\n");
+//                });
+//                return null;
+//            }
+//        };
+//    }
 
 //    private void configureTestProjectParmUI_backup() {
 //        Util.clearGridPaneRowsAfterFirst(testProjectConfigPane);

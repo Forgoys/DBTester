@@ -43,8 +43,17 @@ public class TestArguments {
     };
 
     /**
-     * 此处设置其余测试参数属性。每一个参数属性由参数名和可能存在的参数候选值组成。
+     * influxdb-comparision工具时序数据库测试的参数属性
      */
+    public static final ArgumentProperty[] INFLUXCOMP_WRITE_ARG_PROPERTIES = new ArgumentProperty[] {
+            new ArgumentProperty("写入场景", new String[]{"100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟*"}),
+            new ArgumentProperty("客户端数", new String[]{"16","100"})
+    };
+    public static final ArgumentProperty[] INFLUXCOMP_READ_ARG_PROPERTIES = new ArgumentProperty[] {
+            new ArgumentProperty("查询场景", new String[]{"100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟*"}),
+            new ArgumentProperty("查询类型", new String[]{"8host-1hr","1host-1hr","1host-12hr"}),
+            // new ArgumentProperty("查询语句数量",new String[]{"1万","5万","10万})
+    };
 
     /*
      * FIO读写速度测试参数属性
@@ -97,9 +106,10 @@ public class TestArguments {
                 return TPCC_ARG_PROPERTIES;
             case "TPC-H":
                 return TPCH_ARG_PROPERTIES;
-            // 补全这里补全这里补全这里补全这里补全这里补全这里补全这里
-            // 补全这里补全这里补全这里补全这里补全这里补全这里补全这里
-            // 补全这里补全这里补全这里补全这里补全这里补全这里补全这里
+            case "时序数据库写入测试":
+                return INFLUXCOMP_WRITE_ARG_PROPERTIES;
+            case "时序数据库查询测试":
+                return INFLUXCOMP_READ_ARG_PROPERTIES;
             case "读写速度测试":
                 return FIO_ARG_PROPERTIES;
             case "IOZONE读写速度测试":
