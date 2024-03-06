@@ -1,5 +1,6 @@
 package backend.tester.fileSystem;
 
+import backend.dataset.TestAllResult;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
 
@@ -115,7 +116,8 @@ public class IozoneReadWriteTest extends TestItem {
     }
 
     @Override
-    public void readFromFile(String resultPath) {
+    public TestAllResult readFromFile(String resultPath) {
 
+        return null;
     }
 }

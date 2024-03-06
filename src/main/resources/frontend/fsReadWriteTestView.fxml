@@ -17,6 +17,20 @@
         <Insets bottom="10" left="10" right="10" top="10" />
     </padding>
     <children>
+<!--        <HBox alignment="CENTER_LEFT" spacing="10">-->
+<!--            <VBox spacing="5">-->
+<!--                <Label text="测试进度:">-->
+<!--                    <font>-->
+<!--                        <Font size="18.0"/>-->
+<!--                    </font>-->
+<!--                </Label>-->
+<!--                <ProgressBar fx:id="progressBar" prefWidth="200"/>-->
+<!--            </VBox>-->
+<!--            <VBox alignment="CENTER" spacing="5">-->
+<!--                <Label fx:id="progressPercentLabel" text="0%"/>-->
+<!--                <Label fx:id="currentStepLabel" text="等待开始"/>-->
+<!--            </VBox>-->
+<!--        </HBox>-->
         <VBox alignment="CENTER_LEFT" spacing="10">
             <Label text="测试进度:">
                 <font>
@@ -33,7 +47,7 @@
                 <Font size="18.0" />
             </font>
         </Label>
-        <TableView fx:id="fioResultsTableView" VBox.vgrow="ALWAYS">
+        <TableView fx:id="fioResultsTableView" prefHeight="193.0" prefWidth="248.0" VBox.vgrow="SOMETIMES">
             <columns>
                 <TableColumn fx:id="metricsColumn" text="性能指标" />
                 <TableColumn fx:id="resultColumn" text="结果" />

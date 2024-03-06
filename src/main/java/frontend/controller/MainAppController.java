@@ -1,9 +1,6 @@
 package frontend.controller;
 
-import backend.dataset.ArgumentProperty;
-import backend.dataset.TestArguments;
-import backend.dataset.TestResult;
-import backend.dataset.TestTimeData;
+import backend.dataset.*;
 import backend.tester.TestItem;
 import backend.tester.fileSystem.FioParallelTest;
 import backend.tester.fileSystem.FioReadWriteTest;
@@ -114,6 +111,7 @@ public class MainAppController {
 //        sshConnectionTitledPane.setExpanded(true);
         testObjectConfigTitledPane.setDisable(false);
         testProjectConfigTitledPane.setDisable(false);
+        DirectoryManager.createDirectories();  // 创建结果目录
 //        testObjectConfigTitledPane.setDisable(true);
 //        testProjectConfigTitledPane.setDisable(true);
     }
@@ -350,7 +348,7 @@ public class MainAppController {
     private void configureTestProjectParmUI() {
         Util.clearGridPaneRowsAfterFirst(testProjectConfigPane);
         String testProject = testProjectSelectBox.getValue();
-        ArgumentProperty[] properties = TestArguments.getArgPropertiesForTest(testProject);
+        ArgumentProperty[] properties = TestArguments.getArgPropertiesForTest(testObjectSelectBox.getValue(), testProject);
 
         int rowIndex = 1;
         for (ArgumentProperty property : properties) {
@@ -469,7 +467,7 @@ public class MainAppController {
                     protected Void call() throws Exception {
                         updateMessage(message2Update.append("开始fio读写性能测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
-                        testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
+                        testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3), testArguments.values.get(4));
                         updateMessage(message2Update.append("开始fio读写性能测试1\n").toString());
                         testItem.startTest();
                         updateMessage(message2Update.append("测试完成\n").toString());
@@ -498,7 +496,7 @@ public class MainAppController {
                         updateMessage(message2Update.append("开始并发度测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
 
-                        testItem = new FioParallelTest(testArguments.values.get(0), testArguments.values.get(1));
+                        testItem = new FioParallelTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2));
                         testItem.startTest();
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
@@ -512,7 +510,7 @@ public class MainAppController {
                 };
 
                 // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
-                    fsOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+                fsOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
                 // 在新线程中执行任务
                 new Thread(task).start();
                 break;
