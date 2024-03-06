@@ -44,6 +44,11 @@ public class AdaptTester extends TestItem {
     }
 
     @Override
+    public String getResultDicName() {
+        return null;
+    }
+
+    @Override
     public void writeToFile(String resultPath) {
 
     }

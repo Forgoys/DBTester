@@ -1,9 +1,6 @@
 package frontend.controller;
 
-import backend.dataset.ArgumentProperty;
-import backend.dataset.TestArguments;
-import backend.dataset.TestResult;
-import backend.dataset.TestTimeData;
+import backend.dataset.*;
 import backend.tester.TestItem;
 import backend.tester.fileSystem.FioParallelTest;
 import backend.tester.fileSystem.FioReadWriteTest;
@@ -21,6 +18,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -114,6 +112,7 @@ public class MainAppController {
 //        sshConnectionTitledPane.setExpanded(true);
         testObjectConfigTitledPane.setDisable(false);
         testProjectConfigTitledPane.setDisable(false);
+        DirectoryManager.createDirectories();  // 创建结果目录
 //        testObjectConfigTitledPane.setDisable(true);
 //        testProjectConfigTitledPane.setDisable(true);
     }
@@ -634,14 +633,119 @@ public class MainAppController {
 
 
     // ===============================结果文件导入和导出====================================
-    @FXML
-    private void exportTestResultClick() {
 
+    /**
+     * 导出测试结果文件夹
+     */
+    @FXML
+    private void onExportTestResultClick() {
+        String testObject = testObjectSelectBox.getValue();
+        String testProject = testProjectSelectBox.getValue();
+        String testResultDicName = testItem.getResultDicName();
+        String absolutePath = DirectoryManager.buildAbsolutePath(testObject, testProject, testResultDicName);
+        testItem.writeToFile(absolutePath);
     }
 
+    /**
+     * 导入测试结果文件夹
+     */
     @FXML
-    private void importTestResultClick() {
+    private void onImportTestResultClick() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        // 设置初始目录为当前运行目录下的results文件夹
+        String initialDirectory = System.getProperty("user.dir") + File.separator + "results";
+        directoryChooser.setInitialDirectory(new File(initialDirectory));
+        directoryChooser.setTitle("选择测试结果文件夹");
 
+        // 仅允许选择文件夹
+        Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
+        File selectedDirectory = directoryChooser.showDialog(stage); // 这里的null需要替换为你的Stage
+
+        String testObject = null;
+        String testProject = null;
+        String relativePath = null;
+        String absolutePath = null;
+
+        if (selectedDirectory != null) {
+            // 构建相对于"results"的路径
+            absolutePath = selectedDirectory.getPath();
+            relativePath = absolutePath.substring(System.getProperty("user.dir").length() + 1);
+            System.out.println(relativePath);
+            String[] analysisResult = DirectoryManager.analyzePath(relativePath);
+            if (analysisResult == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("错误");
+                alert.setHeaderText(null);
+                alert.setContentText("请正确选择结果文件夹");
+                alert.showAndWait();
+                return;
+            } else {
+                // 处理分析结果
+                testObject = analysisResult[0];
+                testProject = analysisResult[1];
+            }
+        }
+
+        TestAllResult testAllResult = null;
+        TestItem tmpTestItem = null;
+
+        if (testProject != null) {
+            loadTestProjectResultView(testProject);  // 载入测试结果展示UI
+
+            switch (testProject) {
+                case "TPC-C":
+                    dbOtherTestController.clearAll();
+                    tmpTestItem = new TPCCTester();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    dbOtherTestController.displayTestResults(testAllResult.testResult);
+                    dbOtherTestController.setTimeData(testAllResult.timeDataResult);
+                    break;
+                case "TPC-H":
+                    break;
+                case "写入性能":
+                    break;
+                case "查询性能":
+                    break;
+                case "可靠性":
+                    if (testObject.equals("InfluxDB") || testObject.equals("Lindorm") || testObject.equals("TDengine")) {
+                        ;
+                    } else {
+                        ;
+                    }
+                    break;
+                case "读写速度测试":
+                    fsReadWriteTestController.clearAll();
+                    tmpTestItem = new FioReadWriteTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+//                    fsReadWriteTestController.setTimeData(testAllResult.timeDataResult);
+                    break;
+                case "并发度测试":
+                    fsOtherTestController.clearAll();
+                    tmpTestItem = new FioParallelTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+                    break;
+                case "小文件测试":
+                    fsOtherTestController.clearAll();
+                    tmpTestItem = new MiniFileTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+                    break;
+                case "可靠性测试":
+                    fsReliabilityTestController.clearAll();
+                    tmpTestItem = new ReliableTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReliabilityTestController.setTimeData(testAllResult.timeDataResult);
+                    break;
+                default:
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("错误");
+                    alert.setHeaderText(null);
+                    alert.setContentText("请正确选择结果文件夹");
+                    alert.showAndWait();
+            }
+        }
     }
 
     public void closeAll() {

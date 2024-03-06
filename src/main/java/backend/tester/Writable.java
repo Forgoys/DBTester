@@ -6,6 +6,12 @@ import backend.dataset.TestResult;
 import java.util.List;
 
 public interface Writable {
+
+    /**
+     * 获取当前测试的测试结果文件夹名，定义为关键参数+年-月-日-时-分-秒，关键参数的选择自行决定，能让用户分得清就行
+     * @return 测试结果文件夹名
+     */
+    public String getResultDicName();
     /**
      * 能够将测试过程中的时序数据以及测试结果写入文件中
      */

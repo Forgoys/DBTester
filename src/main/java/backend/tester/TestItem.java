@@ -76,6 +76,11 @@ public abstract class TestItem implements Testable, Writable{
      */
     protected List<List<Double>> timeDataList;
 
+    /**
+     * 保存测试结果
+     */
+    protected TestResult testResult;
+
     public TestItem(){}
 
     public TestItem(String testName, SSHConnection sshStmt, DBConnection DBStmt) {
@@ -170,9 +175,4 @@ public abstract class TestItem implements Testable, Writable{
         return output.toString().trim();
     }
 
-
-    /**
-     * 保存测试结果
-     */
-    protected TestResult testResult;
 }

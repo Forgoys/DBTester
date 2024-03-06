@@ -30,6 +30,8 @@ public class MiniFileTest extends TestItem {
     // 指令运行结果
     TestResult fioMiniFileTestResult = new TestResult();
 
+    public MiniFileTest() {}
+
     public MiniFileTest(String directory) {
         this.directory = directory;
         miniFileName = "cifar-10-batches-bin";
@@ -175,6 +177,11 @@ public class MiniFileTest extends TestItem {
     @Override
     public TestResult getTestResults() {
         return fioMiniFileTestResult;
+    }
+
+    @Override
+    public String getResultDicName() {
+        return null;
     }
 
     @Override

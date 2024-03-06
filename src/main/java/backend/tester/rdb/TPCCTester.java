@@ -67,7 +67,7 @@ public class TPCCTester extends TestItem {
     /**
      * 数据库所在磁盘名，如sda，sdc等
      */
-    private String diskNameOfDB = "sdd";
+    private String diskNameOfDB;
 
     public TPCCTester(String testName, SSHConnection sshStmt) {
         this.testName = testName;
@@ -91,17 +91,24 @@ public class TPCCTester extends TestItem {
         super(testName, sshStmt, DBStmt, testArgs);
     }
 
+    public TPCCTester() {
+
+    }
+
     /**
      * 测试环境准备：软件部署、数据集导入
      */
     @Override
     public void testEnvPrepare() throws Exception {
+
+        // 安装数据库所在磁盘
+        diskNameOfDB = "sdd";
+
         // 创建测试目录
         String userName = execCommandsWithReturn("whoami");
         testHomePath = "/home/" + userName + "/RDB_test/tpcc/";
         File testHomePathFile = new File(testHomePath);
         testHomePathFile.mkdirs();
-
         // 测试文件目录
         dataSetPath = testHomePath + "TPCC_Files/warehouses_" + dataSize + "/";
 
@@ -379,6 +386,11 @@ public class TPCCTester extends TestItem {
         return testResult;
     }
 
+
+    @Override
+    public String getResultDicName() {
+        return null;
+    }
 
     @Override
     public void writeToFile(String resultPath) {
