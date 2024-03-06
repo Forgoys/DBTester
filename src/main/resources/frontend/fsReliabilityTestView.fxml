@@ -42,7 +42,7 @@
         </Label>
         <LineChart fx:id="iopsLineChart" prefHeight="200" VBox.vgrow="ALWAYS">
             <xAxis>
-                <CategoryAxis label="时间" />
+                <CategoryAxis label="采样点" />
             </xAxis>
             <yAxis>
                 <NumberAxis label="IOPS" />
@@ -56,7 +56,7 @@
         </Label>
         <LineChart fx:id="bandwidthLineChart" prefHeight="200" VBox.vgrow="ALWAYS">
             <xAxis>
-                <CategoryAxis label="时间" />
+                <CategoryAxis label="采样点" />
             </xAxis>
             <yAxis>
                 <NumberAxis label="带宽 (MB/s)" />
@@ -70,7 +70,7 @@
         </Label>
         <LineChart fx:id="latencyLineChart" prefHeight="200" VBox.vgrow="ALWAYS">
             <xAxis>
-                <CategoryAxis label="时间" />
+                <CategoryAxis label="采样点" />
             </xAxis>
             <yAxis>
                 <NumberAxis label="延迟 (ms)" />

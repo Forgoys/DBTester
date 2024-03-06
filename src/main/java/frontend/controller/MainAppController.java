@@ -469,7 +469,6 @@ public class MainAppController {
                         updateMessage(message2Update.append("开始fio读写性能测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
                         testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3), testArguments.values.get(4));
-                        updateMessage(message2Update.append("开始fio读写性能测试1\n").toString());
                         testItem.startTest();
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());

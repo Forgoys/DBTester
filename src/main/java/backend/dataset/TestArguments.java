@@ -105,6 +105,8 @@ public class TestArguments {
             new ArgumentProperty("测试目录"),
             // 测试时长，有候选项
             new ArgumentProperty("测试时长", new String[]{"1min", "3min", "10min", "30min", "1h", "4h", "24h", "3day", "7day"}),
+            // sudo密码，用户输入
+            new ArgumentProperty("本机sudo密码"),
     };
 
 
