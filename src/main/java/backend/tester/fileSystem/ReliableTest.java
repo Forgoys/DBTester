@@ -19,7 +19,6 @@ public class ReliableTest extends TestItem {
     private String fioReliableTestTime; // 对应的秒数
     private String reliableResultDirectory; // 结果存放目录
     private String reliableTestScriptName; // 执行可靠性测试脚本名称
-    private String processReliableResultScriptName; // 处理可靠性测试结果脚本名称
     private String processReliableResultCsvName; // 保存结果的csv文件名
 
     // sudo权限
@@ -29,10 +28,19 @@ public class ReliableTest extends TestItem {
     private TestTimeData reliableTimeData = new TestTimeData();
     private List<List<String>> reliableResultList = new ArrayList<>();
 
-    public ReliableTest(String directory, String timeChoose, String localSudoPassword) {
-        this.directory = directory;
+    public ReliableTest(String directory, String timeChoose, String localSudoPassword) throws IOException, InterruptedException {
+        this.directory = directory + "/reliableTest";
         this.timeChoose = timeChoose;
         this.localSudoPassword = localSudoPassword;
+    }
+
+    public ReliableTest() {
+
+    }
+
+    // 创建文件夹 复制脚本
+    @Override
+    public void testEnvPrepare() throws IOException, InterruptedException {
         // 转换timeChoose为秒数
         long seconds = 0;
         try {
@@ -64,22 +72,49 @@ public class ReliableTest extends TestItem {
         fioReliableTestTime = String.valueOf(seconds);
         reliableResultDirectory = directory + "/" + "fioReliableTestResult" + "_" + timeChoose;
         reliableTestScriptName = "reliableTest.sh";
-        processReliableResultScriptName = "processReliableResult.py";
         processReliableResultCsvName = "reliableResult.csv";
-    }
 
-    public ReliableTest() {
+        String currentDirectory = System.getProperty("user.dir");
+        System.out.println("Current directory: " + currentDirectory);
+        String localScriptPath = currentDirectory + "/src/main/resources/scripts/" + reliableTestScriptName;
 
-    }
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        // 创建reliableTest可靠性测试文件夹
+        System.out.println("创建文件夹:" + directory);
+        String command = "mkdir -p " + directory;
+        processBuilder.command("bash", "-c", command);
+        Process process = processBuilder.start();
 
-    // 安装fio
-    @Override
-    public void testEnvPrepare() throws Exception {
+        // 等待进程执行完毕
+        int exitCode = process.waitFor();
+        System.out.println("创建可靠性测试文件夹:" + directory + " Exit code:" + exitCode);
 
+        // 复制reliableTest可靠性测试脚本
+        command = "cp " + localScriptPath + " " + directory;
+        processBuilder.command("bash", "-c", command);
+        System.out.println(command);
+        process = processBuilder.start();
+        // 等待进程执行完毕
+        exitCode = process.waitFor();
+        System.out.println("复制reliableTest可靠性测试脚本:" + reliableTestScriptName + " Exit code:" + exitCode);
+
+        // 给脚本添加执行权限
+        command = "chmod +x " + directory + "/" + reliableTestScriptName;
+        processBuilder.command("bash", "-c", command);
+        System.out.println(command);
+        process = processBuilder.start();
+        // 等待进程执行完毕
+        exitCode = process.waitFor();
+        System.out.println("给脚本添加执行权限:" + reliableTestScriptName + " Exit code:" + exitCode);
     }
 
     @Override
     public void startTest() throws IOException, InterruptedException {
+        System.out.println("可靠性测试环境准备");
+        testEnvPrepare();
+        System.out.println("可靠性测试环境准备完成");
+
+        System.out.println("可靠性测试开始");
         // 测试指令
         String reliableCommand = directory + "/" + reliableTestScriptName + " " + directory + " " + fioReliableTestTime + " " + reliableResultDirectory;
 
@@ -278,7 +313,8 @@ public class ReliableTest extends TestItem {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        ReliableTest reliableTest = new ReliableTest("/home/autotuning/zf/glusterfs/software_test/reliableTest", "3min", "666");
+        ReliableTest reliableTest = new ReliableTest("/home/autotuning/zf/glusterfs/software_test", "1min", "666");
         reliableTest.startTest();
     }
+
 }
