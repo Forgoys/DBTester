@@ -20,4 +20,5 @@ module org.example.dbtester {
     opens frontend.connection to javafx.fxml;
     exports frontend.controller;
     opens frontend.controller to javafx.fxml;
+    opens backend.dataset to javafx.base;
 }

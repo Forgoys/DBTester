@@ -40,12 +40,6 @@ public class ReliableTest extends TestItem {
         reliableScriptName = "fiotest" + "_" + timeChoose + ".sh";
     }
 
-    // 需要生成时序数据
-    @Override
-    public void generateTimeData() {
-
-    }
-
     // 安装fio
     @Override
     public void testEnvPrepare() throws Exception {
@@ -147,13 +141,14 @@ public class ReliableTest extends TestItem {
         return null;
     }
 
+
     @Override
-    public void writeToFile() {
+    public void writeToFile(String resultPath) {
 
     }
 
     @Override
-    public void readFromFile() {
+    public void readFromFile(String resultPath) {
 
     }
 }

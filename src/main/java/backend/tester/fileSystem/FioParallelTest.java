@@ -29,11 +29,6 @@ public class FioParallelTest extends TestItem {
         this.numjobs = numjobs;
     }
 
-    @Override
-    public void generateTimeData() {
-
-    }
-
     // 并发测试环境 安装fio
     @Override
     public void testEnvPrepare() throws RuntimeException {
@@ -141,12 +136,12 @@ public class FioParallelTest extends TestItem {
     }
 
     @Override
-    public void writeToFile() {
+    public void writeToFile(String resultPath) {
 
     }
 
     @Override
-    public void readFromFile() {
+    public void readFromFile(String resultPath) {
 
     }
 }

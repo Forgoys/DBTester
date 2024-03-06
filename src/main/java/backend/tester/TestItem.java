@@ -24,8 +24,6 @@ public abstract class TestItem implements Testable, Writable{
      */
     protected String testName;
 
-    public abstract void generateTimeData();
-
     public enum Status {
         /**
          * 准备阶段，例如参数未配置
@@ -70,7 +68,7 @@ public abstract class TestItem implements Testable, Writable{
     /**
      * 保存测试过程中的时序数据
      */
-    protected List<TestTimeData> timeDataList;
+    protected List<List<Double>> timeDataList;
 
     public TestItem(){}
 
@@ -168,19 +166,7 @@ public abstract class TestItem implements Testable, Writable{
 
 
     /**
-     * 返回测试过程中的时序数据
-     * @return 返回一个存有时序数据的List
-     */
-    public List<TestTimeData> getTimeDataList() {
-        return timeDataList;
-    }
-
-    /**
      * 保存测试结果
      */
     protected TestResult testResult;
-
-
-
-
 }

@@ -102,23 +102,20 @@ public class IozoneReadWriteTest extends TestItem {
         iozoneRWTestResult.values = iozoneResult;
     }
 
-    @Override
-    public void generateTimeData() {
-
-    }
 
     @Override
     public TestResult getTestResults() {
         return iozoneRWTestResult;
     }
 
+
     @Override
-    public void writeToFile() {
+    public void writeToFile(String resultPath) {
 
     }
 
     @Override
-    public void readFromFile() {
+    public void readFromFile(String resultPath) {
 
     }
 }

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -126,6 +127,7 @@ public class FioReadWriteTest extends TestItem {
             textBuilder.append(result);
         }
         String text = textBuilder.toString();
+        System.out.println(text);
 
         // 分别定义read和write的正则表达式
         String regexRead = "read: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
@@ -174,27 +176,16 @@ public class FioReadWriteTest extends TestItem {
         // 添加结果到TestResult类
         fioRWTestResult.names = TestResult.FIO_RW_TEST;
         fioRWTestResult.values = new String[]{readIops, readBw, readLat, writeIops, writeBw, writeLat};
+        System.out.println(Arrays.toString(fioRWTestResult.values));
     }
 
-    @Override
-    public void generateTimeData() {
-
-    }
 
     @Override
     public TestResult getTestResults() {
         return fioRWTestResult;
     }
 
-    @Override
-    public void writeToFile() {
 
-    }
-
-    @Override
-    public void readFromFile() {
-
-    }
 
     public String getDirectory() {
         return directory;
@@ -228,12 +219,14 @@ public class FioReadWriteTest extends TestItem {
         this.rwIndex = rwIndex;
     }
 
-    public TestResult getFioRWTestResult() {
-        return fioRWTestResult;
+    @Override
+    public void writeToFile(String resultPath) {
+
     }
 
-    public void setFioRWTestResult(TestResult fioRWTestResult) {
-        this.fioRWTestResult = fioRWTestResult;
+    @Override
+    public void readFromFile(String resultPath) {
+
     }
 
     public static void main() throws IOException, InterruptedException {
