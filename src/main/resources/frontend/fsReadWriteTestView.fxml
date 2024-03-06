@@ -63,7 +63,7 @@
         <VBox spacing="10" VBox.vgrow="ALWAYS"> <!-- Changed HBox to VBox for vertical layout -->
             <LineChart fx:id="cpuUsageLineChart" prefHeight="200" prefWidth="200" VBox.vgrow="ALWAYS">
                 <xAxis>
-                    <CategoryAxis fx:id="cpuTimeAxis" label="时间" />
+                    <CategoryAxis fx:id="cpuTimeAxis" label="采样点" />
                 </xAxis>
                 <yAxis>
                     <NumberAxis fx:id="cpuAxis" label="CPU (%)" upperBound="90.0" />
@@ -72,7 +72,7 @@
 
             <LineChart fx:id="memoryUsageLineChart" prefHeight="200" prefWidth="200" VBox.vgrow="ALWAYS">
                 <xAxis>
-                    <CategoryAxis fx:id="memoryTimeAxis" label="时间" />
+                    <CategoryAxis fx:id="memoryTimeAxis" label="采样点" />
                 </xAxis>
                 <yAxis>
                     <NumberAxis fx:id="memoryAxis" label="内存 (%)" upperBound="40.0" />
