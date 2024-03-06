@@ -85,7 +85,9 @@ public class MiniFileTest extends TestItem {
         String text = textBuilder.toString();
 
         // 分别定义read和write的正则表达式
-        String regexRead = "read: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
+//        String regexRead = "read: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
+        String regexRead ="read: IOPS=([\\d.]+[kMG]?), BW=([\\d.]+[MiB|GiB|TiB]+/s).*lat \\((usec|msec)\\):.*avg=([\\d.]+)";
+
         String regexWrite = "write: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
 
         // 对读的部分处理
@@ -94,7 +96,7 @@ public class MiniFileTest extends TestItem {
         String readIops = "0";
         String readBw = "0";
         String readLat = "0";
-        while (matcher.find()) {
+        if (matcher.find()) {
             readIops = matcher.group(1);
             readBw = matcher.group(2);
             String unit = matcher.group(3); // 保留带宽单位
