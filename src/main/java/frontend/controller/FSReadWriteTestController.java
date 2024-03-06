@@ -40,6 +40,14 @@ public class FSReadWriteTestController {
 
     @FXML
     public void initialize() {
+        fioResultsTableView.widthProperty().addListener((obs, oldVal, newVal) -> {
+            // 表格的内部宽度减去2，这个值可能需要根据实际情况调整，以避免出现水平滚动条
+            double tableWidth = newVal.doubleValue() - 2;
+
+            // 两列均分宽度
+            metricsColumn.prefWidthProperty().bind(fioResultsTableView.widthProperty().divide(2));
+            resultColumn.prefWidthProperty().bind(fioResultsTableView.widthProperty().divide(2));
+        });
         // 为TableView的列设置如何从DisplayResult对象获取其值
         metricsColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         resultColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
@@ -112,5 +120,14 @@ public class FSReadWriteTestController {
         // 请求布局更新，确保数据变化反映到UI上
         cpuUsageLineChart.requestLayout();
         memoryUsageLineChart.requestLayout();
+    }
+
+    public void clearAll() {
+        cpuUsageLineChart.getData().clear();
+        memoryUsageLineChart.getData().clear();
+
+        currentStepTextArea.clear();
+
+        fioResultsTableView.getItems().clear();
     }
 }

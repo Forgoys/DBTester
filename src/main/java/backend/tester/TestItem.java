@@ -24,7 +24,11 @@ public abstract class TestItem implements Testable, Writable{
      */
     protected String testName;
 
-    public abstract void generateTimeData();
+    /**
+     * 软件相关工具、脚本所在的根目录
+     * 此目录下可再分为三个子目录分别用于关系数据库、时序数据库和文件系统     *
+     */
+    protected String toolRootPath;
 
     public enum Status {
         /**
@@ -71,6 +75,11 @@ public abstract class TestItem implements Testable, Writable{
      * 保存测试过程中的时序数据
      */
     protected List<List<Double>> timeDataList;
+
+    /**
+     * 保存测试结果
+     */
+    protected TestResult testResult;
 
     public TestItem(){}
 
@@ -166,9 +175,4 @@ public abstract class TestItem implements Testable, Writable{
         return output.toString().trim();
     }
 
-
-    /**
-     * 保存测试结果
-     */
-    protected TestResult testResult;
 }

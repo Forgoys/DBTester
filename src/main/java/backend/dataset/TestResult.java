@@ -23,16 +23,16 @@ public class TestResult {
     public static final String[] INFLUXCOMP_READ_RES_NAMES = new String[]{"时序查询性能结果"};
 
     // FIO读写速度测试结果名
-    public static final String[] FIO_RW_TEST = new String[]{"readIOPS", "readBandwidth", "readLatency","writeIOPS", "writeBandwidth", "writeLatency"};
+    public static final String[] FIO_RW_TEST = new String[]{"读取IOPS", "读取带宽(KiB/s)", "读取时延(usec)","写入IOPS", "写入带宽(KiB/s)", "写入时延(usec)"};
 
     // IOZONE读写速度测试结果名
     public static final String[] IOZONE_RW_TEST = new String[]{"write", "rewrite", "read", "reread", "read (backward)", "write (random)"};
 
     // FIO并发度测试结果名
-    public static final String[] FIO_PARALLEL_TEST = new String[]{"readIOPS", "readBandwidth", "readLatency","writeIOPS", "writeBandwidth", "writeLatency"};
+    public static final String[] FIO_PARALLEL_TEST = new String[]{"读取IOPS", "读取带宽(KiB/s)", "读取时延(usec)","写入IOPS", "写入带宽(KiB/s)", "写入时延(usec)"};
 
     // FIO小文件测试结果名
-    public static final String[] FIO_MINIFILE_TEST = new String[]{"readIOPS", "readBandwidth", "readLatency","writeIOPS", "writeBandwidth", "writeLatency"};
+    public static final String[] FIO_MINIFILE_TEST = new String[]{"读取IOPS", "读取带宽(KiB/s)", "读取时延(usec)","写入IOPS", "写入带宽(KiB/s)", "写入时延(usec)"};
 
     /**
      * 数据名称

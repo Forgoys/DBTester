@@ -1,5 +1,6 @@
 package backend.tester.fileSystem;
 
+import backend.dataset.TestAllResult;
 import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
@@ -36,13 +37,14 @@ public class AdaptTester extends TestItem {
         return null;
     }
 
-    @Override
-    public void generateTimeData() {
-
-    }
 
     @Override
     public TestResult getTestResults() {
+        return null;
+    }
+
+    @Override
+    public String getResultDicName() {
         return null;
     }
 
@@ -52,7 +54,8 @@ public class AdaptTester extends TestItem {
     }
 
     @Override
-    public void readFromFile(String resultPath) {
+    public TestAllResult readFromFile(String resultPath) {
 
+        return null;
     }
 }

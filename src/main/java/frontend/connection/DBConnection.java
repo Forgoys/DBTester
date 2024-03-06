@@ -1,11 +1,15 @@
 package frontend.connection;
 
-import javafx.fxml.FXML;
-
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -16,6 +20,7 @@ public class DBConnection {
     private String dbURL;
     private String username;
     private String password;
+    private int port;
 
     /**
      * 这个数据库的名字，比如Postgresql等等
@@ -61,12 +66,22 @@ public class DBConnection {
             this.dbBrandName = "SQLite";
         } // 可以根据需要添加更多的数据库品牌
 
+        // 解析端口号
+        try {
+            URI uri = new URI(url);
+            this.port = uri.getPort();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
         // 尝试解析数据库名
         int dbNameStart = url.lastIndexOf('/') + 1;
         int dbNameEnd = url.indexOf('?', dbNameStart);
         dbNameEnd = (dbNameEnd == -1) ? url.length() : dbNameEnd;
         this.dbName = url.substring(dbNameStart, dbNameEnd);
     }
+
+
 
     private String determineDriverClassName(String jdbcDriverPath) {
         // 这个方法的实现需要根据实际情况来设计。
@@ -117,6 +132,55 @@ public class DBConnection {
         } catch (SQLException e) {
             return "Error executing SQL statement: " + e.getMessage();
         }
+    }
+
+
+    /**
+     * 执行指定SQL文件中的SQL语句，并返回每条语句的执行结果。
+     * @param sqlFilePath SQL文件的路径
+     * @return 每条SQL语句执行结果的列表
+     */
+    public List<String> executeSQLFile(String sqlFilePath) {
+        List<String> results = new ArrayList<>();
+
+        if (this.connection == null) {
+            results.add("无数据库连接，请先连接数据库。");
+            return results;
+        }
+
+        String content;
+        try {
+            content = new String(Files.readAllBytes(Paths.get(sqlFilePath)));
+        } catch (Exception e) {
+            results.add("读取SQL文件错误: " + e.getMessage());
+            return results;
+        }
+
+        String[] statements = content.split(";");
+
+        for (String sql : statements) {
+            sql = sql.trim();
+            if (!sql.isEmpty()) {
+                try (Statement statement = this.connection.createStatement()) {
+                    boolean isResultSet = statement.execute(sql);
+                    if (isResultSet) {
+                        ResultSet resultSet = statement.getResultSet();
+                        int rowCount = 0;
+                        while (resultSet.next()) {
+                            rowCount++;
+                        }
+                        results.add(String.valueOf(rowCount));
+                    } else {
+                        int updateCount = statement.getUpdateCount();
+                        results.add(String.valueOf(updateCount));
+                    }
+                } catch (SQLException e) {
+                    results.add("错误: " + e.getMessage());
+                }
+            }
+        }
+
+        return results;
     }
 
     // 从ResultSet中提取数据
@@ -252,5 +316,9 @@ public class DBConnection {
 
     public void setDBName(String dbName) {
         this.dbName = dbName;
+    }
+
+    public int getPort() {
+        return port;
     }
 }

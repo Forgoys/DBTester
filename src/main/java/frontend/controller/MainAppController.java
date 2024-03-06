@@ -1,14 +1,13 @@
 package frontend.controller;
 
-import backend.dataset.ArgumentProperty;
-import backend.dataset.TestArguments;
-import backend.dataset.TestResult;
-import backend.dataset.TestTimeData;
+import backend.dataset.*;
 import backend.tester.TestItem;
 import backend.tester.fileSystem.FioParallelTest;
 import backend.tester.fileSystem.FioReadWriteTest;
 import backend.tester.fileSystem.MiniFileTest;
 import backend.tester.fileSystem.ReliableTest;
+import backend.tester.rdb.TPCCTester;
+import eu.hansolo.tilesfx.Test;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
 import frontend.connection.SSHConnection;
@@ -19,6 +18,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -112,6 +112,7 @@ public class MainAppController {
 //        sshConnectionTitledPane.setExpanded(true);
         testObjectConfigTitledPane.setDisable(false);
         testProjectConfigTitledPane.setDisable(false);
+        DirectoryManager.createDirectories();  // 创建结果目录
 //        testObjectConfigTitledPane.setDisable(true);
 //        testProjectConfigTitledPane.setDisable(true);
     }
@@ -221,22 +222,13 @@ public class MainAppController {
 
     private void connectDatabase() {
         // 获取UI上的参数
-        String jdbcDriverPath = ((Label) testObjectConfigPane.lookup("#jdbcDriverNameLabel")).getText();
-//        String jdbcDriverClassName = ((PasswordField) testObjectConfigPane.lookup("#jdbcDriverClassPasswordField")).getText();
-        String dbURL = ((TextField) testObjectConfigPane.lookup("#dbURLTextField")).getText();
-        String username = ((TextField) testObjectConfigPane.lookup("#dbUserTextField")).getText();
-        String password = ((TextField) testObjectConfigPane.lookup("#dbPasswordTextField")).getText();
-
+        TestArguments connectArg = Util.getTestArgFromGridPane(testObjectConfigPane, 1);
+        System.out.println(connectArg.values.toString());
         // 创建DBConnection对象
-        DBConnection dbConnection = new DBConnection();
-        dbConnection.setJdbcDriverPath(jdbcDriverPath);
-//        dbConnection.setJdbcDriverClassName(jdbcDriverClassName);
-        dbConnection.setDbURL(dbURL);
-        dbConnection.setUsername(username);
-        dbConnection.setPassword(password);
+        currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2), connectArg.values.get(3));
 
         // 尝试连接数据库
-        if (dbConnection.connect()) {
+        if (currentDBConnection.connect()) {
             Util.popUpInfo("数据库连接成功！", "连接成功");
             testProjectConfigTitledPane.setDisable(false);
         } else {
@@ -270,9 +262,9 @@ public class MainAppController {
      * @param rowIndex 从gridPane的第几行开始装参数配置的“参数名-输入框”对
      */
     private int configureDBConnectUI(int rowIndex) {
-        Label jdbcDriverNameLabel = new Label("未选择驱动");
+        TextField jdbcDriverNameTextField = new TextField();
         testObjectConfigPane.add(new Label("JDBC驱动"), 0, rowIndex);
-        testObjectConfigPane.add(jdbcDriverNameLabel, 1, rowIndex++);
+        testObjectConfigPane.add(jdbcDriverNameTextField, 1, rowIndex++);
         Button jdbcDriverButton = new Button("选择驱动");
         jdbcDriverButton.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
@@ -285,7 +277,8 @@ public class MainAppController {
             Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
             File selectedFile = fileChooser.showOpenDialog(stage);
             if (selectedFile != null) {
-                jdbcDriverNameLabel.setText(selectedFile.getAbsolutePath());
+                jdbcDriverNameTextField.clear();
+                jdbcDriverNameTextField.setText(selectedFile.getAbsolutePath());
             }
         });
 
@@ -356,7 +349,7 @@ public class MainAppController {
     private void configureTestProjectParmUI() {
         Util.clearGridPaneRowsAfterFirst(testProjectConfigPane);
         String testProject = testProjectSelectBox.getValue();
-        ArgumentProperty[] properties = TestArguments.getArgPropertiesForTest(testProject);
+        ArgumentProperty[] properties = TestArguments.getArgPropertiesForTest(testObjectSelectBox.getValue(), testProject);
 
         int rowIndex = 1;
         for (ArgumentProperty property : properties) {
@@ -400,41 +393,59 @@ public class MainAppController {
      */
     private void onTestProjectParmConfirmButtonClicked() throws IOException, InterruptedException {
         // 首先清空旧的参数值
-        TestArguments testArguments = new TestArguments();
-
-        for (Node node : testProjectConfigPane.getChildren()) {
-            // 只处理TextField和ComboBox
-            if (node instanceof TextField textField) {
-                testArguments.values.add(textField.getText()); // 添加TextField的值
-            } else if (node instanceof ComboBox) {
-                @SuppressWarnings("unchecked")
-                ComboBox<String> comboBox = (ComboBox<String>) node;
-                String selected = comboBox.getSelectionModel().getSelectedItem();
-                if (selected != null) {
-                    testArguments.values.add(selected); // 添加ComboBox选中的值
-                } else {
-                    testArguments.values.add(""); // 或者处理未选择的情况
-                }
-            }
-        }
+        TestArguments testArguments = Util.getTestArgFromGridPane(testProjectConfigPane, 1);
 
         for (int i = 0; i < testArguments.values.size(); i++) {
             System.out.println(testArguments.values.get(i));
         }
 
-        // testItem = new TPCCTest(....., testArguments)
-
         String testProject = testProjectSelectBox.getValue();
-        String message;
+        StringBuilder message2Update;
         Task<Void> task;
-//        StringBuilder statusText = new StringBuilder();
         switch (testProjectSelectBox.getValue()) {
             case "TPC-C":
-//                testItem = new TPCCTester();
-//                testItem.testEnvPrepare();
-//                testItem.startTest();
-//                testItem.getTimeData();
-//                testItem.getTestResults();
+                dbOtherTestController.clearAll();
+                message2Update = new StringBuilder();
+                task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        updateMessage(message2Update.append("开始TPC-C测试\n").toString());
+                        testItem = new TPCCTester("TPC-C测试", currentDBConnection, testArguments);
+                        updateMessage(message2Update.append("准备测试环境...\n").toString());
+                        try {
+                            testItem.testEnvPrepare();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            String message = e.getMessage();
+                            Util.popUpInfo(message, "Error");
+                        }
+                        updateMessage(message2Update.append("完成\n").toString());
+                        updateMessage(message2Update.append("测试中....\n").toString());
+                        try {
+                            testItem.startTest();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            String message = e.getMessage();
+                            Util.popUpInfo(message, "Error");
+                        }
+                        updateMessage(message2Update.append("测试完成\n").toString());
+                        updateMessage(message2Update.append("开始生成测试结果\n").toString());
+                        Platform.runLater(() -> {
+                            testResult = testItem.getTestResults();
+                            dbOtherTestController.displayTestResults(testResult);
+                            testTimeData = testItem.getTimeData();
+                            dbOtherTestController.setTimeData(testTimeData);
+
+                        });
+                        updateMessage(message2Update.append("生成完毕\n").toString());
+                        return null;
+                    }
+                };
+                // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
+                dbOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+
+                // 在新线程中执行任务
+                new Thread(task).start();
                 break;
             case "TPC-H":
                 break;
@@ -449,34 +460,23 @@ public class MainAppController {
                     ;
                 }
                 break;
-//            case "适配性":
-//
-//
-//                break;
             case "读写速度测试":
-                StringBuilder message2Update = new StringBuilder();
+                fsReadWriteTestController.clearAll();
+                message2Update = new StringBuilder();
                 task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        TextArea currentStepTextArea = fsReadWriteTestController.currentStepTextArea;
-//                        Platform.runLater(() -> currentStepTextArea.appendText("开始fio读写性能测试\n"));
                         updateMessage(message2Update.append("开始fio读写性能测试\n").toString());
-//                        System.out.println("开始fio读写性能测试\n");
-
-//                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
                         updateMessage(message2Update.append("测试中....\n").toString());
-                        testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
-                        System.out.println("开始fio读写性能测试1\n");
+                        testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3), testArguments.values.get(4));
                         testItem.startTest();
-                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
-                        System.out.println("开始fio读写性能测试2\n");
+                        updateMessage(message2Update.append("测试完成\n").toString());
+                        updateMessage(message2Update.append("开始生成测试结果\n").toString());
                         Platform.runLater(() -> {
-                            currentStepTextArea.appendText("开始生成测试结果\n");
                             testResult = testItem.getTestResults();
-//                            System.out.println(testResult.values);
                             fsReadWriteTestController.displayTestResults(testResult);
-                            currentStepTextArea.appendText("生成完毕\n");
                         });
+                        updateMessage(message2Update.append("生成完毕\n").toString());
                         return null;
                     }
                 };
@@ -488,48 +488,50 @@ public class MainAppController {
                 new Thread(task).start();
                 break;
             case "并发度测试":
+                fsOtherTestController.clearAll();
+                message2Update = new StringBuilder();
                 task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        TextArea currentStepTextArea = fsOtherTestController.currentStepTextArea;
-                        Platform.runLater(() -> currentStepTextArea.appendText("开始并发度测试\n"));
+                        updateMessage(message2Update.append("开始并发度测试\n").toString());
+                        updateMessage(message2Update.append("测试中....\n").toString());
 
-                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
-                        testItem = new FioParallelTest(testArguments.values.get(0), testArguments.values.get(1));
+                        testItem = new FioParallelTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2));
                         testItem.startTest();
-                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
+                        updateMessage(message2Update.append("测试完成\n").toString());
+                        updateMessage(message2Update.append("开始生成测试结果\n").toString());
                         Platform.runLater(() -> {
-                            currentStepTextArea.appendText("开始生成测试结果\n");
                             testResult = testItem.getTestResults();
                             fsOtherTestController.displayTestResults(testResult);
-                            currentStepTextArea.appendText("生成完毕\n");
                         });
+                        updateMessage(message2Update.append("生成完毕\n").toString());
                         return null;
                     }
                 };
 
                 // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
-                    fsOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+                fsOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
                 // 在新线程中执行任务
                 new Thread(task).start();
                 break;
             case "小文件测试":
+                fsOtherTestController.clearAll();
+                message2Update = new StringBuilder();
                 task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        TextArea currentStepTextArea = fsOtherTestController.currentStepTextArea;
-                        Platform.runLater(() -> currentStepTextArea.appendText("开始小文件测试\n"));
+                        updateMessage(message2Update.append("开始小文件测试\n").toString());
+                        updateMessage(message2Update.append("测试中....\n").toString());
 
-                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
                         testItem = new MiniFileTest(testArguments.values.get(0));
                         testItem.startTest();
-                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
+                        updateMessage(message2Update.append("测试完成\n").toString());
+                        updateMessage(message2Update.append("开始生成测试结果\n").toString());
                         Platform.runLater(() -> {
-                            currentStepTextArea.appendText("开始生成测试结果\n");
                             testResult = testItem.getTestResults();
                             fsOtherTestController.displayTestResults(testResult);
-                            currentStepTextArea.appendText("生成完毕\n");
                         });
+                        updateMessage(message2Update.append("生成完毕\n").toString());
                         return null;
                     }
                 };
@@ -540,22 +542,23 @@ public class MainAppController {
                 new Thread(task).start();
                 break;
             case "可靠性测试":
+                fsReliabilityTestController.clearAll();
+                message2Update = new StringBuilder();
                 task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
-                        TextArea currentStepTextArea = fsReliabilityTestController.currentStepTextArea;
-                        Platform.runLater(() -> currentStepTextArea.appendText("开始可靠性测试\n"));
+                        updateMessage(message2Update.append("开始可靠性测试\n").toString());
+                        updateMessage(message2Update.append("测试中....\n").toString());
 
-                        Platform.runLater(() -> currentStepTextArea.appendText("测试中....\n"));
-                        testItem = new ReliableTest(testArguments.values.get(0), testArguments.values.get(0));
+                        testItem = new ReliableTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2));
                         testItem.startTest();
-                        Platform.runLater(() -> currentStepTextArea.appendText("测试完成\n"));
+                        updateMessage(message2Update.append("测试完成\n").toString());
+                        updateMessage(message2Update.append("开始生成测试结果\n").toString());
                         Platform.runLater(() -> {
-                            currentStepTextArea.appendText("开始生成测试结果\n");
                             testTimeData = testItem.getTimeData();
                             fsReliabilityTestController.setTimeData(testTimeData);
-                            currentStepTextArea.appendText("生成完毕\n");
                         });
+                        updateMessage(message2Update.append("生成完毕\n").toString());
                         return null;
                     }
                 };
@@ -565,7 +568,6 @@ public class MainAppController {
                 // 在新线程中执行任务
                 new Thread(task).start();
         }
-
     }
 
     /**
@@ -583,11 +585,7 @@ public class MainAppController {
             case "写入性能":
             case "查询性能":
             case "可靠性":
-                if (testObjectSelectBox.getValue().equals("GlusterFS") || testObjectSelectBox.getValue().equals("OceanFS")) {
-                    fxmlFile = "fsReliabilityTestView.fxml";
-                } else {
-                    fxmlFile = "dbOtherTestView.fxml";
-                }
+                fxmlFile = "dbOtherTestView.fxml";
                 break;
             case "适配性":
                 fxmlFile = "dbAdaptTestView.fxml";
@@ -634,19 +632,127 @@ public class MainAppController {
 
 
     // ===============================结果文件导入和导出====================================
-    @FXML
-    private void exportTestResultClick() {
 
+    /**
+     * 导出测试结果文件夹
+     */
+    @FXML
+    private void onExportTestResultClick() {
+        String testObject = testObjectSelectBox.getValue();
+        String testProject = testProjectSelectBox.getValue();
+        String testResultDicName = testItem.getResultDicName();
+        String absolutePath = DirectoryManager.buildAbsolutePath(testObject, testProject, testResultDicName);
+        testItem.writeToFile(absolutePath);
     }
 
+    /**
+     * 导入测试结果文件夹
+     */
     @FXML
-    private void importTestResultClick() {
+    private void onImportTestResultClick() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        // 设置初始目录为当前运行目录下的results文件夹
+        String initialDirectory = System.getProperty("user.dir") + File.separator + "results";
+        directoryChooser.setInitialDirectory(new File(initialDirectory));
+        directoryChooser.setTitle("选择测试结果文件夹");
 
+        // 仅允许选择文件夹
+        Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
+        File selectedDirectory = directoryChooser.showDialog(stage); // 这里的null需要替换为你的Stage
+
+        String testObject = null;
+        String testProject = null;
+        String relativePath = null;
+        String absolutePath = null;
+
+        if (selectedDirectory != null) {
+            // 构建相对于"results"的路径
+            absolutePath = selectedDirectory.getPath();
+            relativePath = absolutePath.substring(System.getProperty("user.dir").length() + 1);
+            System.out.println(relativePath);
+            String[] analysisResult = DirectoryManager.analyzePath(relativePath);
+            if (analysisResult == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("错误");
+                alert.setHeaderText(null);
+                alert.setContentText("请正确选择结果文件夹");
+                alert.showAndWait();
+                return;
+            } else {
+                // 处理分析结果
+                testObject = analysisResult[0];
+                testProject = analysisResult[1];
+            }
+        }
+
+        TestAllResult testAllResult = null;
+        TestItem tmpTestItem = null;
+
+        if (testProject != null) {
+            loadTestProjectResultView(testProject);  // 载入测试结果展示UI
+
+            switch (testProject) {
+                case "TPC-C":
+                    dbOtherTestController.clearAll();
+                    tmpTestItem = new TPCCTester();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    dbOtherTestController.displayTestResults(testAllResult.testResult);
+                    dbOtherTestController.setTimeData(testAllResult.timeDataResult);
+                    break;
+                case "TPC-H":
+                    break;
+                case "写入性能":
+                    break;
+                case "查询性能":
+                    break;
+                case "可靠性":
+                    if (testObject.equals("InfluxDB") || testObject.equals("Lindorm") || testObject.equals("TDengine")) {
+                        ;
+                    } else {
+                        ;
+                    }
+                    break;
+                case "读写速度测试":
+                    fsReadWriteTestController.clearAll();
+                    tmpTestItem = new FioReadWriteTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+//                    fsReadWriteTestController.setTimeData(testAllResult.timeDataResult);
+                    break;
+                case "并发度测试":
+                    fsOtherTestController.clearAll();
+                    tmpTestItem = new FioParallelTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+                    break;
+                case "小文件测试":
+                    fsOtherTestController.clearAll();
+                    tmpTestItem = new MiniFileTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+                    break;
+                case "可靠性测试":
+                    fsReliabilityTestController.clearAll();
+                    tmpTestItem = new ReliableTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReliabilityTestController.setTimeData(testAllResult.timeDataResult);
+                    break;
+                default:
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("错误");
+                    alert.setHeaderText(null);
+                    alert.setContentText("请正确选择结果文件夹");
+                    alert.showAndWait();
+            }
+        }
     }
 
-    public void closeSSH() {
+    public void closeAll() {
         if (currentSSHConnection != null && !currentSSHConnection.getStatus()) {
             currentSSHConnection.sshDisconnect();
+        }
+        if (currentDBConnection != null) {
+            currentDBConnection.disconnect();
         }
     }
 }

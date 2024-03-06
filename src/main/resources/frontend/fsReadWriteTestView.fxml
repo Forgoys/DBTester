@@ -47,7 +47,7 @@
                 <Font size="18.0" />
             </font>
         </Label>
-        <TableView fx:id="fioResultsTableView" VBox.vgrow="ALWAYS">
+        <TableView fx:id="fioResultsTableView" prefHeight="193.0" prefWidth="248.0" VBox.vgrow="SOMETIMES">
             <columns>
                 <TableColumn fx:id="metricsColumn" text="性能指标" />
                 <TableColumn fx:id="resultColumn" text="结果" />
@@ -63,7 +63,7 @@
         <VBox spacing="10" VBox.vgrow="ALWAYS"> <!-- Changed HBox to VBox for vertical layout -->
             <LineChart fx:id="cpuUsageLineChart" prefHeight="200" prefWidth="200" VBox.vgrow="ALWAYS">
                 <xAxis>
-                    <CategoryAxis fx:id="cpuTimeAxis" label="时间" />
+                    <CategoryAxis fx:id="cpuTimeAxis" label="采样点" />
                 </xAxis>
                 <yAxis>
                     <NumberAxis fx:id="cpuAxis" label="CPU (%)" upperBound="90.0" />
@@ -72,7 +72,7 @@
 
             <LineChart fx:id="memoryUsageLineChart" prefHeight="200" prefWidth="200" VBox.vgrow="ALWAYS">
                 <xAxis>
-                    <CategoryAxis fx:id="memoryTimeAxis" label="时间" />
+                    <CategoryAxis fx:id="memoryTimeAxis" label="采样点" />
                 </xAxis>
                 <yAxis>
                     <NumberAxis fx:id="memoryAxis" label="内存 (%)" upperBound="40.0" />
