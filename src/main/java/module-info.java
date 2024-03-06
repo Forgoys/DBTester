@@ -14,6 +14,11 @@ module org.example.dbtester {
 //    requires rt;
 //    requires jsch;
 
-    opens org.example.dbtester to javafx.fxml;
-    exports org.example.dbtester;
+    opens frontend to javafx.fxml;
+    exports frontend;
+    exports frontend.connection;
+    opens frontend.connection to javafx.fxml;
+    exports frontend.controller;
+    opens frontend.controller to javafx.fxml;
+    opens backend.dataset to javafx.base;
 }
