@@ -1,9 +1,6 @@
 package frontend.controller;
 
-import backend.dataset.ArgumentProperty;
-import backend.dataset.TestArguments;
-import backend.dataset.TestResult;
-import backend.dataset.TestTimeData;
+import backend.dataset.*;
 import backend.tester.TestItem;
 import backend.tester.fileSystem.FioParallelTest;
 import backend.tester.fileSystem.FioReadWriteTest;
@@ -114,6 +111,7 @@ public class MainAppController {
 //        sshConnectionTitledPane.setExpanded(true);
         testObjectConfigTitledPane.setDisable(false);
         testProjectConfigTitledPane.setDisable(false);
+        DirectoryManager.createDirectories();  // 创建结果目录
 //        testObjectConfigTitledPane.setDisable(true);
 //        testProjectConfigTitledPane.setDisable(true);
     }
