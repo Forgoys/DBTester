@@ -19,8 +19,8 @@ public class TestResult {
     /**
      * influxdb-comparision工具时序数据库读写测试结果
      */
-    public static final String[] INFLUXCOMP_WRTIE_RES_NAMES = new String[]{"写入时间"};
-    public static final String[] INFLUXCOMP_READ_RES_NAMES = new String[]{"平均查询时间"};
+    public static final String[] INFLUXCOMP_WRTIE_RES_NAMES = new String[]{"时序写入性能结果"};
+    public static final String[] INFLUXCOMP_READ_RES_NAMES = new String[]{"时序查询性能结果"};
 
     // FIO读写速度测试结果名
     public static final String[] FIO_RW_TEST = new String[]{"readIOPS", "readBandwidth", "readLatency","writeIOPS", "writeBandwidth", "writeLatency"};
