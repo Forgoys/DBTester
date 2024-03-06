@@ -444,7 +444,7 @@ public class MainAppController {
                 // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
                 dbOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
 
-                    // 在新线程中执行任务
+                // 在新线程中执行任务
                 new Thread(task).start();
                 break;
             case "TPC-H":
@@ -460,10 +460,6 @@ public class MainAppController {
                     ;
                 }
                 break;
-//            case "适配性":
-//
-//
-//                break;
             case "读写速度测试":
                 message2Update = new StringBuilder();
                 task = new Task<Void>() {
