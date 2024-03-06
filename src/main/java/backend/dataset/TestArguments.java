@@ -59,6 +59,8 @@ public class TestArguments {
     public static final ArgumentProperty[] FIO_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
+            // sudo密码，用户输入
+            new ArgumentProperty("密码"),
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项
@@ -93,6 +95,14 @@ public class TestArguments {
             new ArgumentProperty("测试目录"),
     };
 
+    // fio可靠性测试参数属性
+    public static final ArgumentProperty[] FIO_RELIABLE_ARG_PROPERTIES = new ArgumentProperty[]{
+            // 测试目录，用户输入
+            new ArgumentProperty("测试目录"),
+            // 测试时长，有候选项
+            new ArgumentProperty("测试时长"),
+    };
+
 
     /**
      * @param testProject 测试项目中文名
@@ -116,6 +126,8 @@ public class TestArguments {
                 return FIO_MINIFILE_ARG_PROPERTIES;
             case "并发度测试":
                 return FIO_PARALLEL_ARG_PROPERTIES;
+            case "可靠性测试":
+                return FIO_RELIABLE_ARG_PROPERTIES;
             default:
                 return new ArgumentProperty[]{}; // 返回空数组表示没有找到匹配的测试项目
         }

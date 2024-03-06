@@ -45,7 +45,7 @@ public class MiniFileTest extends TestItem {
     @Override
     public void testEnvPrepare() throws Exception {
         String command = "scp -r " + remoteMiniFileDataPath + " " + directory;
-        scp -r wlx@10.181.8.216:/home/wlx/zf/test_data_prepare/miniFileData .
+//        scp -r wlx@10.181.8.216:/home/wlx/zf/test_data_prepare/miniFileData .
 
         System.out.println(command);
 
