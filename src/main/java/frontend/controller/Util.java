@@ -62,27 +62,35 @@ public class Util {
         }
     }
 
-    public static TestArguments getTestArgFromGridPane(GridPane gridPane) {
+    public static TestArguments getTestArgFromGridPane(GridPane gridPane, int rowIndex) {
         TestArguments testArguments = new TestArguments();
 
         for (Node node : gridPane.getChildren()) {
-            // 只处理TextField和ComboBox
-            if (node instanceof TextField textField) {
-                testArguments.values.add(textField.getText()); // 添加TextField的值
-            } else if (node instanceof ComboBox) {
-                @SuppressWarnings("unchecked")
-                ComboBox<String> comboBox = (ComboBox<String>) node;
-                String selected = comboBox.getSelectionModel().getSelectedItem();
-                if (selected != null) {
-                    testArguments.values.add(selected); // 添加ComboBox选中的值
-                } else {
-                    testArguments.values.add(""); // 或者处理未选择的情况
+            // ????????
+            Integer nodeRowIndex = GridPane.getRowIndex(node);
+            // ????????????????? 0
+            int actualRowIndex = (nodeRowIndex == null) ? 0 : nodeRowIndex;
+
+            // ????? rowIndex ???????
+            if (actualRowIndex >= rowIndex) {
+                if (node instanceof TextField textField) {
+                    testArguments.values.add(textField.getText()); // ??TextField??
+                } else if (node instanceof ComboBox) {
+                    @SuppressWarnings("unchecked")
+                    ComboBox<String> comboBox = (ComboBox<String>) node;
+                    String selected = comboBox.getSelectionModel().getSelectedItem();
+                    if (selected != null) {
+                        testArguments.values.add(selected); // ??ComboBox????
+                    } else {
+                        testArguments.values.add(""); // ??????????
+                    }
                 }
             }
         }
 
         return testArguments;
     }
+
 
 
 //    public Task<Void> getTask(Object contorller, String testProject) {

@@ -18,14 +18,14 @@
     </padding>
     <children>
 
-        <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="测试进度:">
-                    <font>
-                        <Font size="18.0"/>
-                    </font>
-                </Label>
-                <Label fx:id="currentStepLabel" text="等待开始"/>
-        </HBox>
+        <VBox alignment="CENTER_LEFT" spacing="10">
+            <Label text="测试进度:">
+                <font>
+                    <Font size="18.0" />
+                </font>
+            </Label>
+            <TextArea fx:id="currentStepTextArea" prefHeight="200.0" prefWidth="200.0" />
+        </VBox>
 
         <!-- Test Results section moved up -->
         <Label text="测试结果:">

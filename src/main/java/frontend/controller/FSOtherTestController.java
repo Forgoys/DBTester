@@ -41,4 +41,12 @@ public class FSOtherTestController {
             displayResultsData.add(new DisplayResult(testResult.names[i], testResult.values[i]));
         }
     }
+
+    public void clearAll() {
+        currentStepTextArea.clear();
+
+        fioResultsTableView.getItems().clear();
+    }
 }
+
+
