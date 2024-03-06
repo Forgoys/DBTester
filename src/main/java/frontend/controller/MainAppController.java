@@ -402,34 +402,15 @@ public class MainAppController {
      */
     private void onTestProjectParmConfirmButtonClicked() throws IOException, InterruptedException {
         // 首先清空旧的参数值
-        TestArguments testArguments = new TestArguments();
-
-        for (Node node : testProjectConfigPane.getChildren()) {
-            // 只处理TextField和ComboBox
-            if (node instanceof TextField textField) {
-                testArguments.values.add(textField.getText()); // 添加TextField的值
-            } else if (node instanceof ComboBox) {
-                @SuppressWarnings("unchecked")
-                ComboBox<String> comboBox = (ComboBox<String>) node;
-                String selected = comboBox.getSelectionModel().getSelectedItem();
-                if (selected != null) {
-                    testArguments.values.add(selected); // 添加ComboBox选中的值
-                } else {
-                    testArguments.values.add(""); // 或者处理未选择的情况
-                }
-            }
-        }
+        TestArguments testArguments = Util.getTestArgFromGridPane(testProjectConfigPane);
 
         for (int i = 0; i < testArguments.values.size(); i++) {
             System.out.println(testArguments.values.get(i));
         }
 
-        // testItem = new TPCCTest(....., testArguments)
-
         String testProject = testProjectSelectBox.getValue();
         StringBuilder message2Update;
         Task<Void> task;
-//        StringBuilder statusText = new StringBuilder();
         switch (testProjectSelectBox.getValue()) {
             case "TPC-C":
                 message2Update = new StringBuilder();
@@ -588,7 +569,6 @@ public class MainAppController {
                 // 在新线程中执行任务
                 new Thread(task).start();
         }
-
     }
 
     /**
@@ -606,11 +586,7 @@ public class MainAppController {
             case "写入性能":
             case "查询性能":
             case "可靠性":
-                if (testObjectSelectBox.getValue().equals("GlusterFS") || testObjectSelectBox.getValue().equals("OceanFS")) {
-                    fxmlFile = "fsReliabilityTestView.fxml";
-                } else {
-                    fxmlFile = "dbOtherTestView.fxml";
-                }
+                fxmlFile = "dbOtherTestView.fxml";
                 break;
             case "适配性":
                 fxmlFile = "dbAdaptTestView.fxml";
