@@ -1,5 +1,6 @@
 package backend.tester.fileSystem;
 
+import backend.dataset.TestAllResult;
 import backend.dataset.TestResult;
 import backend.dataset.TestTimeData;
 import backend.tester.TestItem;
@@ -148,7 +149,8 @@ public class ReliableTest extends TestItem {
     }
 
     @Override
-    public void readFromFile(String resultPath) {
+    public TestAllResult readFromFile(String resultPath) {
 
+        return null;
     }
 }

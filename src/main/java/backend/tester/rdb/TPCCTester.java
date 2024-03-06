@@ -1,5 +1,6 @@
 package backend.tester.rdb;
 
+import backend.dataset.TestAllResult;
 import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
@@ -385,8 +386,9 @@ public class TPCCTester extends TestItem {
     }
 
     @Override
-    public void readFromFile(String resultPath) {
+    public TestAllResult readFromFile(String resultPath) {
 
+        return null;
     }
 
     public static void main(String[] args) {
