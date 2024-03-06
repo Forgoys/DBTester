@@ -85,7 +85,7 @@ public class FioReadWriteTest extends TestItem {
         // 设置 fio 测试指令
         String fioCommand = "fio -directory=" + directory + " -ioengine=libaio -direct=1 -iodepth=1 -thread=1 -numjobs=1 -group_reporting -allow_mounted_write=1 " + rwList.get(Integer.parseInt(rwIndex)) + " -bs=" + bs + " -size=" + size + " -runtime=60 -name=fioTest";
 
-        String password = "666";
+        String password = "lhjlhj6929";
         fioCommand = "echo " + password + " | sudo -S " + fioCommand;
         System.out.println(fioCommand);
 
@@ -201,48 +201,73 @@ public class FioReadWriteTest extends TestItem {
 //        System.out.println("FIO读写测试结果保存完成");
 //    }
 
+    // 将带宽从KiB/s或MiB/s转换为MiB/s
+    private static double convertBWToMiB(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "KiB":
+                return numericalValue / 1024;
+            case "MiB":
+                return numericalValue;
+            default:
+                return 0;
+        }
+    }
+
+    // 将延迟从nsec、usec或msec转换为msec
+    private static double convertLatencyToMsec(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "nsec":
+                return numericalValue / 1_000_000;
+            case "usec":
+                return numericalValue / 1_000;
+            case "msec":
+                return numericalValue;
+            default:
+                return 0;
+        }
+    }
+
     public void fioResultSave(List<String> results) {
         StringBuilder textBuilder = new StringBuilder();
         for (String result : results) {
             textBuilder.append(result);
             textBuilder.append(System.lineSeparator());
         }
-        String text = textBuilder.toString();
-        System.out.println(text);
+        String content = textBuilder.toString();
 
-        String content = text;
-        Pattern patternReadIOPS = Pattern.compile("read: IOPS=([\\d.]+)[kMG]?, BW=([\\d.]+)");
-        Matcher matcherReadIOPS = patternReadIOPS.matcher(content);
-        Pattern patternReadLat = Pattern.compile("read:.*\\n.*lat \\(usec\\):.*avg=([\\d.]+)");
-//        Pattern patternReadLat = Pattern.compile("read:.*lat \\((usec|msec)\\):.*avg=([\\\\d.]+)");
-        Matcher matcherReadLat = patternReadLat.matcher(content);
-        Pattern patternWriteIOPS = Pattern.compile("write: IOPS=([\\d.]+)[kMG]?, BW=([\\d.]+)");
-        Matcher matcherWriteIOPS = patternWriteIOPS.matcher(content);
-        Pattern patternWriteLat = Pattern.compile("write:.*\\n.*lat \\((usec|msec)\\):.*avg=([\\d.]+)");
-//        Pattern patternWriteLat = Pattern.compile("write:.*lat \\((usec|msec)\\):.*avg=([\\d.]+)");
+        Pattern patternIOPS_BW = Pattern.compile("(read|write): IOPS=(\\d+(?:\\.\\d+)?), BW=(\\d+(?:\\.\\d+)?)(KiB|MiB)/s");
+        Pattern patternLatency = Pattern.compile("(read|write):.*?\\n\\s+lat \\((nsec|usec|msec)\\):.*?avg=(\\d+(?:\\.\\d+)?)", Pattern.DOTALL);
 
-        Matcher matcherWriteLat = patternWriteLat.matcher(content);
+        Matcher matcherIOPS_BW = patternIOPS_BW.matcher(content);
+        Matcher matcherLatency = patternLatency.matcher(content);
 
         String readIOPS = "0";
         String readBW = "0";
-        String readLat = "0";
         String writeIOPS = "0";
         String writeBW = "0";
+        String readLat = "0";
         String writeLat = "0";
 
-        if (matcherReadIOPS.find()) {
-            readIOPS = matcherReadIOPS.group(1);
-            readBW = matcherReadIOPS.group(2);
+        while (matcherIOPS_BW.find()) {
+            double bw = convertBWToMiB(matcherIOPS_BW.group(3), matcherIOPS_BW.group(4));
+            if ("read".equals(matcherIOPS_BW.group(1))) {
+                readIOPS = matcherIOPS_BW.group(2);
+                readBW = String.valueOf(bw);
+            } else if ("write".equals(matcherIOPS_BW.group(1))) {
+                writeIOPS = matcherIOPS_BW.group(2);
+                writeBW = String.valueOf(bw);
+            }
         }
-        if (matcherReadLat.find()) {
-            readLat = matcherReadLat.group(1);
-        }
-        if (matcherWriteIOPS.find()) {
-            writeIOPS = matcherWriteIOPS.group(1);
-            writeBW = matcherWriteIOPS.group(2);
-        }
-        if (matcherWriteLat.find()) {
-            writeLat = matcherWriteLat.group(1);
+
+        while (matcherLatency.find()) {
+            double lat = convertLatencyToMsec(matcherLatency.group(3), matcherLatency.group(2));
+            if ("read".equals(matcherLatency.group(1))) {
+                readLat = String.valueOf(lat);
+            } else if ("write".equals(matcherLatency.group(1))) {
+                writeLat = String.valueOf(lat);
+            }
         }
 
         // 添加结果到TestResult类
@@ -251,6 +276,57 @@ public class FioReadWriteTest extends TestItem {
         System.out.println(Arrays.toString(fioRWTestResult.values));
         System.out.println("FIO读写测试结果保存完成");
     }
+
+//    public void fioResultSave(List<String> results) {
+//        StringBuilder textBuilder = new StringBuilder();
+//        for (String result : results) {
+//            textBuilder.append(result);
+//            textBuilder.append(System.lineSeparator());
+//        }
+//        String text = textBuilder.toString();
+//        System.out.println(text);
+//
+//        String content = text;
+//        Pattern patternReadIOPS = Pattern.compile("read: IOPS=([\\d.]+)[kMG]?, BW=([\\d.]+)");
+//        Matcher matcherReadIOPS = patternReadIOPS.matcher(content);
+//        Pattern patternReadLat = Pattern.compile("read:.*\\n.*lat \\(usec|msec|nsec\\):.*avg=([\\d.]+)");
+////        Pattern patternReadLat = Pattern.compile("read:.*lat \\((usec|msec)\\):.*avg=([\\\\d.]+)");
+//        Matcher matcherReadLat = patternReadLat.matcher(content);
+//        Pattern patternWriteIOPS = Pattern.compile("write: IOPS=([\\d.]+)[kMG]?, BW=([\\d.]+)");
+//        Matcher matcherWriteIOPS = patternWriteIOPS.matcher(content);
+//        Pattern patternWriteLat = Pattern.compile("write:.*\\n.*lat \\((usec|msec|nsec)\\):.*avg=([\\d.]+)");
+////        Pattern patternWriteLat = Pattern.compile("write:.*lat \\((usec|msec)\\):.*avg=([\\d.]+)");
+//
+//        Matcher matcherWriteLat = patternWriteLat.matcher(content);
+//
+//        String readIOPS = "0";
+//        String readBW = "0";
+//        String readLat = "0";
+//        String writeIOPS = "0";
+//        String writeBW = "0";
+//        String writeLat = "0";
+//
+//        if (matcherReadIOPS.find()) {
+//            readIOPS = matcherReadIOPS.group(1);
+//            readBW = matcherReadIOPS.group(2);
+//        }
+//        if (matcherReadLat.find()) {
+//            readLat = matcherReadLat.group(1);
+//        }
+//        if (matcherWriteIOPS.find()) {
+//            writeIOPS = matcherWriteIOPS.group(1);
+//            writeBW = matcherWriteIOPS.group(2);
+//        }
+//        if (matcherWriteLat.find()) {
+//            writeLat = matcherWriteLat.group(1);
+//        }
+//
+//        // 添加结果到TestResult类
+//        fioRWTestResult.names = TestResult.FIO_RW_TEST;
+//        fioRWTestResult.values = new String[]{readIOPS, readBW, readLat, writeIOPS, writeBW, writeLat};
+//        System.out.println(Arrays.toString(fioRWTestResult.values));
+//        System.out.println("FIO读写测试结果保存完成");
+//    }
 
 
     @Override
@@ -302,7 +378,7 @@ public class FioReadWriteTest extends TestItem {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/autotuning/zf/glusterfs/software_test", "4k", "16k", "%70顺序读,%30顺序写");
+        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/parallels/Desktop/fs", "4k", "16k", "%70顺序读,%30顺序写");
         fioReadWriteTest.startTest();
     }
 }

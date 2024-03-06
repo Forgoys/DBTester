@@ -223,22 +223,13 @@ public class MainAppController {
 
     private void connectDatabase() {
         // 获取UI上的参数
-        String jdbcDriverPath = ((Label) testObjectConfigPane.lookup("#jdbcDriverNameLabel")).getText();
-//        String jdbcDriverClassName = ((PasswordField) testObjectConfigPane.lookup("#jdbcDriverClassPasswordField")).getText();
-        String dbURL = ((TextField) testObjectConfigPane.lookup("#dbURLTextField")).getText();
-        String username = ((TextField) testObjectConfigPane.lookup("#dbUserTextField")).getText();
-        String password = ((TextField) testObjectConfigPane.lookup("#dbPasswordTextField")).getText();
-
+        TestArguments connectArg = Util.getTestArgFromGridPane(testObjectConfigPane, 1);
+        System.out.println(connectArg.values.toString());
         // 创建DBConnection对象
-        DBConnection dbConnection = new DBConnection();
-        dbConnection.setJdbcDriverPath(jdbcDriverPath);
-//        dbConnection.setJdbcDriverClassName(jdbcDriverClassName);
-        dbConnection.setDbURL(dbURL);
-        dbConnection.setUsername(username);
-        dbConnection.setPassword(password);
+        currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2), connectArg.values.get(3));
 
         // 尝试连接数据库
-        if (dbConnection.connect()) {
+        if (currentDBConnection.connect()) {
             Util.popUpInfo("数据库连接成功！", "连接成功");
             testProjectConfigTitledPane.setDisable(false);
         } else {
@@ -272,9 +263,9 @@ public class MainAppController {
      * @param rowIndex 从gridPane的第几行开始装参数配置的“参数名-输入框”对
      */
     private int configureDBConnectUI(int rowIndex) {
-        Label jdbcDriverNameLabel = new Label("未选择驱动");
+        TextField jdbcDriverNameTextField = new TextField();
         testObjectConfigPane.add(new Label("JDBC驱动"), 0, rowIndex);
-        testObjectConfigPane.add(jdbcDriverNameLabel, 1, rowIndex++);
+        testObjectConfigPane.add(jdbcDriverNameTextField, 1, rowIndex++);
         Button jdbcDriverButton = new Button("选择驱动");
         jdbcDriverButton.setOnAction(e -> {
             FileChooser fileChooser = new FileChooser();
@@ -287,7 +278,8 @@ public class MainAppController {
             Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
             File selectedFile = fileChooser.showOpenDialog(stage);
             if (selectedFile != null) {
-                jdbcDriverNameLabel.setText(selectedFile.getAbsolutePath());
+                jdbcDriverNameTextField.clear();
+                jdbcDriverNameTextField.setText(selectedFile.getAbsolutePath());
             }
         });
 
@@ -402,7 +394,7 @@ public class MainAppController {
      */
     private void onTestProjectParmConfirmButtonClicked() throws IOException, InterruptedException {
         // 首先清空旧的参数值
-        TestArguments testArguments = Util.getTestArgFromGridPane(testProjectConfigPane);
+        TestArguments testArguments = Util.getTestArgFromGridPane(testProjectConfigPane, 1);
 
         for (int i = 0; i < testArguments.values.size(); i++) {
             System.out.println(testArguments.values.get(i));
@@ -413,6 +405,7 @@ public class MainAppController {
         Task<Void> task;
         switch (testProjectSelectBox.getValue()) {
             case "TPC-C":
+                dbOtherTestController.clearAll();
                 message2Update = new StringBuilder();
                 task = new Task<Void>() {
                     @Override
@@ -420,13 +413,21 @@ public class MainAppController {
                         updateMessage(message2Update.append("开始TPC-C测试\n").toString());
                         testItem = new TPCCTester("TPC-C测试", currentDBConnection, testArguments);
                         updateMessage(message2Update.append("准备测试环境...\n").toString());
-                        testItem.testEnvPrepare();
+                        try {
+                            testItem.testEnvPrepare();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            String message = e.getMessage();
+                            Util.popUpInfo(message, "Error");
+                        }
                         updateMessage(message2Update.append("完成\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
                         try {
                             testItem.startTest();
                         } catch (Exception e) {
                             e.printStackTrace();
+                            String message = e.getMessage();
+                            Util.popUpInfo(message, "Error");
                         }
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
@@ -461,6 +462,7 @@ public class MainAppController {
                 }
                 break;
             case "读写速度测试":
+                fsReadWriteTestController.clearAll();
                 message2Update = new StringBuilder();
                 task = new Task<Void>() {
                     @Override
@@ -488,6 +490,7 @@ public class MainAppController {
                 new Thread(task).start();
                 break;
             case "并发度测试":
+                fsOtherTestController.clearAll();
                 message2Update = new StringBuilder();
                 task = new Task<Void>() {
                     @Override
@@ -514,6 +517,7 @@ public class MainAppController {
                 new Thread(task).start();
                 break;
             case "小文件测试":
+                fsOtherTestController.clearAll();
                 message2Update = new StringBuilder();
                 task = new Task<Void>() {
                     @Override
@@ -540,6 +544,7 @@ public class MainAppController {
                 new Thread(task).start();
                 break;
             case "可靠性测试":
+                fsReliabilityTestController.clearAll();
                 message2Update = new StringBuilder();
                 task = new Task<Void>() {
                     @Override
@@ -639,9 +644,12 @@ public class MainAppController {
 
     }
 
-    public void closeSSH() {
+    public void closeAll() {
         if (currentSSHConnection != null && !currentSSHConnection.getStatus()) {
             currentSSHConnection.sshDisconnect();
+        }
+        if (currentDBConnection != null) {
+            currentDBConnection.disconnect();
         }
     }
 }
