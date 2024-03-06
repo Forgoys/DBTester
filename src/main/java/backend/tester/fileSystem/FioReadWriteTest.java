@@ -235,4 +235,9 @@ public class FioReadWriteTest extends TestItem {
     public void setFioRWTestResult(TestResult fioRWTestResult) {
         this.fioRWTestResult = fioRWTestResult;
     }
+
+    public static void main() throws IOException, InterruptedException {
+        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/autotuning/zf/glusterfs/nfs_test","4k","8k","随机读");
+        fioReadWriteTest.startTest();
+    }
 }
