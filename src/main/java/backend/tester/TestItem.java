@@ -24,6 +24,12 @@ public abstract class TestItem implements Testable, Writable{
      */
     protected String testName;
 
+    /**
+     * 软件相关工具、脚本所在的根目录
+     * 此目录下可再分为三个子目录分别用于关系数据库、时序数据库和文件系统     *
+     */
+    protected String toolRootPath;
+
     public enum Status {
         /**
          * 准备阶段，例如参数未配置
