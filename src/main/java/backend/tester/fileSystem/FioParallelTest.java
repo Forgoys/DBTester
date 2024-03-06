@@ -42,7 +42,11 @@ public class FioParallelTest extends TestItem {
 //        String numjobs = 128;
 
         // 设置 fio 测试指令
-        String fioCommand = "fio -directory=" + directory + " -ioengine=libaio -direct=1 -iodepth=1 -thread=1 -numjobs=" + numjobs + " -group_reporting -allow_mounted_write=1 -rw=rw -rwmixread=70 -rwmixwrite=30 -bs=4k -size=1G -runtime=60 -name=fioTest";
+        String fioCommand = "fio -directory=" + directory + " -ioengine=libaio -direct=1 -iodepth=1 -thread=1 -numjobs=" + numjobs + " -group_reporting -allow_mounted_write=1 -rw=rw -rwmixread=70 -rwmixwrite=30 -bs=4k -size=1M -runtime=60 -name=fioTest";
+
+        String password = "666";
+        fioCommand = "echo " + password + " | sudo -S " + fioCommand;
+        System.out.println(fioCommand);
 
         // 创建一个 ProcessBuilder 对象
         ProcessBuilder processBuilder = new ProcessBuilder();
@@ -62,11 +66,16 @@ public class FioParallelTest extends TestItem {
             results.add(line);
         }
 
+        // 输出结果
+        for (String s : results) {
+            System.out.println(s);
+        }
+
         // 等待进程执行完毕
         int exitCode = process.waitFor();
         System.out.println("Exit code: " + exitCode);
 
-        fioResultSave(results);
+//        fioResultSave(results);
     }
 
     public void fioResultSave(List<String> results) {
@@ -143,5 +152,10 @@ public class FioParallelTest extends TestItem {
     @Override
     public void readFromFile(String resultPath) {
 
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        FioParallelTest fioParallelTest = new FioParallelTest("/home/autotuning/zf/glusterfs/software_test", "32");
+        fioParallelTest.startTest();
     }
 }
