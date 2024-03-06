@@ -38,8 +38,6 @@ public class TestArguments {
     public static final ArgumentProperty[] TPCH_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试规模，有候选项
             new ArgumentProperty("数据规模", new String[]{"5", "10", "20"}),
-            // 数据文件路径，没有候选项，需要输入
-            new ArgumentProperty("测试路径")
     };
 
     /**

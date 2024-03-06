@@ -1,8 +1,8 @@
 package frontend.connection;
 
-import javafx.fxml.FXML;
-
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -20,6 +20,7 @@ public class DBConnection {
     private String dbURL;
     private String username;
     private String password;
+    private int port;
 
     /**
      * 这个数据库的名字，比如Postgresql等等
@@ -65,12 +66,22 @@ public class DBConnection {
             this.dbBrandName = "SQLite";
         } // 可以根据需要添加更多的数据库品牌
 
+        // 解析端口号
+        try {
+            URI uri = new URI(url);
+            this.port = uri.getPort();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
         // 尝试解析数据库名
         int dbNameStart = url.lastIndexOf('/') + 1;
         int dbNameEnd = url.indexOf('?', dbNameStart);
         dbNameEnd = (dbNameEnd == -1) ? url.length() : dbNameEnd;
         this.dbName = url.substring(dbNameStart, dbNameEnd);
     }
+
+
 
     private String determineDriverClassName(String jdbcDriverPath) {
         // 这个方法的实现需要根据实际情况来设计。
@@ -305,5 +316,9 @@ public class DBConnection {
 
     public void setDBName(String dbName) {
         this.dbName = dbName;
+    }
+
+    public int getPort() {
+        return port;
     }
 }
