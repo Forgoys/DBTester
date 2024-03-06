@@ -84,7 +84,6 @@ public class FioReadWriteTest extends TestItem {
 
         // 设置 fio 测试指令
         String fioCommand = "fio -directory=" + directory + " -ioengine=libaio -direct=1 -iodepth=1 -thread=1 -numjobs=1 -group_reporting -allow_mounted_write=1 " + rwList.get(Integer.parseInt(rwIndex)) + " -bs=" + bs + " -size=" + size + " -runtime=60 -name=fioTest";
-
         String password = "lhjlhj6929";
         fioCommand = "echo " + password + " | sudo -S " + fioCommand;
         System.out.println(fioCommand);
