@@ -632,13 +632,24 @@ public class MainAppController {
 
 
     // ===============================结果文件导入和导出====================================
-    @FXML
-    private void exportTestResultClick() {
 
+    /**
+     * 导出测试结果文件夹
+     */
+    @FXML
+    private void onExportTestResultClick() {
+        String testObject = testObjectSelectBox.getValue();
+        String testProject = testProjectSelectBox.getValue();
+        String testResultDicName = "";
+        String absolutePath = DirectoryManager.buildAbsolutePath(testObject, testProject, testResultDicName);
+        testItem.writeToFile(absolutePath);
     }
 
+    /**
+     * 导入测试结果文件夹
+     */
     @FXML
-    private void importTestResultClick() {
+    private void onImportTestResultClick() {
 
     }
 

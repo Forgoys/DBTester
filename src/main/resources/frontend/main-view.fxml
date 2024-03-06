@@ -12,7 +12,6 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
@@ -28,8 +27,8 @@
       <menus>
         <Menu mnemonicParsing="false" text="File">
           <items>
-              <MenuItem fx:id="exportTestResult" mnemonicParsing="false" onAction="#exportTestResultClick" text="导出测试结果" />
-              <MenuItem fx:id="importTestResult" mnemonicParsing="false" onAction="#importTestResultClick" text="导入测试结果" />
+              <MenuItem fx:id="exportTestResult" mnemonicParsing="false" onAction="#onExportTestResultClick" text="导出测试结果" />
+              <MenuItem fx:id="importTestResult" mnemonicParsing="false" onAction="#onImportTestResultClick" text="导入测试结果" />
             <MenuItem mnemonicParsing="false" text="Quit" />
           </items>
         </Menu>
@@ -46,15 +45,12 @@
               <panes>
                   <TitledPane fx:id="sshConnectionTitledPane" animated="false" expanded="true" text="服务器连接">
                      <content>
-                        <VBox>
-<!--                            <padding>-->
-<!--                                <Insets top="10" right="10" bottom="10" left="10" />-->
-<!--                            </padding>-->
+                        <VBox prefHeight="200.0" prefWidth="100.0">
                            <children>
-                              <GridPane hgap="10" vgap="10">
+                              <GridPane vgap="4.0">
                                 <columnConstraints>
-                                    <ColumnConstraints minWidth="80" prefWidth="100" hgrow="SOMETIMES"/>
-                                    <ColumnConstraints minWidth="150" prefWidth="200" hgrow="SOMETIMES"/>
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="97.0" minWidth="10.0" prefWidth="76.0" />
+                                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="133.0" minWidth="10.0" prefWidth="125.0" />
                                 </columnConstraints>
                                 <rowConstraints>
                                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -89,7 +85,7 @@
                                  <children>
                                     <GridPane fx:id="testObjectConfigPane" alignment="CENTER_LEFT" hgap="10.0" nodeOrientation="LEFT_TO_RIGHT" vgap="4.0">
                                       <columnConstraints>
-                                        <ColumnConstraints halignment="LEFT" hgrow="NEVER" minWidth="100.0" prefWidth="100.0" />
+                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                                         <ColumnConstraints halignment="LEFT" hgrow="ALWAYS" minWidth="10.0" />
                                       </columnConstraints>
                                       <rowConstraints>
@@ -146,7 +142,7 @@
                 </TitledPane>
               </panes>
             </Accordion>
-          <ScrollPane fx:id="rightScrollPane" fitToWidth="true" fitToHeight="true">
+          <ScrollPane fx:id="rightScrollPane" fitToWidth="true" prefWidth="616.0">
               <opaqueInsets>
                   <Insets />
               </opaqueInsets>
