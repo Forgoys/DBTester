@@ -350,7 +350,7 @@ public class MainAppController {
     private void configureTestProjectParmUI() {
         Util.clearGridPaneRowsAfterFirst(testProjectConfigPane);
         String testProject = testProjectSelectBox.getValue();
-        ArgumentProperty[] properties = TestArguments.getArgPropertiesForTest(testObjectSelectBox.getValue(),testProject);
+        ArgumentProperty[] properties = TestArguments.getArgPropertiesForTest(testObjectSelectBox.getValue(), testProject);
 
         int rowIndex = 1;
         for (ArgumentProperty property : properties) {
@@ -469,7 +469,7 @@ public class MainAppController {
                     protected Void call() throws Exception {
                         updateMessage(message2Update.append("开始fio读写性能测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
-                        testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3),testArguments.values.get(4));
+                        testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3), testArguments.values.get(4));
                         updateMessage(message2Update.append("开始fio读写性能测试1\n").toString());
                         testItem.startTest();
                         updateMessage(message2Update.append("测试完成\n").toString());
@@ -498,7 +498,7 @@ public class MainAppController {
                         updateMessage(message2Update.append("开始并发度测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
 
-                        testItem = new FioParallelTest(testArguments.values.get(0), testArguments.values.get(1));
+                        testItem = new FioParallelTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2));
                         testItem.startTest();
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
