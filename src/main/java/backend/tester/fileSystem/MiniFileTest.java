@@ -1,5 +1,6 @@
 package backend.tester.fileSystem;
 
+import backend.dataset.TestAllResult;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
 
@@ -21,8 +22,15 @@ public class MiniFileTest extends TestItem {
     private String miniFileScriptName;
     private String miniFileScriptDirectory;
 
+    // 远程数据目录
+    private String remoteMiniFileDataPath;
+    private String remoteIp;
+    private String remoteName;
+
     // 指令运行结果
     TestResult fioMiniFileTestResult = new TestResult();
+
+    public MiniFileTest() {}
 
     public MiniFileTest(String directory) {
         this.directory = directory;
@@ -30,13 +38,30 @@ public class MiniFileTest extends TestItem {
         miniFileDirectory = directory + "/" + miniFileName;
         miniFileScriptName = "miniFileTest.sh";
         miniFileScriptDirectory = directory + "/" + miniFileScriptName;
+
+        remoteMiniFileDataPath = "/home/wlx/zf/test_data_prepare/miniFileData";
+        remoteIp = "10.181.8.216";
+
     }
-
-
 
     // 准备测试数据 准备测试工具 准备测试脚本 配置文件.ini
     @Override
     public void testEnvPrepare() throws Exception {
+        String command = "scp -r " + remoteMiniFileDataPath + " " + directory;
+//        scp -r wlx@10.181.8.216:/home/wlx/zf/test_data_prepare/miniFileData .
+
+        System.out.println(command);
+
+//        // 创建一个 ProcessBuilder 对象
+//        ProcessBuilder processBuilder = new ProcessBuilder();
+//        processBuilder.command("bash", "-c", command);
+//
+//        // 启动进程
+//        Process process = processBuilder.start();
+//
+//        // 等待进程执行完毕
+//        int exitCode = process.waitFor();
+//        System.out.println("Exit code: " + exitCode);
 
     }
 
@@ -51,6 +76,10 @@ public class MiniFileTest extends TestItem {
 
         // 执行脚本指令
         String fioCommand = miniFileScriptDirectory + miniFileDirectory;
+
+        String password = "666";
+        fioCommand = "echo " + password + " | sudo -S " + fioCommand;
+        System.out.println(fioCommand);
 
         // 创建一个 ProcessBuilder 对象
         ProcessBuilder processBuilder = new ProcessBuilder();
@@ -70,11 +99,16 @@ public class MiniFileTest extends TestItem {
             results.add(line);
         }
 
+        // 输出结果
+        for (String s : results) {
+            System.out.println(s);
+        }
+
         // 等待进程执行完毕
         int exitCode = process.waitFor();
         System.out.println("Exit code: " + exitCode);
 
-        fioResultSave(results);
+//        fioResultSave(results);
     }
 
     public void fioResultSave(List<String> results) {
@@ -86,7 +120,7 @@ public class MiniFileTest extends TestItem {
 
         // 分别定义read和write的正则表达式
 //        String regexRead = "read: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
-        String regexRead ="read: IOPS=([\\d.]+[kMG]?), BW=([\\d.]+[MiB|GiB|TiB]+/s).*lat \\((usec|msec)\\):.*avg=([\\d.]+)";
+        String regexRead = "read: IOPS=([\\d.]+[kMG]?), BW=([\\d.]+[MiB|GiB|TiB]+/s).*lat \\((usec|msec)\\):.*avg=([\\d.]+)";
 
         String regexWrite = "write: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
 
@@ -134,6 +168,7 @@ public class MiniFileTest extends TestItem {
         fioMiniFileTestResult.names = TestResult.FIO_MINIFILE_TEST;
         fioMiniFileTestResult.values = new String[]{readIops, readBw, readLat, writeIops, writeBw, writeLat};
     }
+
     @Override
     public List<List<Double>> getTimeData() {
         return null;
@@ -145,12 +180,23 @@ public class MiniFileTest extends TestItem {
     }
 
     @Override
+    public String getResultDicName() {
+        return null;
+    }
+
+    @Override
     public void writeToFile(String resultPath) {
 
     }
 
     @Override
-    public void readFromFile(String resultPath) {
+    public TestAllResult readFromFile(String resultPath) {
 
+        return null;
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        MiniFileTest miniFileTest = new MiniFileTest("/home/autotuning/zf/glusterfs/software_test");
+        miniFileTest.startTest();
     }
 }

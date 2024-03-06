@@ -1,5 +1,6 @@
 package backend.tester.fileSystem;
 
+import backend.dataset.TestAllResult;
 import backend.dataset.TestResult;
 import backend.dataset.TestTimeData;
 import backend.tester.TestItem;
@@ -38,6 +39,10 @@ public class ReliableTest extends TestItem {
         }
         reliableResultDirectory = "fioReliableTestResult" + "_" + timeChoose;
         reliableScriptName = "fiotest" + "_" + timeChoose + ".sh";
+    }
+
+    public ReliableTest() {
+
     }
 
     // 安装fio
@@ -143,12 +148,18 @@ public class ReliableTest extends TestItem {
 
 
     @Override
+    public String getResultDicName() {
+        return null;
+    }
+
+    @Override
     public void writeToFile(String resultPath) {
 
     }
 
     @Override
-    public void readFromFile(String resultPath) {
+    public TestAllResult readFromFile(String resultPath) {
 
+        return null;
     }
 }
