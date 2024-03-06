@@ -98,20 +98,20 @@ public class TestArguments {
      * @param testProject 测试项目中文名
      * @return 返回测试项目中文名对应TestArguments里面的静态参数数组名
      */
-    public static ArgumentProperty[] getArgPropertiesForTest(String testProject) {
+    public static ArgumentProperty[] getArgPropertiesForTest(String testObject, String testProject) {
         switch (testProject) {
             case "TPC-C":
                 return TPCC_ARG_PROPERTIES;
             case "TPC-H":
                 return TPCH_ARG_PROPERTIES;
-            case "时序数据库写入测试":
+            case "写入性能":
                 return INFLUXCOMP_WRITE_ARG_PROPERTIES;
-            case "时序数据库查询测试":
+            case "查询性能":
                 return INFLUXCOMP_READ_ARG_PROPERTIES;
-            case "读写速度测试":
-                return FIO_ARG_PROPERTIES;
             case "IOZONE读写速度测试":
                 return IOZONE_ARG_PROPERTIES;
+            case "读写速度测试":
+                return FIO_ARG_PROPERTIES;
             case "小文件测试":
                 return FIO_MINIFILE_ARG_PROPERTIES;
             case "并发度测试":

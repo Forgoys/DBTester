@@ -350,7 +350,7 @@ public class MainAppController {
     private void configureTestProjectParmUI() {
         Util.clearGridPaneRowsAfterFirst(testProjectConfigPane);
         String testProject = testProjectSelectBox.getValue();
-        ArgumentProperty[] properties = TestArguments.getArgPropertiesForTest(testProject);
+        ArgumentProperty[] properties = TestArguments.getArgPropertiesForTest(testObjectSelectBox.getValue(),testProject);
 
         int rowIndex = 1;
         for (ArgumentProperty property : properties) {
