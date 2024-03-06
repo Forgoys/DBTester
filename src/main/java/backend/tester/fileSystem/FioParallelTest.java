@@ -192,7 +192,7 @@ public class FioParallelTest extends TestItem {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        FioParallelTest fioParallelTest = new FioParallelTest("/home/autotuning/zf/glusterfs/software_test", "32", "666");
+        FioParallelTest fioParallelTest = new FioParallelTest("/home/autotuning/zf/glusterfs/software_test", "16", "666");
         fioParallelTest.startTest();
     }
 }
