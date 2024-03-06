@@ -1,8 +1,8 @@
 package backend.tester.fileSystem;
 
+import backend.dataset.TestAllResult;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
-import javafx.scene.SubScene;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -253,8 +253,9 @@ public class FioReadWriteTest extends TestItem {
     }
 
     @Override
-    public void readFromFile(String resultPath) {
+    public TestAllResult readFromFile(String resultPath) {
 
+        return null;
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
