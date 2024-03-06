@@ -552,7 +552,7 @@ public class MainAppController {
                         updateMessage(message2Update.append("开始可靠性测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
 
-                        testItem = new ReliableTest(testArguments.values.get(0), testArguments.values.get(0));
+                        testItem = new ReliableTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2));
                         testItem.startTest();
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
