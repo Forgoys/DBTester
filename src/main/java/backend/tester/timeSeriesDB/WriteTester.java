@@ -495,8 +495,17 @@ public class WriteTester extends TestItem {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.timeDataList = result;
-        return result;
+        // 将result进行转置
+        List<List<Double>> transposedResult = new ArrayList<>();
+        for (int i = 0; i < result.get(0).size(); i++) {
+            List<Double> newRow = new ArrayList<>();
+            for (List<Double> row : result) {
+                newRow.add(row.get(i));
+            }
+            transposedResult.add(newRow);
+        }
+        this.timeDataList = transposedResult;
+        return transposedResult;
     }
     // 调用testHomePath路径中的monitor_write.sh脚本，将结果保存到testHomePath/usage文件夹中
     // 执行脚本要用sudo命令，密码可由SSHConnection类中的getPassword()获取
@@ -645,8 +654,17 @@ public class WriteTester extends TestItem {
             e.printStackTrace();
         }
         */
-        this.timeDataList = result;
-        return result;
+        // 将result进行转置
+        List<List<Double>> transposedResult = new ArrayList<>();
+        for (int i = 0; i < result.get(0).size(); i++) {
+            List<Double> newRow = new ArrayList<>();
+            for (List<Double> row : result) {
+                newRow.add(row.get(i));
+            }
+            transposedResult.add(newRow);
+        }
+        this.timeDataList = transposedResult;
+        return transposedResult;
     }
 
     // 删除数据库 devops
@@ -702,10 +720,10 @@ public class WriteTester extends TestItem {
             tester.testEnvPrepare();
             tester.startTest();
             tester.writeToFile(resultPath);
-            //tester.getTestResults();//获取本测试结果
-            //tester.getTestResults1(resultPath);
+            tester.getTestResults();//获取本测试结果
+            tester.getTestResults1(resultPath);
             //System.out.println(tester.getTestResults1(resultPath).values[0]);
-            //System.out.println(tester.getTimeData());//获取本测试的监控数据
+            System.out.println(tester.getTimeData());//获取本测试的监控数据
             //System.out.println(tester.readFromFile1(resultPath));
         } catch (Exception e) {
             e.printStackTrace();

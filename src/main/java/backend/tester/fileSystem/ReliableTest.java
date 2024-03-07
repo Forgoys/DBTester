@@ -4,9 +4,6 @@ import backend.dataset.TestAllResult;
 import backend.dataset.TestResult;
 import backend.dataset.TestTimeData;
 import backend.tester.TestItem;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -16,7 +13,6 @@ import java.util.List;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -311,8 +307,10 @@ public class ReliableTest extends TestItem {
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             // 写入文本内容
             for (List<String> list : reliableResultList) {
-                String content = list.toString();
-                bufferedWriter.write(content);
+                for (String s : list) {
+                    bufferedWriter.write(s);
+                    bufferedWriter.write(",");
+                }
                 bufferedWriter.newLine();
             }
 
@@ -402,7 +400,55 @@ public class ReliableTest extends TestItem {
 
     @Override
     public TestAllResult readFromFile(String resultPath) {
-        return null;
+        String filePath = resultPath + "/" + "reliableResult.csv";
+        List<List<Double>> testResult = new ArrayList<>();
+        try {
+            // 创建文件对象
+            File file = new File(filePath);
+            // 创建 BufferedReader 以读取文件内容
+            BufferedReader reader = null;
+            reader = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] arrayString;
+                List<Double> list = new ArrayList<>();
+                arrayString = line.split(",");
+                for (String s : arrayString) {
+                    list.add(Double.valueOf(s));
+                }
+                testResult.add(list);
+            }
+            // 关闭 BufferedReader
+            reader.close();
+        } catch (IOException e) {
+            // 处理读取文件时可能发生的异常
+            e.printStackTrace();
+        }
+
+        // 转换下格式
+        List<Double> readIOPSList = new ArrayList<>();
+        List<Double> readBWList = new ArrayList<>();
+        List<Double> readLatList = new ArrayList<>();
+        List<Double> writeIOPSList = new ArrayList<>();
+        List<Double> writeBWList = new ArrayList<>();
+        List<Double> writeLatList = new ArrayList<>();
+        for (List<Double> row : testResult) {
+            readIOPSList.add(row.get(0));
+            readBWList.add(row.get(1));
+            readLatList.add(row.get(2));
+            writeIOPSList.add(row.get(3));
+            writeBWList.add(row.get(4));
+            writeLatList.add(row.get(5));
+        }
+        testResult.clear();
+        testResult.add(readIOPSList);
+        testResult.add(readBWList);
+        testResult.add(readLatList);
+        testResult.add(writeIOPSList);
+        testResult.add(writeBWList);
+        testResult.add(writeLatList);
+        System.out.println(testResult);
+        return new TestAllResult(testResult);
     }
 
     @Override
@@ -413,6 +459,7 @@ public class ReliableTest extends TestItem {
     public static void main(String[] args) throws IOException, InterruptedException {
         ReliableTest reliableTest = new ReliableTest("/home/autotuning/zf/glusterfs/software_test", "1min", "666");
         reliableTest.startTest();
+        reliableTest.readFromFile("/home/autotuning/zf/glusterfs/software_test/reliableTest");
     }
 
 }
