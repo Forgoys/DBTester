@@ -6,6 +6,7 @@ import backend.tester.fileSystem.FioParallelTest;
 import backend.tester.fileSystem.FioReadWriteTest;
 import backend.tester.fileSystem.MiniFileTest;
 import backend.tester.fileSystem.ReliableTest;
+import backend.tester.rdb.PressureTester;
 import backend.tester.rdb.TPCCTester;
 import backend.tester.rdb.TPCHTester;
 import backend.tester.timeSeriesDB.ReadTester;
@@ -50,6 +51,7 @@ public class MainAppController {
      * 数据库其他测试结果界面的控制器
      */
     DBOtherTestController dbOtherTestController;
+    DBReliabilityTestController dbReliabilityTestController;
     /**
      * 文件系统可靠性测试结果界面的控制器
      */
@@ -635,7 +637,45 @@ public class MainAppController {
                 if (testObjectSelectBox.getValue().equals("InfluxDB") || testObjectSelectBox.getValue().equals("Lindorm") || testObjectSelectBox.getValue().equals("TDengine")) {
                     ;
                 } else {
-                    ;
+                    dbReliabilityTestController.clearAll();
+                    message2Update = new StringBuilder();
+                    task = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            updateMessage(message2Update.append("开始可靠性测试\n").toString());
+                            testItem = new PressureTester("可靠性测试", currentDBConnection, testArguments);
+                            updateMessage(message2Update.append("准备测试环境...\n").toString());
+                            try {
+                                testItem.testEnvPrepare();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                String message = e.getMessage();
+                                Util.popUpInfo(message, "Error");
+                            }
+                            updateMessage(message2Update.append("完成\n").toString());
+                            updateMessage(message2Update.append("测试中....\n").toString());
+                            try {
+                                testItem.startTest();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                String message = e.getMessage();
+                                Util.popUpInfo(message, "Error");
+                            }
+                            updateMessage(message2Update.append("测试完成\n").toString());
+                            updateMessage(message2Update.append("开始生成测试结果\n").toString());
+                            Platform.runLater(() -> {
+                                testResult = testItem.getTestResults();
+                                dbReliabilityTestController.displayTestResults(testResult);
+                            });
+                            updateMessage(message2Update.append("生成完毕\n").toString());
+                            return null;
+                        }
+                    };
+                    // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
+                    dbReliabilityTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+
+                    // 在新线程中执行任务
+                    new Thread(task).start();
                 }
                 break;
             case "读写速度测试":
@@ -756,14 +796,17 @@ public class MainAppController {
     private void loadTestProjectResultView(String testProject) {
         String fxmlFile;
         Object controller;
+//        String testObject = testObjectSelectBox.getValue();
         // 确定要加载的视图和控制器
         switch (testProject) {
             case "TPC-C":
             case "TPC-H":
             case "写入性能":
             case "查询性能":
-            case "可靠性":
                 fxmlFile = "dbOtherTestView.fxml";
+                break;
+            case "可靠性":
+                fxmlFile = "dbReliabilityTestView.fxml";
                 break;
             case "适配性":
                 fxmlFile = "dbAdaptTestView.fxml";
@@ -792,6 +835,8 @@ public class MainAppController {
             // 更新控制器引用
             if (fxmlFile.equals("dbAdaptTestView.fxml")) {
                 dbAdaptTestController = (DBAdaptTestController) controller;
+            } else if (fxmlFile.equals("dbReliabilityTestView.fxml")) {
+                dbReliabilityTestController = (DBReliabilityTestController) controller;
             } else if (fxmlFile.equals("dbOtherTestView.fxml")) {
                 dbOtherTestController = (DBOtherTestController) controller;
             } else if (fxmlFile.equals("fsReliabilityTestView.fxml")) {
@@ -897,7 +942,11 @@ public class MainAppController {
                     if (testObject.equals("InfluxDB") || testObject.equals("Lindorm") || testObject.equals("TDengine")) {
                         ;
                     } else {
-                        ;
+                        dbReliabilityTestController.clearAll();
+                        tmpTestItem = new PressureTester();
+                        testAllResult = tmpTestItem.readFromFile(absolutePath);
+                        dbReliabilityTestController.displayTestResults(testAllResult.testResult);
+                        break;
                     }
                     break;
                 case "读写速度测试":

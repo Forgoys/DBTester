@@ -73,7 +73,7 @@ public class WriteTester extends TestItem {
         scenario = testArgs.values.get(0);
         clients = Integer.parseInt(testArgs.values.get(1));
         password = testArgs.values.get(2);
-        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tool/TSDB";
+        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         SetTag();
     }
     // 张超群  写一个static函数，检验数据库连接状态，输入String dataBaseName，调用Util.popUpInfo输出数据库连接状态，服务是否启动，数据库是否存在
@@ -135,6 +135,7 @@ public class WriteTester extends TestItem {
     private boolean checkTestToolExist() {
         for (String fileName : DATA_SET_FILE_NAMES) {
             File file = new File(testHomePath, fileName);
+            System.out.println(file.getAbsoluteFile());
             if (!file.exists()) {
                 return false;
             }
