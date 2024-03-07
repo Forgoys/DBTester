@@ -20,7 +20,7 @@ public class TestResult {
      * influxdb-comparision工具时序数据库读写测试结果
      */
     public static final String[] INFLUXCOMP_WRTIE_RES_NAMES = new String[]{"写入条目数","写入时间","客户端数","写入数据点速度","写入数据值速度","磁盘速度"};
-    public static final String[] INFLUXCOMP_READ_RES_NAMES = new String[]{"时序查询性能结果"};
+    public static final String[] INFLUXCOMP_READ_RES_NAMES = new String[]{"最小查询时间","平均查询时间","最大查询时间"};
 
     // FIO读写速度测试结果名
     public static final String[] FIO_RW_TEST = new String[]{"读取IOPS", "读取带宽(KiB/s)", "读取时延(usec)","写入IOPS", "写入带宽(KiB/s)", "写入时延(usec)"};
