@@ -15,6 +15,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -27,10 +32,14 @@ public class FioReadWriteTest extends TestItem {
     private String bs;
     private String size;
     private String rwIndex;
+    private String rwOption;
 
     // 资源检测脚本名称
     private String monitorScriptName;
     private String monitorResultCSV;
+
+    // 测试结果保存文件
+    String fioReadWriteTestResult;
 
     // sudo权限
     String localSudoPassword;
@@ -45,6 +54,7 @@ public class FioReadWriteTest extends TestItem {
         this.directory = directory + "/readWriteTest";
         this.bs = bs;
         this.size = size;
+        this.rwOption = rwOption;
         switch (rwOption) {
             case "随机读":
                 rwIndex = "0";
@@ -71,6 +81,7 @@ public class FioReadWriteTest extends TestItem {
 
         monitorScriptName = "monitor.sh";
         monitorResultCSV = "fioReadWriteTestMonitorResult.csv";
+        fioReadWriteTestResult = "fioReadWriteTestResult.txt";
     }
 
     public int executeCommand(String command) throws IOException, InterruptedException {
@@ -258,6 +269,30 @@ public class FioReadWriteTest extends TestItem {
         fioRWTestResult.values = new String[]{readIOPS, readBW, readLat, writeIOPS, writeBW, writeLat};
         System.out.println(Arrays.toString(fioRWTestResult.values));
 
+        // 保存结果到文件
+        try {
+            // 创建 FileWriter 对象
+            FileWriter fileWriter = new FileWriter(directory + "/" + fioReadWriteTestResult);
+            // 创建 BufferedWriter 对象
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            // 写入文本内容
+            for (String s : fioRWTestResult.names) {
+                bufferedWriter.write(s);
+                bufferedWriter.write(",");
+            }
+            bufferedWriter.newLine();
+            for (String s : fioRWTestResult.values) {
+                bufferedWriter.write(s);
+                bufferedWriter.write(",");
+            }
+            bufferedWriter.newLine();
+            // 关闭 BufferedWriter
+            bufferedWriter.close();
+            System.out.println("读写测试结果保存到：" + directory + "/" + fioReadWriteTestResult);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         List<List<Double>> monitorResult = new ArrayList<>();
         monitorResult = getTimeData();
         System.out.println(monitorResult);
@@ -343,12 +378,38 @@ public class FioReadWriteTest extends TestItem {
 
     @Override
     public String getResultDicName() {
-        return null;
+        String testName = "size" + size + "_bs" + bs + "_" + rwOption;
+        // 获取当前的日期和时间
+        LocalDateTime currentDateTime = LocalDateTime.now();
+//        System.out.println("Current Date and Time: " + currentDateTime);
+
+        // 定义日期时间格式
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+
+        // 格式化日期时间
+        String formattedDateTime = currentDateTime.format(formatter);
+
+        // 输出格式化后的日期时间
+//        System.out.println("Formatted Date and Time: " + formattedDateTime);
+
+        String resultDicName = testName + "_" + formattedDateTime;
+        return resultDicName;
     }
 
+    // 把fio测试结果和系统资源结果保存到这个目录
     @Override
     public void writeToFile(String resultPath) {
-
+        // 把测试结果和系统资源结果文件保存到resultPath目录
+        String command = "cp " + directory + "/" + fioReadWriteTestResult + " " + directory + "/" + monitorResultCSV + " " + resultPath;
+        int exitCode = 0;
+        try {
+            exitCode = executeCommand(command);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("保存测试结果和系统资源结果成功" + " exit code:" + exitCode);
     }
 
     @Override
@@ -366,5 +427,7 @@ public class FioReadWriteTest extends TestItem {
         FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/autotuning/zf/glusterfs/software_test", "666", "4k", "16k", "%70随机读,%30随机写");
 //        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/parallels/Desktop/fs", "lhjlhj6929", "4k", "8k", "%70随机读,%30随机写");
         fioReadWriteTest.startTest();
+        String name = fioReadWriteTest.getResultDicName();
+        System.out.println(name);
     }
 }
