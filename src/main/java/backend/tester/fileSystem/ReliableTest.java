@@ -312,6 +312,11 @@ public class ReliableTest extends TestItem {
         return null;
     }
 
+    @Override
+    public List<List<Double>> readFromFile1(String resultPath) {
+        return null;
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
         ReliableTest reliableTest = new ReliableTest("/home/autotuning/zf/glusterfs/software_test", "1min", "666");
         reliableTest.startTest();

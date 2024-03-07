@@ -125,4 +125,9 @@ public class IozoneReadWriteTest extends TestItem {
 
         return null;
     }
+
+    @Override
+    public List<List<Double>> readFromFile1(String resultPath) {
+        return null;
+    }
 }

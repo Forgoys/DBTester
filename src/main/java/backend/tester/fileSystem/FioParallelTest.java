@@ -191,6 +191,11 @@ public class FioParallelTest extends TestItem {
         return null;
     }
 
+    @Override
+    public List<List<Double>> readFromFile1(String resultPath) {
+        return null;
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
         FioParallelTest fioParallelTest = new FioParallelTest("/home/autotuning/zf/glusterfs/software_test", "16", "666");
         fioParallelTest.startTest();
