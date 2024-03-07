@@ -5,7 +5,6 @@ import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
 import frontend.connection.DBConnection;
-import frontend.connection.SSHConnection;
 
 import java.io.*;
 import java.time.LocalDateTime;
@@ -69,37 +68,28 @@ public class TPCCTester extends TestItem {
      */
     private String diskNameOfDB;
 
-    public TPCCTester(String testName, SSHConnection sshStmt) {
+    public TPCCTester(){}
+
+    public TPCCTester(String testName) {
         this.testName = testName;
-        this.sshStmt = sshStmt;
+//        this.toolRootPath = toolRootPath;
     }
 
-
-
-
     public TPCCTester(String testName, DBConnection DBStmt, TestArguments testArgs) {
-        this.testName = testName;
+        this(testName);
         this.DBStmt = DBStmt;
         this.testArgs = testArgs;
     }
 
-    public TPCCTester(String testName, SSHConnection sshStmt, DBConnection DBStmt) {
-        super(testName, sshStmt, DBStmt);
-    }
 
-    public TPCCTester(String testName, SSHConnection sshStmt, DBConnection DBStmt, TestArguments testArgs) {
-        super(testName, sshStmt, DBStmt, testArgs);
-    }
-
-    public TPCCTester() {
-
-    }
 
     /**
      * 测试环境准备：软件部署、数据集导入
      */
     @Override
     public void testEnvPrepare() throws Exception {
+
+        toolRootPath = "/home/wlx/cx/DBTester/";
 
         // 安装数据库所在磁盘
         diskNameOfDB = "sdd";
@@ -400,6 +390,11 @@ public class TPCCTester extends TestItem {
     public TestAllResult readFromFile(String resultPath) {
 
         return null;
+    }
+
+    @Override
+    public List<List<Double>> readFromFile1(String resultPath) {
+        return List.of();
     }
 
     public static void main(String[] args) {
