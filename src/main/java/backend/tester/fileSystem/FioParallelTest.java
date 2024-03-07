@@ -219,7 +219,10 @@ public class FioParallelTest extends TestItem {
             // 创建 BufferedWriter 对象
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             // 写入文本内容
-            bufferedWriter.write(content);
+//            bufferedWriter.write(content);
+//            bufferedWriter.newLine();
+            List<String> s = List.of(fioParallelTestResult.values);
+            bufferedWriter.write(s.toString());
             bufferedWriter.newLine();
             // 关闭 BufferedWriter
             bufferedWriter.close();
