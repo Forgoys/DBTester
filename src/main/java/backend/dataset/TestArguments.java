@@ -38,19 +38,21 @@ public class TestArguments {
     public static final ArgumentProperty[] TPCH_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试规模，有候选项
             new ArgumentProperty("数据规模", new String[]{"5", "10", "20"}),
+            new ArgumentProperty("测试工具目录"),
     };
 
     /**
      * influxdb-comparision工具时序数据库测试的参数属性
      */
     public static final ArgumentProperty[] INFLUXCOMP_WRITE_ARG_PROPERTIES = new ArgumentProperty[] {
-            new ArgumentProperty("写入场景", new String[]{"100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟*"}),
+            new ArgumentProperty("写入场景", new String[]{"10台*1天","100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟"}),
             new ArgumentProperty("客户端数", new String[]{"16","100"})
     };
     public static final ArgumentProperty[] INFLUXCOMP_READ_ARG_PROPERTIES = new ArgumentProperty[] {
             new ArgumentProperty("查询场景", new String[]{"100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟*"}),
-            new ArgumentProperty("查询类型", new String[]{"8host-1hr","1host-1hr","1host-12hr"}),
-            // new ArgumentProperty("查询语句数量",new String[]{"1万","5万","10万})
+            new ArgumentProperty("查询类型", new String[]{"8-host-1hr","1-host-1hr","1-host-12hr"}),
+            new ArgumentProperty("客户端书", new String[]{"10","100"}),
+            new ArgumentProperty("查询语句数量",new String[]{"1万","5万","10万"})
     };
 
     /*
@@ -60,11 +62,11 @@ public class TestArguments {
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
             // sudo密码，用户输入
-            new ArgumentProperty("密码"),
+            new ArgumentProperty("本机sudo密码"),
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项
-            new ArgumentProperty("文件大小", new String[]{"8K", "1G", "4G", "8G"}),
+            new ArgumentProperty("文件大小", new String[]{"16k","1G", "4G", "8G"}),
             // 读写方式，有候选项
             new ArgumentProperty("读写方式", new String[]{"随机读", "随机写", "顺序读", "顺序写", "%70顺序读,%30顺序写", "%70随机读,%30随机写"}),
     };
@@ -75,6 +77,8 @@ public class TestArguments {
     public static final ArgumentProperty[] IOZONE_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
+            // sudo密码，用户输入
+            new ArgumentProperty("本机sudo密码"),
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项
@@ -87,6 +91,8 @@ public class TestArguments {
             new ArgumentProperty("测试目录"),
             // 并发度设置，有候选项
             new ArgumentProperty("并发线程数", new String[]{"16", "64", "128", "256"}),
+            // sudo密码，用户输入
+            new ArgumentProperty("本机sudo密码"),
     };
 
     // fio小文件测试参数属性
@@ -100,7 +106,9 @@ public class TestArguments {
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
             // 测试时长，有候选项
-            new ArgumentProperty("测试时长"),
+            new ArgumentProperty("测试时长", new String[]{"1min", "3min", "10min", "30min", "1h", "4h", "24h", "3day", "7day"}),
+            // sudo密码，用户输入
+            new ArgumentProperty("本机sudo密码"),
     };
 
 

@@ -23,4 +23,7 @@ public interface Writable {
      * @return 测试结果对，测试结果和时序型结果
      */
     public TestAllResult readFromFile(String resultPath);
+
+    // 新增一个专门用于读取时序型结果的方法
+    public List<List<Double>> readFromFile1(String resultPath);
 }

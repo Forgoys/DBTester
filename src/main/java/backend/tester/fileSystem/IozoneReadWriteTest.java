@@ -111,6 +111,11 @@ public class IozoneReadWriteTest extends TestItem {
 
 
     @Override
+    public String getResultDicName() {
+        return null;
+    }
+
+    @Override
     public void writeToFile(String resultPath) {
 
     }
@@ -118,6 +123,11 @@ public class IozoneReadWriteTest extends TestItem {
     @Override
     public TestAllResult readFromFile(String resultPath) {
 
+        return null;
+    }
+
+    @Override
+    public List<List<Double>> readFromFile1(String resultPath) {
         return null;
     }
 }

@@ -1,6 +1,7 @@
 package backend.dataset;
 
 import java.io.File;
+import java.util.Arrays;
 
 public class DirectoryManager {
 
@@ -45,7 +46,10 @@ public class DirectoryManager {
      */
     public static String[] analyzePath(String relativePath) {
         String[] parts = relativePath.split(File.separator.replace("\\", "\\\\")); // 对于Windows路径分隔符的特殊处理
-        if (parts.length < 3) {
+        System.out.println(Arrays.toString(parts));
+
+        // 从results开始，共有四层文件夹
+        if (parts.length != 4) {
             System.out.println("Invalid path.");
             return null;
         }

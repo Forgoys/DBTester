@@ -7,6 +7,8 @@ import backend.tester.fileSystem.FioReadWriteTest;
 import backend.tester.fileSystem.MiniFileTest;
 import backend.tester.fileSystem.ReliableTest;
 import backend.tester.rdb.TPCCTester;
+import backend.tester.rdb.TPCHTester;
+import backend.tester.timeSeriesDB.WriteTester;
 import eu.hansolo.tilesfx.Test;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
@@ -18,6 +20,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -175,7 +178,11 @@ public class MainAppController {
                 testProjectSelectBox.getItems().addAll("TPC-C", "TPC-H", "可靠性", "适配性");
                 yield configureDBConnectUI(rowIndex);
             }
-            case "TDengine", "InfluxDB", "Lindorm" -> {
+            case "TDengine" -> {
+                testProjectSelectBox.getItems().addAll("写入性能", "查询性能", "可靠性", "适配性");
+                yield configureTDengineConnectUI(rowIndex);
+            }
+            case "InfluxDB", "Lindorm" -> {
                 testProjectSelectBox.getItems().addAll("写入性能", "查询性能", "可靠性", "适配性");
                 yield configureDBConnectUI(rowIndex);
             }
@@ -283,13 +290,29 @@ public class MainAppController {
 
         testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++);
 
-//        Label jdbcDriverClassNameLabel = new Label("JDBC驱动类名");
-//        PasswordField jdbcDriverClassPasswordField = new PasswordField();
-//        jdbcDriverClassPasswordField.setId("jdbcDriverClassPasswordField");
-//        testObjectConfigPane.add(jdbcDriverClassNameLabel, 0, rowIndex);
-//        testObjectConfigPane.add(jdbcDriverClassPasswordField, 1, rowIndex++);
-
         Label dbURLLabel = new Label("数据库URL");
+        TextField dbURLTextField = new TextField();
+        dbURLTextField.setId("dbURLTextField");
+        testObjectConfigPane.add(dbURLLabel, 0, rowIndex);
+        testObjectConfigPane.add(dbURLTextField, 1, rowIndex++);
+
+        Label dbUserLabel = new Label("用户名");
+        TextField dbUserTextField = new TextField();
+        dbUserTextField.setId("dbUserTextField");
+        testObjectConfigPane.add(dbUserLabel, 0, rowIndex);
+        testObjectConfigPane.add(dbUserTextField, 1, rowIndex++);
+
+        Label dbPasswordLabel = new Label("密码");
+        TextField dbPasswordTextField = new TextField();
+        dbPasswordTextField.setId("dbPasswordTextField");
+        testObjectConfigPane.add(dbPasswordLabel, 0, rowIndex);
+        testObjectConfigPane.add(dbPasswordTextField, 1, rowIndex++);
+
+        return rowIndex;
+    }
+
+    private int configureTDengineConnectUI(int rowIndex) {
+        Label dbURLLabel = new Label("数据库名");
         TextField dbURLTextField = new TextField();
         dbURLTextField.setId("dbURLTextField");
         testObjectConfigPane.add(dbURLLabel, 0, rowIndex);
@@ -447,6 +470,48 @@ public class MainAppController {
                 new Thread(task).start();
                 break;
             case "TPC-H":
+                dbOtherTestController.clearAll();
+                message2Update = new StringBuilder();
+                task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        updateMessage(message2Update.append("开始TPC-H测试\n").toString());
+                        testItem = new TPCHTester("TPC-H测试", testArguments.values.get(1), currentDBConnection, testArguments);
+                        updateMessage(message2Update.append("准备测试环境...\n").toString());
+                        try {
+                            testItem.testEnvPrepare();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            String message = e.getMessage();
+                            Util.popUpInfo(message, "Error");
+                        }
+                        updateMessage(message2Update.append("完成\n").toString());
+                        updateMessage(message2Update.append("测试中....\n").toString());
+                        try {
+                            testItem.startTest();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            String message = e.getMessage();
+                            Util.popUpInfo(message, "Error");
+                        }
+                        updateMessage(message2Update.append("测试完成\n").toString());
+                        updateMessage(message2Update.append("开始生成测试结果\n").toString());
+                        Platform.runLater(() -> {
+                            testResult = testItem.getTestResults();
+                            dbOtherTestController.displayTestResults(testResult);
+                            testTimeData = testItem.getTimeData();
+                            dbOtherTestController.setTimeData(testTimeData);
+
+                        });
+                        updateMessage(message2Update.append("生成完毕\n").toString());
+                        return null;
+                    }
+                };
+                // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
+                dbOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+
+                // 在新线程中执行任务
+                new Thread(task).start();
                 break;
             case "写入性能":
                 break;
@@ -468,7 +533,6 @@ public class MainAppController {
                         updateMessage(message2Update.append("开始fio读写性能测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
                         testItem = new FioReadWriteTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3), testArguments.values.get(4));
-                        updateMessage(message2Update.append("开始fio读写性能测试1\n").toString());
                         testItem.startTest();
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
@@ -550,7 +614,7 @@ public class MainAppController {
                         updateMessage(message2Update.append("开始可靠性测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
 
-                        testItem = new ReliableTest(testArguments.values.get(0), testArguments.values.get(0));
+                        testItem = new ReliableTest(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2));
                         testItem.startTest();
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
@@ -640,7 +704,7 @@ public class MainAppController {
     private void onExportTestResultClick() {
         String testObject = testObjectSelectBox.getValue();
         String testProject = testProjectSelectBox.getValue();
-        String testResultDicName = "";
+        String testResultDicName = testItem.getResultDicName();   // 张超群  实现这个函数，返回存放结果数据文件的文件夹名字
         String absolutePath = DirectoryManager.buildAbsolutePath(testObject, testProject, testResultDicName);
         testItem.writeToFile(absolutePath);
     }
@@ -650,7 +714,111 @@ public class MainAppController {
      */
     @FXML
     private void onImportTestResultClick() {
+        DirectoryChooser directoryChooser = new DirectoryChooser();
+        // 设置初始目录为当前运行目录下的results文件夹
+        String initialDirectory = System.getProperty("user.dir") + File.separator + "results";
+        directoryChooser.setInitialDirectory(new File(initialDirectory));
+        directoryChooser.setTitle("选择测试结果文件夹");
 
+        // 仅允许选择文件夹
+        Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
+        File selectedDirectory = directoryChooser.showDialog(stage); // 这里的null需要替换为你的Stage
+
+        String testObject = null;
+        String testProject = null;
+        String relativePath = null;
+        String absolutePath = null;
+
+        if (selectedDirectory != null) {
+            // 构建相对于"results"的路径
+            absolutePath = selectedDirectory.getPath();
+            relativePath = absolutePath.substring(System.getProperty("user.dir").length() + 1);
+            System.out.println(relativePath);
+            String[] analysisResult = DirectoryManager.analyzePath(relativePath);
+            if (analysisResult == null) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("错误");
+                alert.setHeaderText(null);
+                alert.setContentText("请正确选择结果文件夹");
+                alert.showAndWait();
+                return;
+            } else {
+                // 处理分析结果
+                testObject = analysisResult[0];
+                testProject = analysisResult[1];
+            }
+        }
+
+        TestAllResult testAllResult = null;
+        TestItem tmpTestItem = null;
+
+        if (testProject != null) {
+            loadTestProjectResultView(testProject);  // 载入测试结果展示UI
+
+            switch (testProject) {
+                case "TPC-C":
+                    dbOtherTestController.clearAll();
+                    tmpTestItem = new TPCCTester();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    dbOtherTestController.displayTestResults(testAllResult.testResult);
+                    dbOtherTestController.setTimeData(testAllResult.timeDataResult);
+                    break;
+                case "TPC-H":
+                    dbOtherTestController.clearAll();
+                    tmpTestItem = new TPCHTester();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    dbOtherTestController.displayTestResults(testAllResult.testResult);
+                    dbOtherTestController.setTimeData(testAllResult.timeDataResult);
+                    break;
+                case "写入性能":
+                    dbOtherTestController.clearAll();
+                    tmpTestItem = new WriteTester();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);  // 张超群 读取absolutePath下的两个结果文件，把结果写到testAllResult里
+                    dbOtherTestController.displayTestResults(testAllResult.testResult);
+                    dbOtherTestController.setTimeData(testAllResult.timeDataResult);
+                    break;
+                case "查询性能":
+                    break;
+                case "可靠性":
+                    if (testObject.equals("InfluxDB") || testObject.equals("Lindorm") || testObject.equals("TDengine")) {
+                        ;
+                    } else {
+                        ;
+                    }
+                    break;
+                case "读写速度测试":
+                    fsReadWriteTestController.clearAll();
+                    tmpTestItem = new FioReadWriteTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+//                    fsReadWriteTestController.setTimeData(testAllResult.timeDataResult);
+                    break;
+                case "并发度测试":
+                    fsOtherTestController.clearAll();
+                    tmpTestItem = new FioParallelTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+                    break;
+                case "小文件测试":
+                    fsOtherTestController.clearAll();
+                    tmpTestItem = new MiniFileTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+                    break;
+                case "可靠性测试":
+                    fsReliabilityTestController.clearAll();
+                    tmpTestItem = new ReliableTest();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);
+                    fsReliabilityTestController.setTimeData(testAllResult.timeDataResult);
+                    break;
+                default:
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("错误");
+                    alert.setHeaderText(null);
+                    alert.setContentText("请正确选择结果文件夹");
+                    alert.showAndWait();
+            }
+        }
     }
 
     public void closeAll() {

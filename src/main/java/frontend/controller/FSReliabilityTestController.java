@@ -66,12 +66,15 @@ public class FSReliabilityTestController {
         latencyLineChart.getData().clear();
 
         // 创建并添加IOPS数据系列
-        XYChart.Series<String, Number> iopsSeries = new XYChart.Series<>();
-        iopsSeries.setName("IOPS");
+        XYChart.Series<String, Number> readIopsSeries = new XYChart.Series<>();
+        readIopsSeries.setName("读IOPS");
+        XYChart.Series<String, Number> writeIopsSeries = new XYChart.Series<>();
+        writeIopsSeries.setName("写OPS");
         for (int i = 0; i < timeData.get(0).size(); i++) {
-            iopsSeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(0).get(i)));
+            readIopsSeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(0).get(i)));
+            writeIopsSeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(1).get(i)));
         }
-        iopsLineChart.getData().add(iopsSeries);
+        iopsLineChart.getData().addAll(readIopsSeries, writeIopsSeries);
 
         // 创建并添加读写带宽数据系列
         XYChart.Series<String, Number> readBandwidthSeries = new XYChart.Series<>();
@@ -79,8 +82,8 @@ public class FSReliabilityTestController {
         XYChart.Series<String, Number> writeBandwidthSeries = new XYChart.Series<>();
         writeBandwidthSeries.setName("写带宽");
         for (int i = 0; i < timeData.get(1).size(); i++) {
-            readBandwidthSeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(1).get(i)));
-            writeBandwidthSeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(2).get(i)));
+            readBandwidthSeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(2).get(i)));
+            writeBandwidthSeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(3).get(i)));
         }
         bandwidthLineChart.getData().addAll(readBandwidthSeries, writeBandwidthSeries);
 
@@ -90,8 +93,8 @@ public class FSReliabilityTestController {
         XYChart.Series<String, Number> writeLatencySeries = new XYChart.Series<>();
         writeLatencySeries.setName("写延迟");
         for (int i = 0; i < timeData.get(3).size(); i++) {
-            readLatencySeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(3).get(i)));
-            writeLatencySeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(4).get(i)));
+            readLatencySeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(4).get(i)));
+            writeLatencySeries.getData().add(new XYChart.Data<>(String.valueOf(i + 1), timeData.get(5).get(i)));
         }
         latencyLineChart.getData().addAll(readLatencySeries, writeLatencySeries);
 
