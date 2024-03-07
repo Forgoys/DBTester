@@ -126,7 +126,7 @@ public class WriteTester extends TestItem {
         // 检查数据集是否存在
         if (!checkDataSetExist()) {
             dataGenerate();
-            throw new RuntimeException("数据集不存在,将自动创建数据集,请稍后再次检测");
+            //throw new RuntimeException("数据集不存在,将自动创建数据集,请稍后再次检测");
         }
         status = Status.READY;
     }
