@@ -68,7 +68,7 @@ public class ReadTester extends TestItem{
         query_type = testArgs.values.get(1);
         clients = Integer.parseInt(testArgs.values.get(2));
         password = testArgs.values.get(3);
-        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tool/TSDB";
+        //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tool/TSDB";
         SetTag();
     }
     public static void checkDBStatusAndExist(String dataBaseName) {
@@ -467,8 +467,17 @@ public class ReadTester extends TestItem{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.timeDataList = result;
-        return result;
+        // 将result进行转置
+        List<List<Double>> transposedResult = new ArrayList<>();
+        for (int i = 0; i < result.get(0).size(); i++) {
+            List<Double> newRow = new ArrayList<>();
+            for (List<Double> row : result) {
+                newRow.add(row.get(i));
+            }
+            transposedResult.add(newRow);
+        }
+        this.timeDataList = transposedResult;
+        return transposedResult;
     }
     // 调用testHomePath路径中的monitor_read.sh脚本，将结果保存到testHomePath/usage文件夹中
     // 执行脚本要用sudo命令，密码可由SSHConnection类中的getPassword()获取
@@ -593,8 +602,17 @@ public class ReadTester extends TestItem{
                 }
             }
         }
-        this.timeDataList = result;
-        return result;
+        // 将result进行转置
+        List<List<Double>> transposedResult = new ArrayList<>();
+        for (int i = 0; i < result.get(0).size(); i++) {
+            List<Double> newRow = new ArrayList<>();
+            for (List<Double> row : result) {
+                newRow.add(row.get(i));
+            }
+            transposedResult.add(newRow);
+        }
+        this.timeDataList = transposedResult;
+        return transposedResult;
     }
     public static void main(String[] args) {
         String homePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";

@@ -62,6 +62,10 @@ public class TestArguments {
             //new ArgumentProperty("查询语句数量",new String[]{"1万","5万","10万"})，固定为10万
             new ArgumentProperty("本机sudo密码")
     };
+    public static final ArgumentProperty[] INFLUXCOMP_PRESS_ARG_PROPERTIES = new ArgumentProperty[] {
+            new ArgumentProperty("测试时间", new String[]{"1分钟","10分钟","100分钟"}),
+            new ArgumentProperty("客户端数", new String[]{"10","100","1000"})
+    };
 
     /*
      * FIO读写速度测试参数属性
