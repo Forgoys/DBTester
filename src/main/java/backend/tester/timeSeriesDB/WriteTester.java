@@ -42,13 +42,12 @@ public class WriteTester extends TestItem {
         scenarioToFile.put("100万台*3分钟", "tdengine_s1000000_3min.gz");
     }
     private String tag;//形如s100_30d_w16_2021.06.01-12.00
-    private String SetTag () {
+    private void SetTag () {
         String fileName = scenarioToFile.get(scenario);
         DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH.mm");
         String time = dateFormat.format(new Date());
         tag = scenarioToFile.get(scenario).substring(fileName.indexOf("_s") + 1, fileName.indexOf(".gz")) + 
             "_w" + clients + "_" + time;
-        return tag;
     }
     public WriteTester(String testName, String homePath, SSHConnection sshStmt, TestArguments testArgs) {
         this.testName = testName;
@@ -297,16 +296,10 @@ public class WriteTester extends TestItem {
     // 文件名为taosd_usage_write_s100_30d_w16_2021.06.01-12.00格式
     public void writeToFile(String resultPath) {
         try {
-            // 获取对应场景的文件名
-            String fileName = scenarioToFile.get(scenario);
-            DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH.mm");
-            String time = dateFormat.format(new Date());
-            String filename = scenarioToFile.get(scenario).substring(fileName.indexOf("_s") + 1, fileName.indexOf(".gz")) + 
-                "_w" + clients + "_" + time;
             // 构建命令
             String password = sshStmt.getPassword();
 
-            String command = "echo " + password + " | sudo -S ./monitor_write.sh " + filename;
+            String command = "echo " + password + " | sudo -S ./monitor_write.sh " + tag;
             // 执行命令
             ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
             processBuilder.directory(new File(testHomePath));
