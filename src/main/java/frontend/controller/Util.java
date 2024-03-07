@@ -104,6 +104,8 @@ public class Util {
                             if (!Util.checkSudoPassword(textContent)) {
                                 Util.popUpInfo("本机超级权限密码错误，请重新输入", "错误");
                                 return null;
+                            } else {
+                                testArguments.values.add(textContent);
                             }
                         }
                     } else {
