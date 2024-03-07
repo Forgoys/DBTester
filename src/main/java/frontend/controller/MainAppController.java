@@ -235,7 +235,12 @@ public class MainAppController {
         TestArguments connectArg = Util.getTestArgFromGridPane(testObjectConfigPane, 1);
         System.out.println(connectArg.values.toString());
         // 创建DBConnection对象
-        currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2), connectArg.values.get(3));
+        if (connectArg.values.size() == 4) {
+            currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2), connectArg.values.get(3));
+        } else if (connectArg.values.size() == 3) {
+            currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2));
+            return;
+        }
 
         // 尝试连接数据库
         if (currentDBConnection.connect()) {

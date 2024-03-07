@@ -72,7 +72,7 @@ public class TPCCTester extends TestItem {
 
     public TPCCTester(String testName) {
         this.testName = testName;
-//        this.toolRootPath = toolRootPath;
+//        this.toolsRootPath = toolsRootPath;
     }
 
     public TPCCTester(String testName, DBConnection DBStmt, TestArguments testArgs) {
@@ -89,7 +89,7 @@ public class TPCCTester extends TestItem {
     @Override
     public void testEnvPrepare() throws Exception {
 
-        toolRootPath = "/home/wlx/cx/DBTester/";
+        toolsRootPath = "/home/wlx/cx/DBTester/";
 
         // 安装数据库所在磁盘
         diskNameOfDB = "sdd";
@@ -398,34 +398,35 @@ public class TPCCTester extends TestItem {
     }
 
     public static void main(String[] args) {
-        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
-                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
-                "SYSDBA",
-                "szoscar55");
-        dbConnection.connect();
+//        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
+//                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
+//                "SYSDBA",
+//                "szoscar55");
+//        dbConnection.connect();
 
-        TestArguments arguments = new TestArguments();
-        arguments.values = new ArrayList<>();
-        arguments.values.add("20");
-        arguments.values.add("128");
-        arguments.values.add("16");
-        arguments.values.add("1");
-
-        TPCCTester tester = new TPCCTester("tpcc", dbConnection, arguments);
-
-        try {
-            tester.testEnvPrepare();
-
-            tester.startTest();
-
-            List<List<Double>> tmpTimeData = tester.getTimeData();
-
-            TestResult results = tester.getTestResults();
-
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        dbConnection.disconnect();
+//
+//        TestArguments arguments = new TestArguments();
+//        arguments.values = new ArrayList<>();
+//        arguments.values.add("20");
+//        arguments.values.add("128");
+//        arguments.values.add("16");
+//        arguments.values.add("1");
+//
+//        TPCCTester tester = new TPCCTester("tpcc", dbConnection, arguments);
+//
+//        try {
+//            tester.testEnvPrepare();
+//
+//            tester.startTest();
+//
+//            List<List<Double>> tmpTimeData = tester.getTimeData();
+//
+//            TestResult results = tester.getTestResults();
+//
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        dbConnection.disconnect();
     }
 }
