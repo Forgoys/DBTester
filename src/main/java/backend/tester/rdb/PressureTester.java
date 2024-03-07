@@ -467,12 +467,33 @@ public class PressureTester extends TestItem {
 
     @Override
     public void writeToFile(String resultPath) {
-
+        File retFile = new File(resultPath, "result.txt");
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(retFile);
+            pw.printf("%s %s", this.testResult.values[0], this.testResult.values[1]);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if(pw != null) {
+                pw.close();
+            }
+        }
     }
 
     @Override
     public TestAllResult readFromFile(String resultPath) {
-        return null;
+        File retFile = new File(resultPath, "result.txt");
+        try(BufferedReader reader = new BufferedReader(new FileReader(retFile))) {
+            String[] rets = reader.readLine().split(" ");
+            if(rets.length == 2) {
+                this.testResult = new TestResult();
+                testResult.values = rets;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+       return new TestAllResult(this.testResult);
     }
 
     @Override
