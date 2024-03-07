@@ -12,7 +12,7 @@ if [ -f "$output_file" ]; then
 fi
 
 # 创建并写入标题行
-echo "Iteration,User CPU Usage (%),System CPU Usage (%),I/O waite CPU Usage (%),Memory Usage (%)" > "$output_file"
+echo "Iteration,User CPU Usage (%),System CPU Usage (%),I/O waite CPU Usage (%),Memory Usage (%)"
 
 while true; do
     # 增加迭代计数器
