@@ -132,6 +132,11 @@ public class DBOtherTestController {
         }
         diskSpeedLineChart.getData().addAll(readSpeedSeries, writeSpeedSeries);
 
+        // 调整每个图表中系列的样式
+        Util.customizeChartSeriesStyle(cpuUsageLineChart);
+        Util.customizeChartSeriesStyle(memoryUsageLineChart);
+        Util.customizeChartSeriesStyle(diskSpeedLineChart);
+
         // 请求布局更新，确保数据变化反映到UI上
         cpuUsageLineChart.requestLayout();
         memoryUsageLineChart.requestLayout();
