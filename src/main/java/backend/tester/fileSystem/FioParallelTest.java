@@ -4,10 +4,9 @@ import backend.dataset.TestAllResult;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +28,8 @@ public class FioParallelTest extends TestItem {
 
     // 指令运行结果
     TestResult fioParallelTestResult = new TestResult();
+    // 测试结果保存文件
+    private String fioParallelTestResultTxt;
 
     public FioParallelTest() {
     }
@@ -40,6 +41,7 @@ public class FioParallelTest extends TestItem {
 
         monitorScriptName = "monitor.sh";
         monitorResultCSV = "fioParallelTestMonitorResult.csv";
+        fioParallelTestResultTxt = "fioParallelTestResult.txt";
     }
 
     public int executeCommand(String command) throws IOException, InterruptedException {
@@ -210,10 +212,25 @@ public class FioParallelTest extends TestItem {
         fioParallelTestResult.names = TestResult.FIO_PARALLEL_TEST;
         fioParallelTestResult.values = new String[]{readIOPS, readBW, readLat, writeIOPS, writeBW, writeLat};
 
+        // 保存结果到文件
+        try {
+            // 创建 FileWriter 对象
+            FileWriter fileWriter = new FileWriter(directory + "/" + fioParallelTestResultTxt);
+            // 创建 BufferedWriter 对象
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            // 写入文本内容
+            bufferedWriter.write(content);
+            bufferedWriter.newLine();
+            // 关闭 BufferedWriter
+            bufferedWriter.close();
+            System.out.println("读写测试结果保存到：" + directory + "/" + fioParallelTestResultTxt);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         System.out.println(Arrays.toString(fioParallelTestResult.values));
         System.out.println("FIO并发度测试结果保存完成");
     }
-
 
     @Override
     public List<List<Double>> getTimeData() {
@@ -227,12 +244,37 @@ public class FioParallelTest extends TestItem {
 
     @Override
     public String getResultDicName() {
-        return null;
+        String testName = "numjobs" + numjobs;
+        // 获取当前的日期和时间
+        LocalDateTime currentDateTime = LocalDateTime.now();
+//        System.out.println("Current Date and Time: " + currentDateTime);
+
+        // 定义日期时间格式
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+
+        // 格式化日期时间
+        String formattedDateTime = currentDateTime.format(formatter);
+
+        // 输出格式化后的日期时间
+//        System.out.println("Formatted Date and Time: " + formattedDateTime);
+
+        String resultDicName = testName + "_" + formattedDateTime;
+        return resultDicName;
     }
 
     @Override
     public void writeToFile(String resultPath) {
-
+        // 把测试结果和系统资源结果文件保存到resultPath目录
+        String command = "cp " + directory + "/" + fioParallelTestResultTxt + " " + directory + "/" + monitorResultCSV + " " + resultPath;
+        int exitCode = 0;
+        try {
+            exitCode = executeCommand(command);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("保存测试结果和系统资源结果成功" + " exit code:" + exitCode);
     }
 
     @Override
@@ -249,5 +291,7 @@ public class FioParallelTest extends TestItem {
     public static void main(String[] args) throws IOException, InterruptedException {
         FioParallelTest fioParallelTest = new FioParallelTest("/home/autotuning/zf/glusterfs/software_test", "16", "666");
         fioParallelTest.startTest();
+        String name = fioParallelTest.getResultDicName();
+        System.out.println(name);
     }
 }
