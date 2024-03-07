@@ -962,13 +962,15 @@ public class MainAppController {
                     fsOtherTestController.clearAll();
                     tmpTestItem = new FioParallelTest();
                     testAllResult = tmpTestItem.readFromFile(absolutePath);
-                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+                    fsOtherTestController.displayTestResults(testAllResult.testResult);
+//                    System.out.println(testAllResult.testResult.toString());
                     break;
                 case "小文件测试":
                     fsOtherTestController.clearAll();
                     tmpTestItem = new MiniFileTest();
                     testAllResult = tmpTestItem.readFromFile(absolutePath);
-                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+                    fsOtherTestController.displayTestResults(testAllResult.testResult);
+                    System.out.println(testAllResult.testResult.toString());
                     break;
                 case "可靠性测试":
                     fsReliabilityTestController.clearAll();
