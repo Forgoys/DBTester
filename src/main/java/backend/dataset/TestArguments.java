@@ -132,6 +132,12 @@ public class TestArguments {
                 return TPCC_ARG_PROPERTIES;
             case "TPC-H":
                 return TPCH_ARG_PROPERTIES;
+            case "可靠性":
+                if (testObject.equals("InfluxDB") || testObject.equals("TDengine") || testObject.equals("Lindorm")) {
+                    ;
+                } else {
+                    return PRESSURE_TEST_ARG_PROPERTIES;
+                }
             case "写入性能":
                 return INFLUXCOMP_WRITE_ARG_PROPERTIES;
             case "查询性能":

@@ -344,6 +344,10 @@ public class PressureTester extends TestItem {
     private int thread_num = 8;
 
 
+    public PressureTester() {
+        test_time = 0;
+    }
+
     public PressureTester(String testName, DBConnection DBStmt, TestArguments testArgs) {
 
         this.testName = testName;
