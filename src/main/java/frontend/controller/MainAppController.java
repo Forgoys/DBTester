@@ -476,7 +476,7 @@ public class MainAppController {
                     @Override
                     protected Void call() throws Exception {
                         updateMessage(message2Update.append("开始TPC-H测试\n").toString());
-                        testItem = new TPCHTester("TPC-H测试", testArguments.values.get(1), currentDBConnection, testArguments);
+                        testItem = new TPCHTester("TPC-H测试", currentDBConnection, testArguments);
                         updateMessage(message2Update.append("准备测试环境...\n").toString());
                         try {
                             testItem.testEnvPrepare();

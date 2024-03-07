@@ -57,19 +57,21 @@ public class TPCHTester extends TestItem {
 
     public TPCHTester(){}
 
-    public TPCHTester(String testName, String toolRootPath) {
+    public TPCHTester(String testName) {
         this.testName = testName;
-        this.toolRootPath = toolRootPath;
+//        this.toolRootPath = toolRootPath;
     }
 
-    public TPCHTester(String testName, String toolRootPath, DBConnection DBStmt, TestArguments testArgs) {
-        this(testName, toolRootPath);
+    public TPCHTester(String testName, DBConnection DBStmt, TestArguments testArgs) {
+        this(testName);
         this.DBStmt = DBStmt;
         this.testArgs = testArgs;
     }
 
 
     private void initialization() throws Exception{
+
+        toolRootPath = "/home/wlx/DBTestTools";
 
         // 检查工具目录
         File toolRootDir = new File(toolRootPath);
@@ -380,6 +382,11 @@ public class TPCHTester extends TestItem {
         return null;
     }
 
+    @Override
+    public List<List<Double>> readFromFile1(String resultPath) {
+        return List.of();
+    }
+
     public static void main(String[] args) {
 
         DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
@@ -391,7 +398,7 @@ public class TPCHTester extends TestItem {
         TestArguments arguments = new TestArguments();
         arguments.values.add("1"); // 测试规模
 
-        TPCHTester tester = new TPCHTester("tpch", "/home/wlx/DBTestTools", dbConnection, arguments);
+        TPCHTester tester = new TPCHTester("tpch", dbConnection, arguments);
 
         try {
 
