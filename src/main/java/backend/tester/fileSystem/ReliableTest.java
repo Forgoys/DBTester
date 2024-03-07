@@ -24,6 +24,10 @@ public class ReliableTest extends TestItem {
     // sudo权限
     String localSudoPassword;
 
+    // 资源检测脚本名称
+    private String monitorScriptName;
+    private String monitorResultCSV;
+
     // 存放时序性数据
     private TestTimeData reliableTimeData = new TestTimeData();
     private List<List<String>> reliableResultList = new ArrayList<>();
@@ -32,10 +36,22 @@ public class ReliableTest extends TestItem {
         this.directory = directory + "/reliableTest";
         this.timeChoose = timeChoose;
         this.localSudoPassword = localSudoPassword;
+
+        monitorScriptName = "monitor.sh";
+        monitorResultCSV = "fioReliableMonitorResult.csv";
     }
 
     public ReliableTest() {
 
+    }
+
+    public int executeCommand(String command) throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command("bash", "-c", command);
+        Process process = processBuilder.start();
+        // 等待进程执行完毕
+        int exitCode = process.waitFor();
+        return exitCode;
     }
 
     // 创建文件夹 复制脚本
@@ -106,6 +122,17 @@ public class ReliableTest extends TestItem {
         // 等待进程执行完毕
         exitCode = process.waitFor();
         System.out.println("给脚本添加执行权限:" + reliableTestScriptName + " Exit code:" + exitCode);
+
+        // 传入检测系统资源的脚本
+        String localMonitorScriptPath = currentDirectory + "/src/main/resources/scripts/" + monitorScriptName;
+        command = "cp " + localMonitorScriptPath + " " + directory;
+        exitCode = executeCommand(command);
+        System.out.println("系统资源监测脚本:" + localMonitorScriptPath + " Exit code:" + exitCode);
+
+        // 给脚本添加执行权限
+        command = "chmod +x " + directory + "/" + monitorScriptName;
+        exitCode = executeCommand(command);
+        System.out.println("给脚本添加执行权限:" + monitorScriptName + " Exit code:" + exitCode);
     }
 
     @Override
@@ -113,6 +140,12 @@ public class ReliableTest extends TestItem {
         System.out.println("可靠性测试环境准备");
         testEnvPrepare();
         System.out.println("可靠性测试环境准备完成");
+
+        // 检测系统资源 CPU利用率 内存使用率
+        String command = directory + "/" + monitorScriptName + " " + directory + "/" + monitorResultCSV;
+        ProcessBuilder monitorProcessBuilder = new ProcessBuilder();
+        monitorProcessBuilder.command("bash", "-c", command);
+        Process monitorProcess = monitorProcessBuilder.start();
 
         System.out.println("可靠性测试开始");
         // 测试指令
@@ -147,6 +180,12 @@ public class ReliableTest extends TestItem {
         // 等待进程执行完毕
         int exitCode = process.waitFor();
         System.out.println("Exit code: " + exitCode);
+        System.out.println("指令运行结束");
+
+        // 系统资源监测关闭
+        monitorProcess.destroy();
+        int monitorExitCode = monitorProcess.waitFor();
+        System.out.println("系统资源监测关闭,检测结果保存在" + monitorResultCSV + " exit code:" + monitorExitCode);
 
         // 处理结果
         processReliableResult();

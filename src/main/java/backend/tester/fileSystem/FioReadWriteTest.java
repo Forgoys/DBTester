@@ -21,6 +21,10 @@ public class FioReadWriteTest extends TestItem {
     private String size;
     private String rwIndex;
 
+    // 资源检测脚本名称
+    private String monitorScriptName;
+    private String monitorResultCSV;
+
     // sudo权限
     String localSudoPassword;
 
@@ -31,7 +35,7 @@ public class FioReadWriteTest extends TestItem {
     }
 
     public FioReadWriteTest(String directory, String localSudoPassword, String bs, String size, String rwOption) {
-        this.directory = directory;
+        this.directory = directory + "/readWriteTest";
         this.bs = bs;
         this.size = size;
         switch (rwOption) {
@@ -57,12 +61,43 @@ public class FioReadWriteTest extends TestItem {
                 rwIndex = "0";
         }
         this.localSudoPassword = localSudoPassword;
+
+        monitorScriptName = "monitor.sh";
+        monitorResultCSV = "fioReadWriteTestMonitorResult.csv";
+    }
+
+    public int executeCommand(String command) throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command("bash", "-c", command);
+        Process process = processBuilder.start();
+        // 等待进程执行完毕
+        int exitCode = process.waitFor();
+        return exitCode;
     }
 
     // 安装FIO测试工具
     @Override
-    public void testEnvPrepare() {
+    public void testEnvPrepare() throws IOException, InterruptedException {
+        int exitCode = 0;
+        String command = new String();
 
+        // 创建readWriteTest文件夹
+        command = "mkdir -p " + directory;
+        exitCode = executeCommand(command);
+        System.out.println("创建读写测试文件夹:" + directory + " Exit code:" + exitCode);
+
+        // 传入检测系统资源的脚本
+        String currentDirectory = System.getProperty("user.dir");
+        System.out.println("Current directory: " + currentDirectory);
+        String localMonitorScriptPath = currentDirectory + "/src/main/resources/scripts/" + monitorScriptName;
+        command = "cp " + localMonitorScriptPath + " " + directory;
+        exitCode = executeCommand(command);
+        System.out.println("系统资源监测脚本:" + localMonitorScriptPath + " Exit code:" + exitCode);
+
+        // 给脚本添加执行权限
+        command = "chmod +x " + directory + "/" + monitorScriptName;
+        exitCode = executeCommand(command);
+        System.out.println("给脚本添加执行权限:" + monitorScriptName + " Exit code:" + exitCode);
     }
 
     @Override
@@ -72,6 +107,15 @@ public class FioReadWriteTest extends TestItem {
 //        String bs = "4k";
 //        String size = "1G";
 //        String rwIndex = 0;
+
+        // 准备环境
+        testEnvPrepare();
+
+        // 检测系统资源 CPU利用率 内存使用率
+        String command = directory + "/" + monitorScriptName + " " + directory + "/" + monitorResultCSV;
+        ProcessBuilder monitorProcessBuilder = new ProcessBuilder();
+        monitorProcessBuilder.command("bash", "-c", command);
+        Process monitorProcess = monitorProcessBuilder.start();
 
         System.out.println("FIO读写速度测试开始");
         System.out.println("测试参数为:");
@@ -120,6 +164,11 @@ public class FioReadWriteTest extends TestItem {
         System.out.println("Exit code: " + exitCode);
 
         System.out.println("指令运行结束");
+
+        // 系统资源监测关闭
+        monitorProcess.destroy();
+        int monitorExitCode = monitorProcess.waitFor();
+        System.out.println("系统资源监测关闭,检测结果保存在" + monitorResultCSV + " exit code:" + monitorExitCode);
 
         // 提取出结果并保存到TestResult
         fioResultSave(results);
@@ -269,8 +318,8 @@ public class FioReadWriteTest extends TestItem {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-//        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/autotuning/zf/glusterfs/software_test", "666", "4k", "16k", "%70随机读,%30随机写");
-        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/parallels/Desktop/fs", "lhjlhj6929", "4k", "8k", "%70随机读,%30随机写");
+        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/autotuning/zf/glusterfs/software_test", "666", "4k", "16k", "%70随机读,%30随机写");
+//        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/parallels/Desktop/fs", "lhjlhj6929", "4k", "8k", "%70随机读,%30随机写");
         fioReadWriteTest.startTest();
     }
 }
