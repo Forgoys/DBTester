@@ -4,7 +4,9 @@ import backend.dataset.TestAllResult;
 import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
+import frontend.connection.DBConnection;
 import frontend.connection.SSHConnection;
+import frontend.controller.Util;
 
 import java.io.*;
 import java.util.*;
@@ -21,7 +23,10 @@ import java.text.SimpleDateFormat;
 // 此软件在服务器上运行，无需使用SSH连接
 public class WriteTester extends TestItem {
     
-    SSHConnection sshStmt;
+    static String password = "";
+    static String dbuser = "root";
+    static String dbpassword = "taosdata";
+    static String dbname = "devops";
 
     // 测试工具路径，存在二进制文件、config文件夹(内含两个toml文件)、monitor_write.sh、monitor_read.sh，以及用于存储数据集和结果的data和usage文件夹
     public static String testHomePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
@@ -55,19 +60,47 @@ public class WriteTester extends TestItem {
             "_w" + clients + "_" + time;
     }
 
-    // 张超群  写一个static函数，检验数据库连接状态，输入String dataBaseName，调用Util.popUpInfo输出数据库连接状态，服务是否启动，数据库是否存在
+    
 
-    public WriteTester(String testName, String homePath, SSHConnection sshStmt, TestArguments testArgs) {
+    public WriteTester(String testName, String homePath, String sudoPassord, DBConnection DBStmt,TestArguments testArgs) {
         this.testName = testName;
-        this.sshStmt = sshStmt;  // 张超群 这里改为String sudoPassword，SSH连接类后面要删掉，用不了了，对应的TestArgument里面也记得改
         this.testArgs = testArgs;
         this.toolRootPath = homePath;
         //testHomePath = homePath + ; 待添加
+        this.password = sudoPassord;
+        this.DBStmt = DBStmt;
+        dbuser = DBStmt.getUsername();
+        dbpassword = DBStmt.getPassword();
+        dbname = DBStmt.getDBName();
         scenario = testArgs.values.get(0);
         clients = Integer.parseInt(testArgs.values.get(1));
         SetTag();
     }
-
+    // 张超群  写一个static函数，检验数据库连接状态，输入String dataBaseName，调用Util.popUpInfo输出数据库连接状态，服务是否启动，数据库是否存在
+    // 利用checkDBStatus()和checkDBExist()函数，检查服务是否启动，数据库是否存在
+    // 如果服务没有启动，显示"数据库服务未开启"，如果服务启动，并且数据库不存在，显示"数据库不存在"，如果服务启动，数据库存在，显示"数据库存在"
+    // 调用Util.popUpInfo(information, title)
+    // title固定为TDengie服务及数据库状态检测
+    public static void checkDBStatusAndExist(String dataBaseName) {
+        String title = "TDengine服务及数据库状态检测";
+        String information;
+    
+        // 检查服务是否启动
+        if (!checkDBStatus()) {
+            information = "数据库服务未开启";
+            Util.popUpInfo(information, title);
+            return;
+        }
+    
+        // 检查数据库是否存在
+        if (!checkDBExist()) {
+            information = "数据库不存在";
+        } else {
+            information = "数据库存在";
+        }
+    
+        Util.popUpInfo(information, title);
+    }
     /**
      * 测试环境检测，数据集和测试工具是否存在，数据库是否开启
      */
@@ -84,10 +117,18 @@ public class WriteTester extends TestItem {
         }
         // 检查数据库是否开启，即taosd进程是否存在
         if (!checkDBStatus()) {
-            throw new RuntimeException("数据库未开启");
+            throw new RuntimeException("数据库服务未开启");
         }
         // 检查数据库用户和密码是否正确
+        if (!checkDBUserPassword()) {
+            throw new RuntimeException("数据库用户或密码错误");
+        }
+        // 检查sudo密码是否正确
+        if (!Util.checkSudoPassword(password)) {
+            throw new RuntimeException("sudo密码错误");
+        }
     }
+
     // 遍历DATA_SET_FILE_NAMES数组，检查每个文件和文件夹是否存在
     private boolean checkTestToolExist() {
         for (String fileName : DATA_SET_FILE_NAMES) {
@@ -106,7 +147,7 @@ public class WriteTester extends TestItem {
         return file.exists();
     }
     // 检查数据库是否开启，即taosd进程是否存在
-    private boolean checkDBStatus() {
+    private static boolean checkDBStatus() {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("ps", "-ef");
             Process process = processBuilder.start();
@@ -121,6 +162,57 @@ public class WriteTester extends TestItem {
             e.printStackTrace();
         }
         return false;
+    }
+    // 输入指令：taos -uroot -ptaosdata能进入taos命令行
+    private static boolean checkDBUserPassword() {
+        try {
+            // 输入指令：taos -u"root" -p"taosdata"能进入taos命令行
+            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
+            Process process = Runtime.getRuntime().exec(command);
+    
+            // 向进程写入输入
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+            writer.write("q\n");
+            writer.flush();
+            writer.close();
+    
+            // 读取命令行指令的输入流
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = inputReader.readLine()) != null) {
+                // 打印命令行指令的执行结果
+                System.out.println(line);
+    
+                // 检查是否存在"Authentication failure"的错误信息
+                if (line.contains("Authentication failure")) {
+                    return false;
+                }
+            }
+    
+            // 如果没有"Authentication failure"的错误信息，那么认为命令执行成功
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    // 检测数据库名是否存在
+    private static boolean checkDBExist() {
+        try {
+            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
+            Process process = Runtime.getRuntime().exec(command);
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = inputReader.readLine()) != null) {
+                if (line.contains("Database not exist")) {
+                    return false;
+                }
+            }
+            return true && checkDBUserPassword();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
     // 数据集生成，调用使用bulk_data_gen生成数据集(脚本位于testHomePath路径中)，生成的数据集文件存放在testHomePath/data文件夹下
     // 如果scenario为100台*30天，则脚本的命令为：
@@ -228,7 +320,7 @@ public class WriteTester extends TestItem {
             processBuilder.redirectErrorStream(true);// 将标准错误流重定向到标准输出流
             
             Process process = processBuilder.start();
-            writeToFile(testHomePath);//实际这个路径无用。开启脚本监视资源使用，测试结束后自动停止，生成名为taosd_usage_write_后缀.csv的文件
+            writeToFile1();//开启脚本监视资源使用，测试结束后自动停止，usage文件中生成名为taosd_usage_write_后缀.csv的文件
             
             // 读取命令输出，并保存输出到usage文件夹中，
             /*
@@ -261,46 +353,87 @@ public class WriteTester extends TestItem {
     }
     @Override
     public String getResultDicName() {
-        return null;
+        return "Write_" + tag;
     }
     @Override
     // 把txt最后一行提取出来进行解析，要求解析出
     // loaded 233280000 items in 705.426129sec with 16 workers (mean point rate 330693.73/s, mean value rate 3711118.56/s, 44.72MB/sec from stdin)
     // 提出233280000，705.426129，16，330693.73, 3711118.56，44.72
     // 将这个值存入testResult.values中
-public TestResult getTestResults() {
+    public TestResult getTestResults() {
     // 获取对应场景的文件名
-    String filepath = testHomePath + "/usage/" + "write_" + tag + ".txt";
-    String result = "";
-    testResult = new TestResult();
-    testResult.names = TestResult.INFLUXCOMP_WRTIE_RES_NAMES;
-    try {
-        File file = new File(filepath);
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            result = line;
-        }
-        reader.close();
+        String filepath = testHomePath + "/usage/" + "write_" + tag + ".txt";
+        String result = "";
+        testResult = new TestResult();
+        testResult.names = TestResult.INFLUXCOMP_WRTIE_RES_NAMES;
+        try {
+            File file = new File(filepath);
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result = line;
+            }
+            reader.close();
 
-        // 使用正则表达式提取需要的值
-        Pattern pattern = Pattern.compile("loaded (\\d+) items in (\\d+\\.\\d+)sec with (\\d+) workers \\(mean point rate (\\d+\\.\\d+)/s, mean value rate (\\d+\\.\\d+)/s, (\\d+\\.\\d+)MB/sec from stdin\\)");
-        Matcher matcher = pattern.matcher(result);
-        if (matcher.find()) {
-            testResult.values = new String[] {
-                matcher.group(1), // 233280000
-                matcher.group(2), // 705.426129
-                matcher.group(3), // 16
-                matcher.group(4), // 330693.73
-                matcher.group(5), // 3711118.56
-                matcher.group(6)  // 44.72
-            };
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
+            // 使用正则表达式提取需要的值
+            Pattern pattern = Pattern.compile("loaded (\\d+) items in (\\d+\\.\\d+)sec with (\\d+) workers \\(mean point rate (\\d+\\.\\d+)/s, mean value rate (\\d+\\.\\d+)/s, (\\d+\\.\\d+)MB/sec from stdin\\)");
+            Matcher matcher = pattern.matcher(result);
+            if (matcher.find()) {
+                testResult.values = new String[] {
+                    matcher.group(1), // 233280000
+                    matcher.group(2), // 705.426129
+                    matcher.group(3), // 16
+                    matcher.group(4), // 330693.73
+                    matcher.group(5), // 3711118.56
+                    matcher.group(6)  // 44.72
+                };
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }   
+        return testResult;
     }
-    return testResult;
-}
+    public TestResult getTestResults1(String resultPath) {
+        String result = "";
+        testResult = new TestResult();
+        testResult.names = TestResult.INFLUXCOMP_WRTIE_RES_NAMES;
+        File directory = new File(resultPath);
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().matches(".*\\.txt$")) {
+                    String fileName = file.getAbsolutePath();
+                    try {
+                        File resultfile = new File(fileName);
+                        BufferedReader reader = new BufferedReader(new FileReader(resultfile));
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            result = line;
+                        }
+                        reader.close();
+            
+                        // 使用正则表达式提取需要的值
+                        Pattern pattern = Pattern.compile("loaded (\\d+) items in (\\d+\\.\\d+)sec with (\\d+) workers \\(mean point rate (\\d+\\.\\d+)/s, mean value rate (\\d+\\.\\d+)/s, (\\d+\\.\\d+)MB/sec from stdin\\)");
+                        Matcher matcher = pattern.matcher(result);
+                        if (matcher.find()) {
+                            testResult.values = new String[] {
+                                matcher.group(1), // 233280000
+                                matcher.group(2), // 705.426129
+                                matcher.group(3), // 16
+                                matcher.group(4), // 330693.73
+                                matcher.group(5), // 3711118.56
+                                matcher.group(6)  // 44.72
+                            };
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                break; //只读第一个
+            }
+        }   
+        return testResult;
+    }
     @Override
     public List<List<Double>> getTimeData() {
         /*
@@ -310,18 +443,14 @@ public TestResult getTestResults() {
         String filename = scenarioToFile.get(scenario).substring(fileName.indexOf("_s") + 1, fileName.indexOf(".gz")) + 
             "_w" + clients + "_" + time + ".txt"; 
         */
-        String usageFilePath = testHomePath + "/usage/" + "taosd_usage_write_" + tag +".csv";
+        String usageFilePath = testHomePath + "/usage/";
         return readFromFile1(usageFilePath);
     }
-    @Override
     // 调用testHomePath路径中的monitor.sh脚本，将结果保存到testHomePath/usage文件夹中
     // 执行脚本要用sudo命令，密码可由SSHConnection类中的getPassword()获取
     // 文件名为taosd_usage_write_s100_30d_w16_2021.06.01-12.00格式
-    // Path无用，固定写入usage文件夹中
-    public void writeToFile(String resultPath) {
+    public void writeToFile1() {
         try {
-            // 构建命令
-            String password = sshStmt.getPassword();
 
             String command = "echo " + password + " | sudo -S ./monitor_write.sh " + tag;
             // 执行命令
@@ -339,11 +468,14 @@ public TestResult getTestResults() {
             e.printStackTrace();
             throw new RuntimeException("执行monitor_write.sh失败");
         }
+    }
+    // 复制taosd_usage_write_tag.csv和write_tag.txt文件到resultPath中
+    @Override
+    public void writeToFile(String resultPath) {
+        // 首先修改csv文件的读写权限
         String fileName = testHomePath + "/usage/taosd_usage_write_" + tag + ".csv";
         try{
-            String password = sshStmt.getPassword();
-
-            String command = "echo " + password + " | sudo -S chmod 666 " + fileName;
+            String command = "echo " + password + " | sudo -S chown $USER " + fileName;
             // 执行命令
             ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
             processBuilder.directory(new File(testHomePath));
@@ -351,18 +483,16 @@ public TestResult getTestResults() {
             process.waitFor();
             // 检查命令执行结果
             if (process.exitValue() != 0) {
-                throw new RuntimeException("修改CSV文件读写权限失败, sudo权限不足");
+                throw new RuntimeException("修改CSV文件权限失败, sudo权限不足");
             }
         }catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("修改CSV文件读写权限失败, sudo权限不足");
+            throw new RuntimeException("修改CSV文件权限失败, sudo权限不足");
         }
         // 将taosd_usage_write_tag.csv和write_tag.txt文件中的数据复制到resultPath中
         try {
-            String password = sshStmt.getPassword();
-        
-            String command1 = "echo " + password + " | sudo -S cp " + testHomePath + "/usage/taosd_usage_write_" + tag + ".csv " + resultPath;
-            String command2 = "echo " + password + " | sudo -S cp " + testHomePath + "/usage/write_" + tag + ".txt " + resultPath;
+            String command1 = "cp " + testHomePath + "/usage/taosd_usage_write_" + tag + ".csv " + resultPath;
+            String command2 = "cp " + testHomePath + "/usage/write_" + tag + ".txt " + resultPath;
         
             // 执行命令
             ProcessBuilder processBuilder1 = new ProcessBuilder("/bin/bash", "-c", command1);
@@ -382,17 +512,54 @@ public TestResult getTestResults() {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("复制CSV文件或TXT文件到指定路径失败");
-        }
+        } 
     }
+       
     @Override
     public TestAllResult readFromFile(String resultPath) {
-        return null;
+        TestAllResult result = new TestAllResult();
+        
+        result.timeDataResult = readFromFile1(resultPath);
+        result.testResult = getTestResults1(resultPath);
+        return result;
     }
+    // 实际实现了返回结果的一半功能，即监控数据
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
 
         List<List<Double>> result = new ArrayList<>();
-        String fileName = resultPath + "/taosd_usage_write_" + tag + ".csv";//指定路径中的csv文件
+        //String fileName = resultPath + "/taosd_usage_write_" + tag + ".csv";//指定路径中的csv文件
+        // 读取后缀为.csv的文件
+        // String fileName = resultPath + "/*.csv";
+        File directory = new File(resultPath);
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().matches(".*\\.csv$")) {
+                    String fileName = file.getAbsolutePath();
+                    try {
+                        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+                        String line;
+                        // 跳过表头
+                        reader.readLine();
+                        while ((line = reader.readLine()) != null) {
+                            String[] values = line.split(",");
+                            List<Double> row = new ArrayList<>();
+                            // 从第二列开始读取数据
+                            for (int i = 1; i < values.length; i++) {
+                                row.add(Double.parseDouble(values[i]));
+                            }
+                            result.add(row);
+                        }
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+            }
+        }
+        /*
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
             String line;
@@ -411,6 +578,7 @@ public TestResult getTestResults() {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        */
         this.timeDataList = result;
         return result;
     }
@@ -419,7 +587,7 @@ public TestResult getTestResults() {
     private void dropDevopsDatabase() {
         try {
             // 构建命令
-            String command = "taos -s 'drop database if exists devops'";
+            String command = "taos -u" + dbuser + " -p" + dbpassword + " -s 'drop database if exists devops;'";
             // 执行命令
             ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
             Process process = processBuilder.start();
@@ -438,7 +606,7 @@ public TestResult getTestResults() {
     private void createDevopsDatabase() {
         try {
             // 构建命令
-            String command = "taos -s 'create database if not exists devops vgroups 2 buffer 8192 stt_trigger 8;'";
+            String command = "taos -u" + dbuser + " -p" + dbpassword + " -s 'create database if not exists devops vgroups 2 buffer 8192 stt_trigger 8;'";
             // 执行命令
             ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
             Process process = processBuilder.start();
@@ -454,22 +622,23 @@ public TestResult getTestResults() {
         }
     }
     public static void main(String[] args) {
-        SSHConnection sshStmt = new SSHConnection("10.181.8.146", 22, "wlx", "Admin@wlx");
         String homePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
-        // resultPath 待定
+        String resultPath = homePath;
         TestArguments arguments = new TestArguments();
         arguments.values = new ArrayList<>();
         arguments.values.add("100台*30天");
         arguments.values.add("16");
-
-        WriteTester tester = new WriteTester("Write", homePath, sshStmt, arguments);
+        DBConnection DBStmt = new DBConnection("root","taosdata","devops");
+        //WriteTester(String testName, String homePath, String sudoPassord, DBConnection DBStmt,TestArguments testArgs)
+        WriteTester tester = new WriteTester("Write", homePath, "Admin@wlx", DBStmt, arguments);
         try {
             //tester.SetTag();
             tester.testEnvPrepare();
             tester.startTest();
-            tester.writeToFile(homePath);
-            System.out.println(tester.getTestResults().values[0]);
+            tester.writeToFile(resultPath);
+            System.out.println(tester.getTestResults1(resultPath).values[0]);
             System.out.println(tester.getTimeData());
+            System.out.println(tester.readFromFile1(resultPath));
         } catch (Exception e) {
             e.printStackTrace();
         }
