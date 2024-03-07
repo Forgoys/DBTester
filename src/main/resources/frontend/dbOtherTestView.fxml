@@ -12,7 +12,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import java.net.URL?>
 <VBox fillWidth="true" spacing="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.controller.DBOtherTestController">
+    <stylesheets>
+        <URL value="@css/chart-styles.css" />
+    </stylesheets>
     <padding>
         <Insets bottom="10" left="10" right="10" top="10" />
     </padding>
@@ -33,7 +37,7 @@
                 <Font size="18.0" />
             </font>
         </Label>
-        <TableView fx:id="resultsTableView" prefHeight="161.0" prefWidth="248.0" VBox.vgrow="ALWAYS">
+        <TableView fx:id="resultsTableView" prefHeight="80.0" prefWidth="248.0" VBox.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="metricsColumn" text="性能指标" />
                 <TableColumn fx:id="resultColumn" text="结果" />
@@ -48,7 +52,7 @@
             </font>
         </Label>
         <VBox spacing="10" VBox.vgrow="ALWAYS"> <!-- Changed HBox to VBox for vertical layout -->
-            <LineChart fx:id="cpuUsageLineChart" prefHeight="200" prefWidth="200" VBox.vgrow="ALWAYS">
+            <LineChart fx:id="cpuUsageLineChart" prefHeight="300" prefWidth="200" VBox.vgrow="ALWAYS">
                 <xAxis>
                     <CategoryAxis fx:id="cpuTimeAxis" label="采样点" />
                 </xAxis>
@@ -57,7 +61,7 @@
                 </yAxis>
             </LineChart>
 
-            <LineChart fx:id="memoryUsageLineChart" prefHeight="200" prefWidth="200" VBox.vgrow="ALWAYS">
+            <LineChart fx:id="memoryUsageLineChart" prefHeight="300" prefWidth="200" VBox.vgrow="ALWAYS">
                 <xAxis>
                     <CategoryAxis fx:id="memoryTimeAxis" label="采样点" />
                 </xAxis>
@@ -66,7 +70,7 @@
                 </yAxis>
             </LineChart>
 
-            <LineChart fx:id="diskSpeedLineChart" prefHeight="200" prefWidth="200" VBox.vgrow="ALWAYS">
+            <LineChart fx:id="diskSpeedLineChart" prefHeight="300" prefWidth="200" VBox.vgrow="ALWAYS">
                 <xAxis>
                     <CategoryAxis fx:id="diskTimeAxis" label="采样点" />
                 </xAxis>
