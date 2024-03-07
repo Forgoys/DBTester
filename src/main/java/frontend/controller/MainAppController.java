@@ -62,6 +62,8 @@ public class MainAppController {
      */
     FSOtherTestController fsOtherTestController;
 
+    static String testObjectOut = null;
+
     TestItem testItem;
     @FXML
     private TitledPane sshConnectionTitledPane;
@@ -169,6 +171,7 @@ public class MainAppController {
     @FXML
     private void onTestObjectSelect() {
         String selectedTestObject = testObjectSelectBox.getValue();
+        testObjectOut = selectedTestObject;
         Util.clearGridPaneRowsAfterFirst(testObjectConfigPane);
         testProjectSelectBox.getItems().clear();
 
@@ -828,5 +831,9 @@ public class MainAppController {
         if (currentDBConnection != null) {
             currentDBConnection.disconnect();
         }
+    }
+
+    public static String getTestObject() {
+        return testObjectOut;
     }
 }
