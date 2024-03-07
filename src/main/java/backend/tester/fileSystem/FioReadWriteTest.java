@@ -263,6 +263,11 @@ public class FioReadWriteTest extends TestItem {
         return null;
     }
 
+    @Override
+    public List<List<Double>> readFromFile1(String resultPath) {
+        return null;
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
 //        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/autotuning/zf/glusterfs/software_test", "666", "4k", "16k", "%70随机读,%30随机写");
         FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/parallels/Desktop/fs", "lhjlhj6929", "4k", "8k", "%70随机读,%30随机写");

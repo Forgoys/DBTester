@@ -195,6 +195,11 @@ public class MiniFileTest extends TestItem {
         return null;
     }
 
+    @Override
+    public List<List<Double>> readFromFile1(String resultPath) {
+        return null;
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
         MiniFileTest miniFileTest = new MiniFileTest("/home/autotuning/zf/glusterfs/software_test");
         miniFileTest.startTest();

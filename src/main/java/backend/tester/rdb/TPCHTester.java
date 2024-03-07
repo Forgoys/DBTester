@@ -382,6 +382,11 @@ public class TPCHTester extends TestItem {
         return null;
     }
 
+    @Override
+    public List<List<Double>> readFromFile1(String resultPath) {
+        return null;
+    }
+
     public static void main(String[] args) {
         DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
                 "jdbc:oscar://10.181.8.146:2003/TPCC_20",

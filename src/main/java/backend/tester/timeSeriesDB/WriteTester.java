@@ -33,6 +33,9 @@ public class WriteTester extends TestItem {
     // 测试场景及并发写入的客户端数
     private static String scenario = "100台*30天";
     private static int clients = 16;
+
+    public WriteTester() {}
+
     // 场景与数据集文件名的映射关系
     private static Map<String, String> scenarioToFile = new HashMap<String,String>();
     static {
@@ -51,9 +54,12 @@ public class WriteTester extends TestItem {
         tag = scenarioToFile.get(scenario).substring(fileName.indexOf("_s") + 1, fileName.indexOf(".gz")) + 
             "_w" + clients + "_" + time;
     }
+
+    // 张超群  写一个static函数，检验数据库连接状态，输入String dataBaseName，调用Util.popUpInfo输出数据库连接状态，服务是否启动，数据库是否存在
+
     public WriteTester(String testName, String homePath, SSHConnection sshStmt, TestArguments testArgs) {
         this.testName = testName;
-        this.sshStmt = sshStmt;
+        this.sshStmt = sshStmt;  // 张超群 这里改为String sudoPassword，SSH连接类后面要删掉，用不了了，对应的TestArgument里面也记得改
         this.testArgs = testArgs;
         this.toolRootPath = homePath;
         //testHomePath = homePath + ; 待添加
@@ -450,6 +456,7 @@ public TestResult getTestResults() {
     public static void main(String[] args) {
         SSHConnection sshStmt = new SSHConnection("10.181.8.146", 22, "wlx", "Admin@wlx");
         String homePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
+        // resultPath 待定
         TestArguments arguments = new TestArguments();
         arguments.values = new ArrayList<>();
         arguments.values.add("100台*30天");

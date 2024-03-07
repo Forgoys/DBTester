@@ -8,6 +8,7 @@ import backend.tester.fileSystem.MiniFileTest;
 import backend.tester.fileSystem.ReliableTest;
 import backend.tester.rdb.TPCCTester;
 import backend.tester.rdb.TPCHTester;
+import backend.tester.timeSeriesDB.WriteTester;
 import eu.hansolo.tilesfx.Test;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
@@ -177,7 +178,11 @@ public class MainAppController {
                 testProjectSelectBox.getItems().addAll("TPC-C", "TPC-H", "可靠性", "适配性");
                 yield configureDBConnectUI(rowIndex);
             }
-            case "TDengine", "InfluxDB", "Lindorm" -> {
+            case "TDengine" -> {
+                testProjectSelectBox.getItems().addAll("写入性能", "查询性能", "可靠性", "适配性");
+                yield configureTDengineConnectUI(rowIndex);
+            }
+            case "InfluxDB", "Lindorm" -> {
                 testProjectSelectBox.getItems().addAll("写入性能", "查询性能", "可靠性", "适配性");
                 yield configureDBConnectUI(rowIndex);
             }
@@ -285,13 +290,29 @@ public class MainAppController {
 
         testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++);
 
-//        Label jdbcDriverClassNameLabel = new Label("JDBC驱动类名");
-//        PasswordField jdbcDriverClassPasswordField = new PasswordField();
-//        jdbcDriverClassPasswordField.setId("jdbcDriverClassPasswordField");
-//        testObjectConfigPane.add(jdbcDriverClassNameLabel, 0, rowIndex);
-//        testObjectConfigPane.add(jdbcDriverClassPasswordField, 1, rowIndex++);
-
         Label dbURLLabel = new Label("数据库URL");
+        TextField dbURLTextField = new TextField();
+        dbURLTextField.setId("dbURLTextField");
+        testObjectConfigPane.add(dbURLLabel, 0, rowIndex);
+        testObjectConfigPane.add(dbURLTextField, 1, rowIndex++);
+
+        Label dbUserLabel = new Label("用户名");
+        TextField dbUserTextField = new TextField();
+        dbUserTextField.setId("dbUserTextField");
+        testObjectConfigPane.add(dbUserLabel, 0, rowIndex);
+        testObjectConfigPane.add(dbUserTextField, 1, rowIndex++);
+
+        Label dbPasswordLabel = new Label("密码");
+        TextField dbPasswordTextField = new TextField();
+        dbPasswordTextField.setId("dbPasswordTextField");
+        testObjectConfigPane.add(dbPasswordLabel, 0, rowIndex);
+        testObjectConfigPane.add(dbPasswordTextField, 1, rowIndex++);
+
+        return rowIndex;
+    }
+
+    private int configureTDengineConnectUI(int rowIndex) {
+        Label dbURLLabel = new Label("数据库名");
         TextField dbURLTextField = new TextField();
         dbURLTextField.setId("dbURLTextField");
         testObjectConfigPane.add(dbURLLabel, 0, rowIndex);
@@ -683,7 +704,7 @@ public class MainAppController {
     private void onExportTestResultClick() {
         String testObject = testObjectSelectBox.getValue();
         String testProject = testProjectSelectBox.getValue();
-        String testResultDicName = testItem.getResultDicName();
+        String testResultDicName = testItem.getResultDicName();   // 张超群  实现这个函数，返回存放结果数据文件的文件夹名字
         String absolutePath = DirectoryManager.buildAbsolutePath(testObject, testProject, testResultDicName);
         testItem.writeToFile(absolutePath);
     }
@@ -750,6 +771,11 @@ public class MainAppController {
                     dbOtherTestController.setTimeData(testAllResult.timeDataResult);
                     break;
                 case "写入性能":
+                    dbOtherTestController.clearAll();
+                    tmpTestItem = new WriteTester();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);  // 张超群 读取absolutePath下的两个结果文件，把结果写到testAllResult里
+                    dbOtherTestController.displayTestResults(testAllResult.testResult);
+                    dbOtherTestController.setTimeData(testAllResult.timeDataResult);
                     break;
                 case "查询性能":
                     break;
