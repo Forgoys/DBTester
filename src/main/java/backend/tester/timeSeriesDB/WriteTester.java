@@ -65,7 +65,7 @@ public class WriteTester extends TestItem {
     public WriteTester(String testName, String homePath, String sudoPassord, DBConnection DBStmt,TestArguments testArgs) {
         this.testName = testName;
         this.testArgs = testArgs;
-        this.toolRootPath = homePath;
+        this.toolsRootPath = homePath;
         //testHomePath = homePath + ; 待添加
         this.password = sudoPassord;
         this.DBStmt = DBStmt;

@@ -59,7 +59,7 @@ public class TPCHTester extends TestItem {
 
     public TPCHTester(String testName) {
         this.testName = testName;
-//        this.toolRootPath = toolRootPath;
+//        this.toolsRootPath = toolsRootPath;
     }
 
     public TPCHTester(String testName, DBConnection DBStmt, TestArguments testArgs) {
@@ -71,12 +71,12 @@ public class TPCHTester extends TestItem {
 
     private void initialization() throws Exception{
 
-        toolRootPath = "/home/wlx/DBTestTools";
+        toolsRootPath = "/home/wlx/DBTestTools";
 
         // 检查工具目录
-        File toolRootDir = new File(toolRootPath);
+        File toolRootDir = new File(toolsRootPath);
         if(!toolRootDir.exists() || !toolRootDir.isDirectory()) {
-            throw new Exception("未检测到工具目录:：" + toolRootPath);
+            throw new Exception("未检测到工具目录:：" + toolsRootPath);
         }
 
         // 检查测试参数是否正确
@@ -89,10 +89,10 @@ public class TPCHTester extends TestItem {
         diskNameOfDB = "sdd";
 
         // 创建tpch测试目录
-        if(!toolRootPath.endsWith("/")) {
-            toolRootPath += "/";
+        if(!toolsRootPath.endsWith("/")) {
+            toolsRootPath += "/";
         }
-        testHomePath = toolRootPath + "RDB_test/tpch/";
+        testHomePath = toolsRootPath + "RDB_test/tpch/";
 
 
         // tpch工具所在根目录
@@ -389,32 +389,33 @@ public class TPCHTester extends TestItem {
 
     public static void main(String[] args) {
 
-        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
-                "jdbc:oscar://10.181.8.146:2005/ADAPTTEST",
-                "SYSDBA",
-                "szoscar55");
-        dbConnection.connect();
-
-        TestArguments arguments = new TestArguments();
-        arguments.values.add("1"); // 测试规模
-
-        TPCHTester tester = new TPCHTester("tpch", dbConnection, arguments);
-
-        try {
-
-            tester.testEnvPrepare();
-
-            tester.startTest();
-
-            List<List<Double>> tmpTimeData = tester.getTimeData();
-
-            TestResult results = tester.getTestResults();
-
-            int i = 0;
-            i++;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        dbConnection.disconnect();
+        System.out.println(System.getProperty("user.dir"));
+//        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
+//                "jdbc:oscar://10.181.8.146:2005/ADAPTTEST",
+//                "SYSDBA",
+//                "szoscar55");
+//        dbConnection.connect();
+//
+//        TestArguments arguments = new TestArguments();
+//        arguments.values.add("1"); // 测试规模
+//
+//        TPCHTester tester = new TPCHTester("tpch", dbConnection, arguments);
+//
+//        try {
+//
+//            tester.testEnvPrepare();
+//
+//            tester.startTest();
+//
+//            List<List<Double>> tmpTimeData = tester.getTimeData();
+//
+//            TestResult results = tester.getTestResults();
+//
+//            int i = 0;
+//            i++;
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        dbConnection.disconnect();
     }
 }

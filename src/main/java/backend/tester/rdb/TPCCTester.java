@@ -72,7 +72,7 @@ public class TPCCTester extends TestItem {
 
     public TPCCTester(String testName) {
         this.testName = testName;
-//        this.toolRootPath = toolRootPath;
+//        this.toolsRootPath = toolsRootPath;
     }
 
     public TPCCTester(String testName, DBConnection DBStmt, TestArguments testArgs) {
@@ -89,7 +89,7 @@ public class TPCCTester extends TestItem {
     @Override
     public void testEnvPrepare() throws Exception {
 
-        toolRootPath = "/home/wlx/cx/DBTester/";
+        toolsRootPath = "/home/wlx/cx/DBTester/";
 
         // 安装数据库所在磁盘
         diskNameOfDB = "sdd";
