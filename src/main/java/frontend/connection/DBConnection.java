@@ -199,6 +199,10 @@ public class DBConnection {
         return builder.toString();
     }
 
+    public static String tdengineExecSQL(String sql) {
+        return null;
+    }
+
     // 检查数据库连接状态
     public boolean isConnected() {
         try {

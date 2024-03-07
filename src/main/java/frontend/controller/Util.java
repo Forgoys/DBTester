@@ -5,6 +5,8 @@ import backend.tester.fileSystem.FioReadWriteTest;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Node;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
@@ -17,10 +19,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class Util {
-    public enum status {
-        SSH_UNCONNECT;
-    }
-
     public static void popUpInfo(String information, String title) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, information, ButtonType.OK);
         alert.setHeaderText(title);
@@ -119,6 +117,22 @@ public class Util {
         boolean isCorrect = checkSudoPassword(sudoPassword);
         System.out.println("Is sudo password correct? " + isCorrect);
     }
+
+    static void customizeChartSeriesStyle(LineChart<String, Number> chart) {
+        for (XYChart.Series<String, Number> series : chart.getData()) {
+            // 调整线条粗细
+            series.getNode().setStyle("-fx-stroke-width: 1px;");
+
+            // 调整数据点样式
+            for (XYChart.Data<String, Number> data : series.getData()) {
+                Node dataNode = data.getNode();
+                if (dataNode != null) {
+                    dataNode.setStyle("-fx-padding: 0;"); // 隐藏数据点的圆圈
+                }
+            }
+        }
+    }
+
 //    public Task<Void> getTask(Object contorller, String testProject) {
 //        return new Task<>() {
 //            @Override

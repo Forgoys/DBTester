@@ -11,13 +11,13 @@ import java.util.List;
 
 // 文件系统适配性测试 通过挂载 暂时不写
 public class AdaptTester extends TestItem {
-
-    public AdaptTester(String testName, SSHConnection sshStmt, DBConnection DBStmt) {
-        super(testName, sshStmt, DBStmt);
+    public AdaptTester(String testName, DBConnection DBStmt) {
+        super(testName, DBStmt);
     }
 
-    public AdaptTester(String testName, SSHConnection sshStmt, DBConnection DBStmt, TestArguments testArgs) {
-        super(testName, sshStmt, DBStmt, testArgs);
+    public AdaptTester(String testName, TestArguments testArgs) {
+        this.testName = testName;
+        this.testArgs = testArgs;
     }
 
     // 文件系统适配性测试环境部署

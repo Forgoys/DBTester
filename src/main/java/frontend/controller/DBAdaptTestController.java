@@ -1,5 +1,6 @@
 package frontend.controller;
 
+import frontend.connection.DBConnection;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
@@ -23,13 +24,26 @@ public class DBAdaptTestController {
             sqlOutputTextArea.setText("SQL语句不能为空！");
             return;
         }
-        // 检查数据库连接
-        if (MainAppController.currentDBConnection == null || !MainAppController.currentDBConnection.isConnected()) {
-            sqlOutputTextArea.setText("数据库未连接，请先连接数据库。");
+
+        String testObject = MainAppController.getTestObject();
+
+        if (testObject == null || testObject.equals("GlustFS") || testObject.equals("OceanFS")) {
+            Util.popUpInfo("数据库未正确选择。", "错误");
             return;
         }
-        // 执行SQL语句并展示结果
-        String result = MainAppController.currentDBConnection.executeSQL(sqlText);
-        sqlOutputTextArea.setText(result);
+
+        if (testObject.equals("PolarDB") || testObject.equals("神通数据库") || testObject.equals("OpenGauss")) {
+            if (MainAppController.currentDBConnection == null || !MainAppController.currentDBConnection.isConnected()) {
+                Util.popUpInfo("数据库未连接，请先连接数据库。", "错误");
+                return;
+            }
+            // 执行SQL语句并展示结果
+            String result = MainAppController.currentDBConnection.executeSQL(sqlText);
+            sqlOutputTextArea.setText(result);
+        } else if (testObject.equals("TDengine")){
+            String result = DBConnection.tdengineExecSQL(sqlText);
+            sqlOutputTextArea.setText(result);
+        }
+        // 检查数据库连接
     }
 }

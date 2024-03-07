@@ -17,6 +17,11 @@ public class TestResult {
     public static final String[] TPCH_RES_NAMES = new String[]{"每小时执行次数"};
 
     /**
+     * 压力测试结果名
+     */
+    public static final String[] PRESSURE_TEST_RES_NAMES = new String[]{"平均线程发送请求数", "平均失败数"};
+
+    /**
      * influxdb-comparision工具时序数据库读写测试结果
      */
     public static final String[] INFLUXCOMP_WRTIE_RES_NAMES = new String[]{"写入条目数","写入时间","客户端数","写入数据点速度","写入数据值速度","磁盘速度"};

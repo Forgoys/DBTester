@@ -1,0 +1,10 @@
+/* 调整线条粗细 */
+.chart-line-symbol {
+    -fx-stroke-width: 0.5px; /* 设置线条更细 */
+}
+
+/* 隐藏数据点的圆圈 */
+.chart-line-symbol > .chart-line-symbol {
+    -fx-padding: 0;
+    -fx-background-color: transparent, transparent; /* 设置数据点为透明 */
+}

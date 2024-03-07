@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class MainAppController {
-    public static SSHConnection currentSSHConnection;
+//    public static SSHConnection currentSSHConnection;
     /**
      * 数据库连接
      */
@@ -62,22 +62,24 @@ public class MainAppController {
      */
     FSOtherTestController fsOtherTestController;
 
+    static String testObjectOut = null;
+
     TestItem testItem;
-    @FXML
-    private TitledPane sshConnectionTitledPane;
+//    @FXML
+//    private TitledPane sshConnectionTitledPane;
     @FXML
     private TitledPane testObjectConfigTitledPane;
     @FXML
     private TitledPane testProjectConfigTitledPane;
     // ssh 连接参数
-    @FXML
-    private TextField sshIPInput;
-    @FXML
-    private TextField sshPortInput;
-    @FXML
-    private TextField sshUserNameInput;
-    @FXML
-    private TextField sshPasswordInput;
+//    @FXML
+//    private TextField sshIPInput;
+//    @FXML
+//    private TextField sshPortInput;
+//    @FXML
+//    private TextField sshUserNameInput;
+//    @FXML
+//    private TextField sshPasswordInput;
 
     /**
      * 测试对象选择下拉列表
@@ -112,6 +114,7 @@ public class MainAppController {
     private void initialize() {
         // 初始化时不允许展开
 //        sshConnectionTitledPane.setExpanded(true);
+        testObjectConfigTitledPane.setExpanded(true);
         testObjectConfigTitledPane.setDisable(false);
         testProjectConfigTitledPane.setDisable(false);
         DirectoryManager.createDirectories();  // 创建结果目录
@@ -121,45 +124,45 @@ public class MainAppController {
 
     // =================================== ssh连接服务器 =================================================
 
-    /**
-     * ssh连接按钮确认，连接服务器
-     */
-    @FXML
-    private void sshConnectButtonClick() {
-        String ip = sshIPInput.getText().isEmpty() ? "127.0.0.1" : sshIPInput.getText();
-        int port = sshPortInput.getText().isEmpty() ? 22 : Integer.parseInt(sshPortInput.getText());
-        String userName = sshUserNameInput.getText();
-        String password = sshPasswordInput.getText();
-
-        // 如果当前有连接，检查连接信息是否相同
-        if (currentSSHConnection != null && currentSSHConnection.getStatus()) {
-            if (currentSSHConnection.getIp().equals(ip) && currentSSHConnection.getPort() == port && currentSSHConnection.getUserName().equals(userName)) {
-                Util.popUpInfo("当前已连接到相同的服务器，无需重新连接。", "SSH连接信息");
-                return; // 早期返回，避免进一步的处理
-            } else {
-                Optional<ButtonType> result = Util.popUpChoose("当前已有其他SSH连接，是否断开并重新连接到新的服务器？", "确认新的SSH连接");
-                if (result.isPresent() && result.get() == ButtonType.YES) {
-                    currentSSHConnection.sshDisconnect(); // 断开当前连接
-                } else {
-                    return; // 用户选择不断开当前连接，直接返回
-                }
-            }
-        }
-
-        // 尝试连接到新的服务器
-        if (currentSSHConnection == null) {
-            currentSSHConnection = new SSHConnection(ip, port, userName, password); // 假设SSHConnection有无参数的构造函数
-        }
-        boolean connected = currentSSHConnection.sshConnect(); // 假设这个方法返回一个boolean值表示是否连接成功
-
-        // 根据连接结果更新UI
-        if (connected) {
-            Util.popUpInfo("成功连接到服务器。", "SSH连接成功");
-            testObjectConfigTitledPane.setDisable(false);
-        } else {
-            Util.popUpInfo("无法连接到服务器，请检查输入的参数。", "SSH连接失败");
-        }
-    }
+//    /**
+//     * ssh连接按钮确认，连接服务器
+//     */
+//    @FXML
+//    private void sshConnectButtonClick() {
+//        String ip = sshIPInput.getText().isEmpty() ? "127.0.0.1" : sshIPInput.getText();
+//        int port = sshPortInput.getText().isEmpty() ? 22 : Integer.parseInt(sshPortInput.getText());
+//        String userName = sshUserNameInput.getText();
+//        String password = sshPasswordInput.getText();
+//
+//        // 如果当前有连接，检查连接信息是否相同
+//        if (currentSSHConnection != null && currentSSHConnection.getStatus()) {
+//            if (currentSSHConnection.getIp().equals(ip) && currentSSHConnection.getPort() == port && currentSSHConnection.getUserName().equals(userName)) {
+//                Util.popUpInfo("当前已连接到相同的服务器，无需重新连接。", "SSH连接信息");
+//                return; // 早期返回，避免进一步的处理
+//            } else {
+//                Optional<ButtonType> result = Util.popUpChoose("当前已有其他SSH连接，是否断开并重新连接到新的服务器？", "确认新的SSH连接");
+//                if (result.isPresent() && result.get() == ButtonType.YES) {
+//                    currentSSHConnection.sshDisconnect(); // 断开当前连接
+//                } else {
+//                    return; // 用户选择不断开当前连接，直接返回
+//                }
+//            }
+//        }
+//
+//        // 尝试连接到新的服务器
+//        if (currentSSHConnection == null) {
+//            currentSSHConnection = new SSHConnection(ip, port, userName, password); // 假设SSHConnection有无参数的构造函数
+//        }
+//        boolean connected = currentSSHConnection.sshConnect(); // 假设这个方法返回一个boolean值表示是否连接成功
+//
+//        // 根据连接结果更新UI
+//        if (connected) {
+//            Util.popUpInfo("成功连接到服务器。", "SSH连接成功");
+//            testObjectConfigTitledPane.setDisable(false);
+//        } else {
+//            Util.popUpInfo("无法连接到服务器，请检查输入的参数。", "SSH连接失败");
+//        }
+//    }
 
     // ================================ 数据库连接或文件系统挂载 ===========================================
 
@@ -169,6 +172,7 @@ public class MainAppController {
     @FXML
     private void onTestObjectSelect() {
         String selectedTestObject = testObjectSelectBox.getValue();
+        testObjectOut = selectedTestObject;
         Util.clearGridPaneRowsAfterFirst(testObjectConfigPane);
         testProjectSelectBox.getItems().clear();
 
@@ -271,24 +275,44 @@ public class MainAppController {
         TextField jdbcDriverNameTextField = new TextField();
         testObjectConfigPane.add(new Label("JDBC驱动"), 0, rowIndex);
         testObjectConfigPane.add(jdbcDriverNameTextField, 1, rowIndex++);
-        Button jdbcDriverButton = new Button("选择驱动");
-        jdbcDriverButton.setOnAction(e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("选择文件");
-            // 设置初始目录为程序的当前工作目录
-            fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
-            // 设置文件过滤器
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR 文件 (*.jar)", "*.jar"));
-            // 通过从任何一个组件获取Stage
-            Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
-            File selectedFile = fileChooser.showOpenDialog(stage);
-            if (selectedFile != null) {
-                jdbcDriverNameTextField.clear();
-                jdbcDriverNameTextField.setText(selectedFile.getAbsolutePath());
-            }
-        });
 
-        testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++);
+        String testObject = testObjectSelectBox.getValue();
+        jdbcDriverNameTextField.clear();
+        // 先自动找驱动文件
+        File driverFolder = new File(System.getProperty("user.dir") + File.separator + "JDBCDriver" + File.separator + testObject);
+        File selectedFile = null;
+        // 检查driverFolder是否存在且是一个目录
+        if (driverFolder.exists() && driverFolder.isDirectory()) {
+            File[] files = driverFolder.listFiles((dir, name) -> name.endsWith(".jar"));
+            // 检查是否找到了至少一个jar文件
+            if (files != null && files.length > 0) {
+                selectedFile = files[0]; // 选择第一个找到的JAR文件
+            }
+        }
+
+        // 如果找到了文件，更新文本字段。否则，准备并显示选择按钮
+        if (selectedFile != null) {
+            jdbcDriverNameTextField.setText(selectedFile.getAbsolutePath());
+        } else {
+            // 显示"未找到驱动"消息并提供一个按钮让用户手动选择文件
+            jdbcDriverNameTextField.setText("未找到驱动，请手动选择");
+
+            Button jdbcDriverButton = new Button("选择驱动");
+            jdbcDriverButton.setOnAction(e -> {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("选择文件");
+                fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR 文件 (*.jar)", "*.jar"));
+                Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
+                File file = fileChooser.showOpenDialog(stage);
+                if (file != null) {
+                    jdbcDriverNameTextField.clear();
+                    jdbcDriverNameTextField.setText(file.getAbsolutePath());
+                }
+            });
+
+            testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++); // 不再使用rowIndex++，除非有其他元素会紧随其后添加
+        }
 
         Label dbURLLabel = new Label("数据库URL");
         TextField dbURLTextField = new TextField();
@@ -476,7 +500,7 @@ public class MainAppController {
                     @Override
                     protected Void call() throws Exception {
                         updateMessage(message2Update.append("开始TPC-H测试\n").toString());
-                        testItem = new TPCHTester("TPC-H测试", testArguments.values.get(1), currentDBConnection, testArguments);
+                        testItem = new TPCHTester("TPC-H测试", currentDBConnection, testArguments);
                         updateMessage(message2Update.append("准备测试环境...\n").toString());
                         try {
                             testItem.testEnvPrepare();
@@ -587,7 +611,7 @@ public class MainAppController {
                         updateMessage(message2Update.append("开始小文件测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
 
-                        testItem = new MiniFileTest(testArguments.values.get(0));
+                        testItem = new MiniFileTest(testArguments.values.get(0), testArguments.values.get(1));
                         testItem.startTest();
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
@@ -822,11 +846,15 @@ public class MainAppController {
     }
 
     public void closeAll() {
-        if (currentSSHConnection != null && !currentSSHConnection.getStatus()) {
-            currentSSHConnection.sshDisconnect();
-        }
+//        if (currentSSHConnection != null && !currentSSHConnection.getStatus()) {
+//            currentSSHConnection.sshDisconnect();
+//        }
         if (currentDBConnection != null) {
             currentDBConnection.disconnect();
         }
+    }
+
+    public static String getTestObject() {
+        return testObjectOut;
     }
 }

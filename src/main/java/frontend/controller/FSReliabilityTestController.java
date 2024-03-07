@@ -98,6 +98,11 @@ public class FSReliabilityTestController {
         }
         latencyLineChart.getData().addAll(readLatencySeries, writeLatencySeries);
 
+        // 调整每个图表中系列的样式
+        Util.customizeChartSeriesStyle(iopsLineChart);
+        Util.customizeChartSeriesStyle(bandwidthLineChart);
+        Util.customizeChartSeriesStyle(latencyLineChart);
+
         // 请求布局更新，确保数据变化反映到UI上
         iopsLineChart.requestLayout();
         bandwidthLineChart.requestLayout();

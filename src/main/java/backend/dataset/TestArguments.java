@@ -37,8 +37,14 @@ public class TestArguments {
      */
     public static final ArgumentProperty[] TPCH_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试规模，有候选项
-            new ArgumentProperty("数据规模", new String[]{"5", "10", "20"}),
-            new ArgumentProperty("测试工具目录"),
+            new ArgumentProperty("数据规模", new String[]{"1", "5", "10", "20"}),
+    };
+
+    public static final ArgumentProperty[] PRESSURE_TEST_ARG_PROPERTIES = new ArgumentProperty[]{
+
+            new ArgumentProperty("线程数", new String[]{"16", "32", "64", "128", "256"}),
+
+            new ArgumentProperty("测试时长(min)", new String[]{"1", "3", "5"}),
     };
 
     /**
@@ -68,7 +74,7 @@ public class TestArguments {
             // 文件大小，有候选项
             new ArgumentProperty("文件大小", new String[]{"16k","1G", "4G", "8G"}),
             // 读写方式，有候选项
-            new ArgumentProperty("读写方式", new String[]{"随机读", "随机写", "顺序读", "顺序写", "%70顺序读,%30顺序写", "%70随机读,%30随机写"}),
+            new ArgumentProperty("读写方式", new String[]{"随机读", "随机写", "顺序读", "顺序写", "70%顺序读,30%顺序写", "70%随机读,30%随机写"}),
     };
 
     /*
@@ -99,6 +105,8 @@ public class TestArguments {
     public static final ArgumentProperty[] FIO_MINIFILE_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
+            // sudo密码，用户输入
+            new ArgumentProperty("本机sudo密码"),
     };
 
     // fio可靠性测试参数属性
