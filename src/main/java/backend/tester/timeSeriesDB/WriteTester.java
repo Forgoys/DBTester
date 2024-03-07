@@ -32,7 +32,7 @@ public class WriteTester extends TestItem {
     private static String scenario = "100台*30天";
     private static int clients = 16;
     // 场景与数据集文件名的映射关系
-    private static Map<String, String> scenarioToFile = new HashMap<>();
+    private static Map<String, String> scenarioToFile = new HashMap<String,String>();
     static {
         scenarioToFile.put("10台*1天", "tdengine_s10_1d.gz");
         scenarioToFile.put("100台*30天", "tdengine_s100_30d.gz");
@@ -53,9 +53,11 @@ public class WriteTester extends TestItem {
         this.testName = testName;
         this.sshStmt = sshStmt;
         this.testArgs = testArgs;
-        testHomePath = homePath;
+        this.toolRootPath = homePath;
+        //testHomePath = homePath + ; 待添加
         scenario = testArgs.values.get(0);
         clients = Integer.parseInt(testArgs.values.get(1));
+        SetTag();
     }
 
     /**
@@ -69,7 +71,7 @@ public class WriteTester extends TestItem {
         }
         // 检查数据集是否存在
         if (!checkDataSetExist()) {
-            dataGenerate(scenario);
+            dataGenerate();
             throw new RuntimeException("数据集不存在,将自动创建数据集");
         }
         // 检查数据库是否开启，即taosd进程是否存在
@@ -122,7 +124,7 @@ public class WriteTester extends TestItem {
     | gzip > data/tdengine_s100_30d.gz
     */
     // 如果是其他场景，只需要替换-scale-var和-timestamp-end,以及生成的数据集文件名
-    private static void dataGenerate(String scenario) {
+    private void dataGenerate() {
         try {
             // 获取对应场景的文件名
             String fileName = scenarioToFile.get(scenario);
@@ -204,7 +206,7 @@ public class WriteTester extends TestItem {
                     "-do-load=true -fileout=false -http-api=false " +
                     "-workers=" + clients;
             
-            File workingDirectory = new File("/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare");
+            File workingDirectory = new File(testHomePath);
             
             // 执行命令
             // 创建 ProcessBuilder 对象并设置工作目录
@@ -226,7 +228,7 @@ public class WriteTester extends TestItem {
             String filename = scenarioToFile.get(scenario).substring(fileName.indexOf("_s") + 1, fileName.indexOf(".gz")) + 
                 "_w" + clients + "_" + time + ".txt";
             */
-            String filepath = testHomePath + "/usage/" + tag + ".txt";
+            String filepath = testHomePath + "/usage/" + "write_" + tag + ".txt";
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             PrintWriter writer = new PrintWriter(new File(filepath), "UTF-8");
@@ -260,7 +262,7 @@ public class WriteTester extends TestItem {
         DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH.mm");
         String time = dateFormat.format(new Date());
         */
-        String filepath = testHomePath + "/usage/" + tag + ".txt";
+        String filepath = testHomePath + "/usage/" + "write_" + tag + ".txt";
         String result = "";
         testResult = new TestResult();
         testResult.names = TestResult.INFLUXCOMP_WRTIE_RES_NAMES;
@@ -294,6 +296,7 @@ public class WriteTester extends TestItem {
     // 调用testHomePath路径中的monitor.sh脚本，将结果保存到testHomePath/usage文件夹中
     // 执行脚本要用sudo命令，密码可由SSHConnection类中的getPassword()获取
     // 文件名为taosd_usage_write_s100_30d_w16_2021.06.01-12.00格式
+    // Path无用，固定写入usage文件夹中
     public void writeToFile(String resultPath) {
         try {
             // 构建命令
@@ -342,6 +345,7 @@ public class WriteTester extends TestItem {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.timeDataList = result;
         return result;
     }
 
@@ -393,7 +397,7 @@ public class WriteTester extends TestItem {
 
         WriteTester tester = new WriteTester("Write", homePath, sshStmt, arguments);
         try {
-            tester.SetTag();
+            //tester.SetTag();
             tester.testEnvPrepare();
             tester.startTest();
             tester.writeToFile(homePath);
