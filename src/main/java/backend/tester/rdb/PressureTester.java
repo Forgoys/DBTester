@@ -128,14 +128,17 @@ class MyDBConnection {
             return false;
         }
         Statement statement = this.connection.createStatement();
-        return statement.execute(sql);
+        boolean isResultSet = statement.execute(sql);
+        if (isResultSet) {
+            System.out.println(extractDataFromResultSet(statement.getResultSet()));
+        } else {
+            System.out.println("Update count: " + statement.getUpdateCount());
+        }
+        return true;
     }
 
-    public boolean executeSQLScript(String filePath) throws SQLException, FileNotFoundException {
+    public boolean executeSQLScript(String filePath) throws SQLException {
         File script = new  File(filePath);
-        if(!script.exists() || !script.isFile()) {
-            throw new FileNotFoundException("sql脚本文件不存在:" + filePath);
-        }
         List<String> sqlList = parseSQLScript(filePath);
         boolean ret = true;
         for(String sql : sqlList) {
@@ -162,6 +165,19 @@ class MyDBConnection {
             e.printStackTrace();
         }
         return sqlStatements;
+    }
+
+    // 从ResultSet中提取数据
+    private String extractDataFromResultSet(ResultSet resultSet) throws SQLException {
+        StringBuilder builder = new StringBuilder();
+        while (resultSet.next()) {
+            int columnCount = resultSet.getMetaData().getColumnCount();
+            for (int i = 1; i <= columnCount; i++) {
+                builder.append(resultSet.getString(i)).append(" ");
+            }
+            builder.append("\n");
+        }
+        return builder.toString();
     }
 
     // 断开数据库连接
@@ -297,7 +313,7 @@ public class PressureTester extends TestItem {
     /**
      * sql文件
      */
-    private String[] sqlFiles;
+    private File[] sqlFiles;
 
     /**
      * 结果文件存放路径
@@ -331,7 +347,8 @@ public class PressureTester extends TestItem {
     public PressureTester(String testName, DBConnection DBStmt, TestArguments testArgs) {
 
         this.testName = testName;
-
+        this.DBStmt = DBStmt;
+        this.testArgs = testArgs;
         this.jdbcDrivePath = DBStmt.getJdbcDriverPath();
         this.jdbcUrl = DBStmt.getDbURL();
         this.username = DBStmt.getUsername();
@@ -343,7 +360,8 @@ public class PressureTester extends TestItem {
         }
         dataSize = 1;
         this.thread_num = Integer.parseInt(testArgs.values.get(0));
-        test_time = Integer.parseInt(testArgs.values.get(1));
+        // 分钟转毫秒
+        test_time = Integer.parseInt(testArgs.values.get(1)) * 60000;
     }
 
 
@@ -352,7 +370,9 @@ public class PressureTester extends TestItem {
      */
     private void initialization() throws Exception{
 
-        toolsRootPath = "/home/wlx/DBTestTools";
+        // 获取工具包根目录
+        File projectDir = new File(System.getProperty("user.dir"));
+        toolsRootPath = String.format("%s/%s/", projectDir.getParentFile().getAbsolutePath(), TOOLS_ROOT_NAME);
 
         // 检查工具目录
         File toolRootDir = new File(toolsRootPath);
@@ -360,22 +380,20 @@ public class PressureTester extends TestItem {
             throw new Exception("未检测到工具目录:：" + toolsRootPath);
         }
 
-
-
-        // 安装数据库所在磁盘
-//        diskNameOfDB = "sdd";
-
         // 创建压力测试测试目录
         if(!toolsRootPath.endsWith("/")) {
             toolsRootPath += "/";
         }
         testHomePath = toolsRootPath + "/RDB_test/pressure_test/";
 
+        // 安装数据库所在磁盘
+//        diskNameOfDB = "sdd";
+
         // sql查询语句所在目录
         sqlsPath = testHomePath + "queries/";
         File sqlsDir;
         if((sqlsDir = new File(sqlsPath)).exists()) {
-            sqlFiles = sqlsDir.list();
+            sqlFiles = sqlsDir.listFiles();
         }
 
         // 测试结果目录
@@ -383,7 +401,7 @@ public class PressureTester extends TestItem {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
         String formatDateTime = formatter.format(localDateTime);
         // 结果目录格式类似于/results/16_2024-03-05_21-22-34/
-        resultDirectory = String.format("%s%d_%s/", testHomePath + "results/", thread_num, formatDateTime);
+        resultDirectory = String.format("%s%s/%d_%s/", testHomePath, "results", thread_num, formatDateTime);
     }
 
     @Override
@@ -440,7 +458,7 @@ public class PressureTester extends TestItem {
 
     @Override
     public String getResultDicName() {
-        return "";
+        return new File(resultDirectory).getName();
     }
 
     @Override
@@ -467,21 +485,25 @@ public class PressureTester extends TestItem {
         @Override
         public void run() {
             long startTime = System.currentTimeMillis();
-            Random random = new Random(startTime);
-
+            long id = getId();
+            Random random = new Random(startTime + id);
             while (System.currentTimeMillis() - startTime < test_time) {
                 // 连接数据库
                 MyDBConnection dbConnection = new MyDBConnection(jdbcDrivePath, jdbcUrl, username, password);
                 if (dbConnection.connect()) {
                     totalRequestCount++;
                     // 随机选择一条SQL语句
-                    String sql = sqlFiles[random.nextInt(sqlFiles.length)];
+                    File sqlFile = sqlFiles[random.nextInt(sqlFiles.length)];
+                    System.out.printf("线程%d选择sql语句:%s\n", id, sqlFile.getName());
                     // 执行语句
                     try {
-                        if(!dbConnection.executeSQL("")) {
+                        if(!dbConnection.executeSQLScript(sqlFile.getAbsolutePath())) {
+                            System.out.println("线程" + id + "执行失败！");
                             failedRequestCount++;
                         }
                     } catch (SQLException e) {
+                        System.out.println("线程" + id + "执行失败！");
+                        e.printStackTrace();
                         failedRequestCount++;
                     }
                 }
@@ -504,6 +526,26 @@ public class PressureTester extends TestItem {
     }
 
     public static void main(String[] args) {
+        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
+                "jdbc:oscar://10.181.8.146:2004/TPCH_5",
+                "SYSDBA",
+                "szoscar55");
 
+        TestArguments arguments = new TestArguments();
+        arguments.values.add("4"); // 线程数
+        arguments.values.add("5"); // 测试分钟数
+
+        TestItem tester = new PressureTester("pressureTest", dbConnection, arguments);
+
+        try {
+
+            tester.testEnvPrepare();
+
+            tester.startTest();
+
+            TestResult results = tester.getTestResults();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
