@@ -31,6 +31,9 @@ public class WriteTester extends TestItem {
     // 测试场景及并发写入的客户端数
     private static String scenario = "100台*30天";
     private static int clients = 16;
+
+    public WriteTester() {}
+
     // 场景与数据集文件名的映射关系
     private static Map<String, String> scenarioToFile = new HashMap<String,String>();
     static {
@@ -49,9 +52,12 @@ public class WriteTester extends TestItem {
         tag = scenarioToFile.get(scenario).substring(fileName.indexOf("_s") + 1, fileName.indexOf(".gz")) + 
             "_w" + clients + "_" + time;
     }
+
+    // 张超群  写一个static函数，检验数据库连接状态，输入String dataBaseName，调用Util.popUpInfo输出数据库连接状态，服务是否启动，数据库是否存在
+
     public WriteTester(String testName, String homePath, SSHConnection sshStmt, TestArguments testArgs) {
         this.testName = testName;
-        this.sshStmt = sshStmt;
+        this.sshStmt = sshStmt;  // 张超群 这里改为String sudoPassword，SSH连接类后面要删掉，用不了了，对应的TestArgument里面也记得改
         this.testArgs = testArgs;
         this.toolRootPath = homePath;
         //testHomePath = homePath + ; 待添加
@@ -277,7 +283,7 @@ public class WriteTester extends TestItem {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        testResult.values = new String[] {result};
+        testResult.values = new String[] {result};  // 张超群  性能指标分开存
         return testResult;
     }
     @Override

@@ -8,6 +8,7 @@ import backend.tester.fileSystem.MiniFileTest;
 import backend.tester.fileSystem.ReliableTest;
 import backend.tester.rdb.TPCCTester;
 import backend.tester.rdb.TPCHTester;
+import backend.tester.timeSeriesDB.WriteTester;
 import eu.hansolo.tilesfx.Test;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
@@ -683,7 +684,7 @@ public class MainAppController {
     private void onExportTestResultClick() {
         String testObject = testObjectSelectBox.getValue();
         String testProject = testProjectSelectBox.getValue();
-        String testResultDicName = testItem.getResultDicName();
+        String testResultDicName = testItem.getResultDicName();   // 张超群  实现这个函数，返回存放结果数据文件的文件夹名字
         String absolutePath = DirectoryManager.buildAbsolutePath(testObject, testProject, testResultDicName);
         testItem.writeToFile(absolutePath);
     }
@@ -750,6 +751,11 @@ public class MainAppController {
                     dbOtherTestController.setTimeData(testAllResult.timeDataResult);
                     break;
                 case "写入性能":
+                    dbOtherTestController.clearAll();
+                    tmpTestItem = new WriteTester();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);  // 张超群 读取absolutePath下的两个结果文件，把结果写到testAllResult里
+                    dbOtherTestController.displayTestResults(testAllResult.testResult);
+                    dbOtherTestController.setTimeData(testAllResult.timeDataResult);
                     break;
                 case "查询性能":
                     break;
