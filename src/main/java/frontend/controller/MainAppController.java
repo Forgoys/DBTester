@@ -178,7 +178,11 @@ public class MainAppController {
                 testProjectSelectBox.getItems().addAll("TPC-C", "TPC-H", "可靠性", "适配性");
                 yield configureDBConnectUI(rowIndex);
             }
-            case "TDengine", "InfluxDB", "Lindorm" -> {
+            case "TDengine" -> {
+                testProjectSelectBox.getItems().addAll("写入性能", "查询性能", "可靠性", "适配性");
+                yield configureTDengineConnectUI(rowIndex);
+            }
+            case "InfluxDB", "Lindorm" -> {
                 testProjectSelectBox.getItems().addAll("写入性能", "查询性能", "可靠性", "适配性");
                 yield configureDBConnectUI(rowIndex);
             }
@@ -286,13 +290,29 @@ public class MainAppController {
 
         testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++);
 
-//        Label jdbcDriverClassNameLabel = new Label("JDBC驱动类名");
-//        PasswordField jdbcDriverClassPasswordField = new PasswordField();
-//        jdbcDriverClassPasswordField.setId("jdbcDriverClassPasswordField");
-//        testObjectConfigPane.add(jdbcDriverClassNameLabel, 0, rowIndex);
-//        testObjectConfigPane.add(jdbcDriverClassPasswordField, 1, rowIndex++);
-
         Label dbURLLabel = new Label("数据库URL");
+        TextField dbURLTextField = new TextField();
+        dbURLTextField.setId("dbURLTextField");
+        testObjectConfigPane.add(dbURLLabel, 0, rowIndex);
+        testObjectConfigPane.add(dbURLTextField, 1, rowIndex++);
+
+        Label dbUserLabel = new Label("用户名");
+        TextField dbUserTextField = new TextField();
+        dbUserTextField.setId("dbUserTextField");
+        testObjectConfigPane.add(dbUserLabel, 0, rowIndex);
+        testObjectConfigPane.add(dbUserTextField, 1, rowIndex++);
+
+        Label dbPasswordLabel = new Label("密码");
+        TextField dbPasswordTextField = new TextField();
+        dbPasswordTextField.setId("dbPasswordTextField");
+        testObjectConfigPane.add(dbPasswordLabel, 0, rowIndex);
+        testObjectConfigPane.add(dbPasswordTextField, 1, rowIndex++);
+
+        return rowIndex;
+    }
+
+    private int configureTDengineConnectUI(int rowIndex) {
+        Label dbURLLabel = new Label("数据库名");
         TextField dbURLTextField = new TextField();
         dbURLTextField.setId("dbURLTextField");
         testObjectConfigPane.add(dbURLLabel, 0, rowIndex);
