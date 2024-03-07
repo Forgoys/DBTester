@@ -275,24 +275,41 @@ public class MainAppController {
         TextField jdbcDriverNameTextField = new TextField();
         testObjectConfigPane.add(new Label("JDBC驱动"), 0, rowIndex);
         testObjectConfigPane.add(jdbcDriverNameTextField, 1, rowIndex++);
-        Button jdbcDriverButton = new Button("选择驱动");
-        jdbcDriverButton.setOnAction(e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("选择文件");
-            // 设置初始目录为程序的当前工作目录
-            fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
-            // 设置文件过滤器
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR 文件 (*.jar)", "*.jar"));
-            // 通过从任何一个组件获取Stage
-            Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
-            File selectedFile = fileChooser.showOpenDialog(stage);
-            if (selectedFile != null) {
-                jdbcDriverNameTextField.clear();
-                jdbcDriverNameTextField.setText(selectedFile.getAbsolutePath());
-            }
-        });
 
-        testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++);
+        String testObject = testObjectSelectBox.getValue();
+        jdbcDriverNameTextField.clear();
+        // 先自动找驱动文件
+        File driverFolder = new File(System.getProperty("user.dir") + File.separator + "JDBCDriver" + File.separator + testObject);
+        if (driverFolder.exists() && driverFolder.isDirectory()) {
+            File[] files = driverFolder.listFiles((dir, name) -> name.endsWith(".jar"));
+            if (files != null && files.length > 0) {
+                // 假设我们总是选择第一个找到的JAR文件
+                File selectedFile = files[0];
+                jdbcDriverNameTextField.setText(selectedFile.getAbsolutePath());
+            } else {
+                // 如果没有找到驱动，则准备让用户手动选择
+                jdbcDriverNameTextField.setText("未找到驱动，请手动选择");
+                Button jdbcDriverButton = new Button("选择驱动");
+                jdbcDriverButton.setOnAction(e -> {
+                    FileChooser fileChooser = new FileChooser();
+                    fileChooser.setTitle("选择文件");
+                    // 设置初始目录为程序的当前工作目录
+                    fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+                    // 设置文件过滤器
+                    fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR 文件 (*.jar)", "*.jar"));
+                    // 通过从任何一个组件获取Stage
+                    Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
+                    File selectedFile = fileChooser.showOpenDialog(stage);
+                    if (selectedFile != null) {
+                        jdbcDriverNameTextField.clear();
+                        jdbcDriverNameTextField.setText(selectedFile.getAbsolutePath());
+                    }
+                });
+
+                testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++);
+            }
+        }
+
 
         Label dbURLLabel = new Label("数据库URL");
         TextField dbURLTextField = new TextField();
