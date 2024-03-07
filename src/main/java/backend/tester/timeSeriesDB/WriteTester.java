@@ -8,6 +8,8 @@ import frontend.connection.SSHConnection;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -78,6 +80,7 @@ public class WriteTester extends TestItem {
         if (!checkDBStatus()) {
             throw new RuntimeException("数据库未开启");
         }
+        // 检查数据库用户和密码是否正确
     }
     // 遍历DATA_SET_FILE_NAMES数组，检查每个文件和文件夹是否存在
     private boolean checkTestToolExist() {
@@ -255,31 +258,43 @@ public class WriteTester extends TestItem {
         return null;
     }
     @Override
-    public TestResult getTestResults() {
-        // 获取对应场景的文件名
-        /*
-        String fileName = scenarioToFile.get(scenario);
-        DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH.mm");
-        String time = dateFormat.format(new Date());
-        */
-        String filepath = testHomePath + "/usage/" + "write_" + tag + ".txt";
-        String result = "";
-        testResult = new TestResult();
-        testResult.names = TestResult.INFLUXCOMP_WRTIE_RES_NAMES;
-        try {
-            File file = new File(filepath);
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result = line;
-            }
-            reader.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+    // 把txt最后一行提取出来进行解析，要求解析出
+    // loaded 233280000 items in 705.426129sec with 16 workers (mean point rate 330693.73/s, mean value rate 3711118.56/s, 44.72MB/sec from stdin)
+    // 提出233280000，705.426129，16，330693.73, 3711118.56，44.72
+    // 将这个值存入testResult.values中
+public TestResult getTestResults() {
+    // 获取对应场景的文件名
+    String filepath = testHomePath + "/usage/" + "write_" + tag + ".txt";
+    String result = "";
+    testResult = new TestResult();
+    testResult.names = TestResult.INFLUXCOMP_WRTIE_RES_NAMES;
+    try {
+        File file = new File(filepath);
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            result = line;
         }
-        testResult.values = new String[] {result};
-        return testResult;
+        reader.close();
+
+        // 使用正则表达式提取需要的值
+        Pattern pattern = Pattern.compile("loaded (\\d+) items in (\\d+\\.\\d+)sec with (\\d+) workers \\(mean point rate (\\d+\\.\\d+)/s, mean value rate (\\d+\\.\\d+)/s, (\\d+\\.\\d+)MB/sec from stdin\\)");
+        Matcher matcher = pattern.matcher(result);
+        if (matcher.find()) {
+            testResult.values = new String[] {
+                matcher.group(1), // 233280000
+                matcher.group(2), // 705.426129
+                matcher.group(3), // 16
+                matcher.group(4), // 330693.73
+                matcher.group(5), // 3711118.56
+                matcher.group(6)  // 44.72
+            };
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+    return testResult;
+}
     @Override
     public List<List<Double>> getTimeData() {
         /*
@@ -318,6 +333,50 @@ public class WriteTester extends TestItem {
             e.printStackTrace();
             throw new RuntimeException("执行monitor_write.sh失败");
         }
+        String fileName = testHomePath + "/usage/taosd_usage_write_" + tag + ".csv";
+        try{
+            String password = sshStmt.getPassword();
+
+            String command = "echo " + password + " | sudo -S chmod 666 " + fileName;
+            // 执行命令
+            ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
+            processBuilder.directory(new File(testHomePath));
+            Process process = processBuilder.start();
+            process.waitFor();
+            // 检查命令执行结果
+            if (process.exitValue() != 0) {
+                throw new RuntimeException("修改CSV文件读写权限失败, sudo权限不足");
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("修改CSV文件读写权限失败, sudo权限不足");
+        }
+        // 将taosd_usage_write_tag.csv和write_tag.txt文件中的数据复制到resultPath中
+        try {
+            String password = sshStmt.getPassword();
+        
+            String command1 = "echo " + password + " | sudo -S cp " + testHomePath + "/usage/taosd_usage_write_" + tag + ".csv " + resultPath;
+            String command2 = "echo " + password + " | sudo -S cp " + testHomePath + "/usage/write_" + tag + ".txt " + resultPath;
+        
+            // 执行命令
+            ProcessBuilder processBuilder1 = new ProcessBuilder("/bin/bash", "-c", command1);
+            processBuilder1.directory(new File(testHomePath));
+            Process process1 = processBuilder1.start();
+            process1.waitFor();
+        
+            ProcessBuilder processBuilder2 = new ProcessBuilder("/bin/bash", "-c", command2);
+            processBuilder2.directory(new File(testHomePath));
+            Process process2 = processBuilder2.start();
+            process2.waitFor();
+        
+            // 检查命令执行结果
+            if (process1.exitValue() != 0 || process2.exitValue() != 0) {
+                throw new RuntimeException("复制CSV文件或TXT文件到指定路径失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("复制CSV文件或TXT文件到指定路径失败");
+        }
     }
     @Override
     public TestAllResult readFromFile(String resultPath) {
@@ -327,8 +386,9 @@ public class WriteTester extends TestItem {
     public List<List<Double>> readFromFile1(String resultPath) {
 
         List<List<Double>> result = new ArrayList<>();
+        String fileName = resultPath + "/taosd_usage_write_" + tag + ".csv";//指定路径中的csv文件
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(resultPath));
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
             String line;
             // 跳过表头
             reader.readLine();
