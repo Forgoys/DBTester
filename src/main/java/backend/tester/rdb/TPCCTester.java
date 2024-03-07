@@ -382,6 +382,10 @@ public class TPCCTester extends TestItem {
 
     @Override
     public TestResult getTestResults() {
+        // 如果已经生成了结果，则直接返回
+        if(this.testResult != null) {
+            return this.testResult;
+        }
         // 读取结果文件
         String res = execCommandsWithReturn("tail -n 6 " + resultDirectory + "result.txt");
         if (!res.isEmpty()) {
@@ -410,13 +414,24 @@ public class TPCCTester extends TestItem {
 
     @Override
     public void writeToFile(String resultPath) {
-
+        if(status != Status.FINISHED) {
+            System.out.println("还未生成结果文件");
+            return ;
+        }
+        String cmd = String.format("cp -r %s* %s", resultDirectory, resultPath);
+        execCommands(cmd);
     }
 
     @Override
     public TestAllResult readFromFile(String resultPath) {
-
-        return null;
+        if(resultPath == null) {
+            return null;
+        }
+        if(!resultPath.endsWith("/")) {
+            resultPath += "/";
+        }
+        this.resultDirectory = resultPath;
+        return new TestAllResult(getTestResults(), getTimeData());
     }
 
     @Override

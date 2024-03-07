@@ -317,7 +317,7 @@ public class TPCHTester extends TestItem {
         }
         // 从文件读取监测数据
         // 系统资源监视结果文件路径
-        File file = new File(resultDirectory + "monitor.csv");
+        File file = new File(resultDirectory, "monitor.csv");
         List<Double> userCpuUsageList = new ArrayList<>();
         List<Double> memoryUsageList = new ArrayList<>();
         List<Double> diskReadSpeedList = new ArrayList<>();
@@ -353,12 +353,9 @@ public class TPCHTester extends TestItem {
 
     @Override
     public TestResult getTestResults() {
-        if(this.status != Status.FINISHED) {
-            System.out.println("测试正在进行中，请稍等");
-            return null;
-        }
         // 读取结果文件
-        try(BufferedReader br = new BufferedReader(new FileReader(resultDirectory + "result.txt"))) {
+        File retFile = new File(this.resultDirectory,  "result.txt");
+        try(BufferedReader br = new BufferedReader(new FileReader(retFile))) {
             testResult = new TestResult();
             testResult.values = br.readLine().split(" ");
             testResult.names = TestResult.TPCH_RES_NAMES;
@@ -376,12 +373,24 @@ public class TPCHTester extends TestItem {
 
     @Override
     public void writeToFile(String resultPath) {
-
+        if(status != Status.FINISHED) {
+            System.out.println("还未生成结果文件");
+            return ;
+        }
+        String cmd = String.format("cp -r %s* %s", resultDirectory, resultPath);
+        execCommands(cmd);
     }
 
     @Override
     public TestAllResult readFromFile(String resultPath) {
-        return null;
+        if(resultPath == null) {
+            return null;
+        }
+        if(!resultPath.endsWith("/")) {
+            resultPath += "/";
+        }
+        this.resultDirectory = resultPath;
+        return new TestAllResult(getTestResults(), getTimeData());
     }
 
     @Override
