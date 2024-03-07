@@ -1,24 +1,20 @@
 package backend.tester.timeSeriesDB;
 
+import backend.dataset.TestAllResult;
 import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
 import frontend.connection.SSHConnection;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
+import java.util.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 // 此软件在服务器上运行，无需使用SSH连接
 public class WriteTester extends TestItem {
@@ -45,7 +41,15 @@ public class WriteTester extends TestItem {
         scenarioToFile.put("10万台*3小时", "tdengine_s100000_3h.gz");
         scenarioToFile.put("100万台*3分钟", "tdengine_s1000000_3min.gz");
     }
-
+    private String tag;//形如s100_30d_w16_2021.06.01-12.00
+    private String SetTag () {
+        String fileName = scenarioToFile.get(scenario);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH.mm");
+        String time = dateFormat.format(new Date());
+        tag = scenarioToFile.get(scenario).substring(fileName.indexOf("_s") + 1, fileName.indexOf(".gz")) + 
+            "_w" + clients + "_" + time;
+        return tag;
+    }
     public WriteTester(String testName, String homePath, SSHConnection sshStmt, TestArguments testArgs) {
         this.testName = testName;
         this.sshStmt = sshStmt;
@@ -214,14 +218,16 @@ public class WriteTester extends TestItem {
             processBuilder.redirectErrorStream(true);// 将标准错误流重定向到标准输出流
             
             Process process = processBuilder.start();
-            writeToFile();//开启脚本监视资源使用，测试结束后自动停止，生成名为taosd_usage_write_后缀.csv的文件
+            writeToFile(testHomePath);//实际这个路径无用。开启脚本监视资源使用，测试结束后自动停止，生成名为taosd_usage_write_后缀.csv的文件
             
             // 读取命令输出，并保存输出到usage文件夹中，
+            /*
             DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH.mm");
             String time = dateFormat.format(new Date());
             String filename = scenarioToFile.get(scenario).substring(fileName.indexOf("_s") + 1, fileName.indexOf(".gz")) + 
                 "_w" + clients + "_" + time + ".txt";
-            String filepath = testHomePath + "/usage/" + filename;
+            */
+            String filepath = testHomePath + "/usage/" + tag + ".txt";
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             PrintWriter writer = new PrintWriter(new File(filepath), "UTF-8");
@@ -244,18 +250,23 @@ public class WriteTester extends TestItem {
         }
     }
     @Override
+    public String getResultDicName() {
+        return null;
+    }
+    @Override
     public TestResult getTestResults() {
         // 获取对应场景的文件名
+        /*
         String fileName = scenarioToFile.get(scenario);
         DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH.mm");
         String time = dateFormat.format(new Date());
-        String filename = scenarioToFile.get(scenario).substring(fileName.indexOf("_s") + 1, fileName.indexOf(".gz")) + 
-            "_w" + clients + "_" + time + ".txt";  
+        */
+        String filepath = testHomePath + "/usage/" + tag + ".txt";
         String result = "";
         testResult = new TestResult();
         testResult.names = TestResult.INFLUXCOMP_WRTIE_RES_NAMES;
         try {
-            File file = new File(res_filepath);
+            File file = new File(filepath);
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String line;
             while ((line = reader.readLine()) != null) {
@@ -270,14 +281,21 @@ public class WriteTester extends TestItem {
     }
     @Override
     public List<List<Double>> getTimeData() {
-        String usageFilePath = testHomePath + "/usage/" + "taosd_usage_write_" + res_file_tag +".csv";
-        return readFromFile(usageFilePath);
+        /*
+        String fileName = scenarioToFile.get(scenario);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH.mm");
+        String time = dateFormat.format(new Date());
+        String filename = scenarioToFile.get(scenario).substring(fileName.indexOf("_s") + 1, fileName.indexOf(".gz")) + 
+            "_w" + clients + "_" + time + ".txt"; 
+        */
+        String usageFilePath = testHomePath + "/usage/" + "taosd_usage_write_" + tag +".csv";
+        return readFromFile1(usageFilePath);
     }
     @Override
     // 调用testHomePath路径中的monitor.sh脚本，将结果保存到testHomePath/usage文件夹中
     // 执行脚本要用sudo命令，密码可由SSHConnection类中的getPassword()获取
     // 文件名为taosd_usage_write_s100_30d_w16_2021.06.01-12.00格式
-    public void writeToFile() {
+    public void writeToFile(String resultPath) {
         try {
             // 获取对应场景的文件名
             String fileName = scenarioToFile.get(scenario);
@@ -305,12 +323,16 @@ public class WriteTester extends TestItem {
             throw new RuntimeException("执行monitor_write.sh失败");
         }
     }
-
     @Override
-    public List<List<Double>> readFromFile(String resultPath) {
+    public TestAllResult readFromFile(String resultPath) {
+        return null;
+    }
+    @Override
+    public List<List<Double>> readFromFile1(String resultPath) {
+
         List<List<Double>> result = new ArrayList<>();
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(filepath));
+            BufferedReader reader = new BufferedReader(new FileReader(resultPath));
             String line;
             // 跳过表头
             reader.readLine();
@@ -378,9 +400,10 @@ public class WriteTester extends TestItem {
 
         WriteTester tester = new WriteTester("Write", homePath, sshStmt, arguments);
         try {
+            tester.SetTag();
             tester.testEnvPrepare();
             tester.startTest();
-            tester.writeToFile();
+            tester.writeToFile(homePath);
             System.out.println(tester.getTestResults().values[0]);
             System.out.println(tester.getTimeData());
         } catch (Exception e) {
