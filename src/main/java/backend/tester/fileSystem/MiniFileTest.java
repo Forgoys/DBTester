@@ -29,6 +29,10 @@ public class MiniFileTest extends TestItem {
     // sudo权限
     String localSudoPassword;
 
+    // 资源检测脚本名称
+    private String monitorScriptName;
+    private String monitorResultCSV;
+
     // 指令运行结果
     TestResult fioMiniFileTestResult = new TestResult();
     // 脚本执行后结果保存在txt文件
@@ -50,6 +54,9 @@ public class MiniFileTest extends TestItem {
         fioMiniFileTestResultPath = this.directory + "/" + "miniFileTestResult.txt";
 
         miniFileWriteNum = "100";
+
+        monitorScriptName = "monitor.sh";
+        monitorResultCSV = "fioMiniFileTestMonitorResult.csv";
     }
 
     public int executeCommand(String command) throws IOException, InterruptedException {
@@ -99,6 +106,17 @@ public class MiniFileTest extends TestItem {
         String localMiniFilePath = currentDirectory + "/src/main/resources/miniFile/" + miniFileName;
         exitCode = executeCommand(command);
         System.out.println("复制cifar数据集:" + localMiniFilePath + " Exit code:" + exitCode);
+
+        // 传入检测系统资源的脚本
+        String localMonitorScriptPath = currentDirectory + "/src/main/resources/scripts/" + monitorScriptName;
+        command = "cp " + localMonitorScriptPath + " " + directory;
+        exitCode = executeCommand(command);
+        System.out.println("系统资源监测脚本:" + localMonitorScriptPath + " Exit code:" + exitCode);
+
+        // 给脚本添加执行权限
+        command = "chmod +x " + directory + "/" + monitorScriptName;
+        exitCode = executeCommand(command);
+        System.out.println("给脚本添加执行权限:" + monitorScriptName + " Exit code:" + exitCode);
     }
 
     public void miniFileReadWriteTest(String fioCommand, List<String> results) throws IOException, InterruptedException {
@@ -140,6 +158,12 @@ public class MiniFileTest extends TestItem {
         testEnvPrepare();
         System.out.println("小文件测试环境准备完成");
 
+        // 检测系统资源 CPU利用率 内存使用率
+        String command = directory + "/" + monitorScriptName + " " + directory + "/" + monitorResultCSV;
+        ProcessBuilder monitorProcessBuilder = new ProcessBuilder();
+        monitorProcessBuilder.command("bash", "-c", command);
+        Process monitorProcess = monitorProcessBuilder.start();
+
         System.out.println("小文件测试开始");
 
         List<String> results = new ArrayList<>();
@@ -155,6 +179,11 @@ public class MiniFileTest extends TestItem {
         String miniFileWriteCommand = miniFileWriteScriptPath + " " + miniFileDirectory + " " + miniFileWriteNum;
         miniFileReadWriteTest(miniFileWriteCommand, results);
         System.out.println("小文件写入测试完成");
+
+        // 系统资源监测关闭
+        monitorProcess.destroy();
+        int monitorExitCode = monitorProcess.waitFor();
+        System.out.println("系统资源监测关闭,检测结果保存在" + monitorResultCSV + " exit code:" + monitorExitCode);
 
         fioResultSave(results);
     }

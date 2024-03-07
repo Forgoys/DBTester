@@ -23,6 +23,10 @@ public class FioParallelTest extends TestItem {
     // sudo权限
     String localSudoPassword;
 
+    // 资源检测脚本名称
+    private String monitorScriptName;
+    private String monitorResultCSV;
+
     // 指令运行结果
     TestResult fioParallelTestResult = new TestResult();
 
@@ -30,15 +34,46 @@ public class FioParallelTest extends TestItem {
     }
 
     public FioParallelTest(String directory, String numjobs, String localSudoPassword) {
-        this.directory = directory;
+        this.directory = directory + "/parallelTest";
         this.numjobs = numjobs;
         this.localSudoPassword = localSudoPassword;
+
+        monitorScriptName = "monitor.sh";
+        monitorResultCSV = "fioParallelTestMonitorResult.csv";
+    }
+
+    public int executeCommand(String command) throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command("bash", "-c", command);
+        Process process = processBuilder.start();
+        // 等待进程执行完毕
+        int exitCode = process.waitFor();
+        return exitCode;
     }
 
     // 并发测试环境 安装fio
     @Override
-    public void testEnvPrepare() throws RuntimeException {
+    public void testEnvPrepare() throws RuntimeException, IOException, InterruptedException {
+        int exitCode = 0;
+        String command = new String();
 
+        // 创建ParallelTest文件夹
+        command = "mkdir -p " + directory;
+        exitCode = executeCommand(command);
+        System.out.println("创建并发度测试文件夹:" + directory + " Exit code:" + exitCode);
+
+        // 传入检测系统资源的脚本
+        String currentDirectory = System.getProperty("user.dir");
+        System.out.println("Current directory: " + currentDirectory);
+        String localMonitorScriptPath = currentDirectory + "/src/main/resources/scripts/" + monitorScriptName;
+        command = "cp " + localMonitorScriptPath + " " + directory;
+        exitCode = executeCommand(command);
+        System.out.println("系统资源监测脚本:" + localMonitorScriptPath + " Exit code:" + exitCode);
+
+        // 给脚本添加执行权限
+        command = "chmod +x " + directory + "/" + monitorScriptName;
+        exitCode = executeCommand(command);
+        System.out.println("给脚本添加执行权限:" + monitorScriptName + " Exit code:" + exitCode);
     }
 
     @Override
@@ -46,6 +81,15 @@ public class FioParallelTest extends TestItem {
         // 获取用户参数 定义为成员变量 默认已经存在
 //        String directory = "/home/wlx/zf/data";
 //        String numjobs = 128;
+
+        // 准备环境
+        testEnvPrepare();
+
+        // 检测系统资源 CPU利用率 内存使用率
+        String command = directory + "/" + monitorScriptName + " " + directory + "/" + monitorResultCSV;
+        ProcessBuilder monitorProcessBuilder = new ProcessBuilder();
+        monitorProcessBuilder.command("bash", "-c", command);
+        Process monitorProcess = monitorProcessBuilder.start();
 
         // 设置 fio 测试指令
         String fioCommand = "fio -directory=" + directory + " -ioengine=libaio -direct=1 -iodepth=1 -thread=1 -numjobs=" + numjobs + " -group_reporting -allow_mounted_write=1 -rw=rw -rwmixread=70 -rwmixwrite=30 -bs=4k -size=1M -runtime=60 -name=fioTest";
@@ -80,6 +124,12 @@ public class FioParallelTest extends TestItem {
         // 等待进程执行完毕
         int exitCode = process.waitFor();
         System.out.println("Exit code: " + exitCode);
+        System.out.println("指令运行结束");
+
+        // 系统资源监测关闭
+        monitorProcess.destroy();
+        int monitorExitCode = monitorProcess.waitFor();
+        System.out.println("系统资源监测关闭,检测结果保存在" + monitorResultCSV + " exit code:" + monitorExitCode);
 
         // 保存结果
         fioResultSave(results);
