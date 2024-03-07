@@ -1,6 +1,8 @@
 package frontend.connection;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -37,10 +39,10 @@ public class DBConnection {
     public DBConnection() {
     }
     // 涛思不用jdbc
-    public DBConnection(String username, String password, String dbName) {
+    public DBConnection(String dbName, String username, String password) {
+        this.dbName = dbName;
         this.username = username;
         this.password = password;
-        this.dbName = dbName;
     }
     public DBConnection(String jdbcDriverPath, String dbURL, String username, String password) {
         this.jdbcDriverPath = jdbcDriverPath;
@@ -198,9 +200,35 @@ public class DBConnection {
         }
         return builder.toString();
     }
-
-    public static String tdengineExecSQL(String sql) {
-        return null;
+    // 涛思不用jdbc
+    public static String tdengineExecSQL(String sql, DBConnection dbConnection) {
+        
+        String command = "taos -u" + dbConnection.username + " -p" + dbConnection.password + " -s '" + sql + "'";
+        String output = "";
+    
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
+            Process process = processBuilder.start();
+    
+            // 读取输入流
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = inputReader.readLine()) != null) {
+                output += line + "\n";
+            }
+    
+            // 读取错误流
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            while ((line = errorReader.readLine()) != null) {
+                output += line + "\n";
+            }
+    
+            process.waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    
+        return output;
     }
 
     // 检查数据库连接状态

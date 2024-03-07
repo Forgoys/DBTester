@@ -11,6 +11,7 @@ module org.example.dbtester {
     requires eu.hansolo.tilesfx;
     requires jsch;
     requires java.sql;
+    requires org.apache.commons.csv;
 //    requires rt;
 //    requires jsch;
 

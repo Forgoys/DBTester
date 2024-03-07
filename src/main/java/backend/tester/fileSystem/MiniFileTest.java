@@ -4,10 +4,9 @@ import backend.dataset.TestAllResult;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -231,7 +230,7 @@ public class MiniFileTest extends TestItem {
         String content = textBuilder.toString();
 
 //        Pattern patternIOPS_BW = Pattern.compile("(read|write): IOPS=(\\d+(?:\\.\\d+)?), BW=(\\d+(?:\\.\\d+)?)(KiB|MiB)/s");
-        Pattern patternIOPS_BW = Pattern.compile("(read|write): IOPS=(\\d+(?:\\.\\d+)?k?), BW=(\\d+(?:\\.\\d+)?)(KiB|MiB)/s\n");
+        Pattern patternIOPS_BW = Pattern.compile("(read|write): IOPS=(\\d+(?:\\.\\d+)?k?), BW=(\\d+(?:\\.\\d+)?)(KiB|MiB)/s");
         Pattern patternLatency = Pattern.compile("(read|write):.*?\\n\\s+lat \\((nsec|usec|msec)\\):.*?avg=(\\d+(?:\\.\\d+)?)", Pattern.DOTALL);
 
         Matcher matcherIOPS_BW = patternIOPS_BW.matcher(content);
@@ -283,12 +282,37 @@ public class MiniFileTest extends TestItem {
 
     @Override
     public String getResultDicName() {
-        return null;
+        String testName = miniFileName;
+        // 获取当前的日期和时间
+        LocalDateTime currentDateTime = LocalDateTime.now();
+//        System.out.println("Current Date and Time: " + currentDateTime);
+
+        // 定义日期时间格式
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+
+        // 格式化日期时间
+        String formattedDateTime = currentDateTime.format(formatter);
+
+        // 输出格式化后的日期时间
+//        System.out.println("Formatted Date and Time: " + formattedDateTime);
+
+        String resultDicName = testName + "_" + formattedDateTime;
+        return resultDicName;
     }
 
     @Override
     public void writeToFile(String resultPath) {
-
+        // 把测试结果和系统资源结果文件保存到resultPath目录
+        String command = "cp " + fioMiniFileTestResultPath + " " + directory + "/" + monitorResultCSV + " " + resultPath;
+        int exitCode = 0;
+        try {
+            exitCode = executeCommand(command);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("保存测试结果和系统资源结果成功" + " exit code:" + exitCode);
     }
 
     @Override
@@ -303,7 +327,10 @@ public class MiniFileTest extends TestItem {
     }
 
     public static void main(String[] args) throws Exception {
-        MiniFileTest miniFileTest = new MiniFileTest("/home/wlx/fsTest", "Admin@wlx");
+//        MiniFileTest miniFileTest = new MiniFileTest("/home/wlx/fsTest", "Admin@wlx");
+        MiniFileTest miniFileTest = new MiniFileTest("/home/autotuning/zf/glusterfs/software_test", "666");
         miniFileTest.startTest();
+        String name = miniFileTest.getResultDicName();
+        System.out.println(name);
     }
 }

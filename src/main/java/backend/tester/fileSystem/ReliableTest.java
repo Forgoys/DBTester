@@ -4,6 +4,15 @@ import backend.dataset.TestAllResult;
 import backend.dataset.TestResult;
 import backend.dataset.TestTimeData;
 import backend.tester.TestItem;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -19,7 +28,9 @@ public class ReliableTest extends TestItem {
     private String fioReliableTestTime; // 对应的秒数
     private String reliableResultDirectory; // 结果存放目录
     private String reliableTestScriptName; // 执行可靠性测试脚本名称
+
     private String processReliableResultCsvName; // 保存结果的csv文件名
+    private String reliableResultCSV;
 
     // sudo权限
     String localSudoPassword;
@@ -39,6 +50,7 @@ public class ReliableTest extends TestItem {
 
         monitorScriptName = "monitor.sh";
         monitorResultCSV = "fioReliableMonitorResult.csv";
+        reliableResultCSV = "reliableResult.csv";
     }
 
     public ReliableTest() {
@@ -268,9 +280,9 @@ public class ReliableTest extends TestItem {
     // 处理保存到文件夹的结果
     public void processReliableResult() throws InterruptedException, IOException {
 
-        File directory = new File(reliableResultDirectory);
+        File resultDirectory = new File(reliableResultDirectory);
         // 遍历目录下的所有txt文件
-        File[] files = directory.listFiles((dir, name) -> name.toLowerCase().endsWith(".txt"));
+        File[] files = resultDirectory.listFiles((dir, name) -> name.toLowerCase().endsWith(".txt"));
         if (files != null) {
             for (File file : files) {
                 StringBuilder contentBuilder = new StringBuilder();
@@ -291,7 +303,26 @@ public class ReliableTest extends TestItem {
             System.out.println(list);
         }
 
-        // 处理CSV的文件保存到时序数据里
+        // 把结果保存到csv文件
+        try {
+            // 创建 FileWriter 对象
+            FileWriter fileWriter = new FileWriter(directory + "/" + reliableResultCSV);
+            // 创建 BufferedWriter 对象
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            // 写入文本内容
+            for (List<String> list : reliableResultList) {
+                String content = list.toString();
+                bufferedWriter.write(content);
+                bufferedWriter.newLine();
+            }
+
+            // 关闭 BufferedWriter
+            bufferedWriter.close();
+            System.out.println("可靠性测试结果保存到：" + directory + "/" + reliableResultCSV);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         // 转换下格式
         List<Double> readIOPSList = new ArrayList<>();
         List<Double> readBWList = new ArrayList<>();
@@ -321,7 +352,6 @@ public class ReliableTest extends TestItem {
         for (List<Double> list : reliableResult) {
             System.out.println(list);
         }
-        System.out.println("CSV结果处理完成");
     }
 
     @Override
@@ -334,26 +364,50 @@ public class ReliableTest extends TestItem {
         return null;
     }
 
-
     @Override
     public String getResultDicName() {
-        return null;
+        String testName = "timeChoose" + timeChoose;
+        // 获取当前的日期和时间
+        LocalDateTime currentDateTime = LocalDateTime.now();
+//        System.out.println("Current Date and Time: " + currentDateTime);
+
+        // 定义日期时间格式
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+
+        // 格式化日期时间
+        String formattedDateTime = currentDateTime.format(formatter);
+
+        // 输出格式化后的日期时间
+//        System.out.println("Formatted Date and Time: " + formattedDateTime);
+
+        String resultDicName = testName + "_" + formattedDateTime;
+        return resultDicName;
     }
 
+    // 把可靠性结果放到csv
     @Override
     public void writeToFile(String resultPath) {
-
+        // 把测试结果和系统资源结果文件保存到resultPath目录
+        String command = "cp " + directory + "/" + reliableResultCSV + " " + directory + "/" + monitorResultCSV + " " + resultPath;
+        int exitCode = 0;
+        try {
+            exitCode = executeCommand(command);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("保存测试结果和系统资源结果成功" + " exit code:" + exitCode);
     }
 
     @Override
     public TestAllResult readFromFile(String resultPath) {
-
         return null;
     }
 
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
-        return null;
+        return List.of();
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {

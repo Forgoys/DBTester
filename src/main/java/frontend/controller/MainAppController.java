@@ -8,6 +8,7 @@ import backend.tester.fileSystem.MiniFileTest;
 import backend.tester.fileSystem.ReliableTest;
 import backend.tester.rdb.TPCCTester;
 import backend.tester.rdb.TPCHTester;
+import backend.tester.timeSeriesDB.ReadTester;
 import backend.tester.timeSeriesDB.WriteTester;
 import eu.hansolo.tilesfx.Test;
 import frontend.connection.DBConnection;
@@ -235,7 +236,12 @@ public class MainAppController {
         TestArguments connectArg = Util.getTestArgFromGridPane(testObjectConfigPane, 1);
         System.out.println(connectArg.values.toString());
         // 创建DBConnection对象
-        currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2), connectArg.values.get(3));
+        if (connectArg.values.size() == 4) {
+            currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2), connectArg.values.get(3));
+        } else if (connectArg.values.size() == 3) {  // TDengine只需要三个参数
+            currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2));
+            return;
+        }
 
         // 尝试连接数据库
         if (currentDBConnection.connect()) {
@@ -440,10 +446,10 @@ public class MainAppController {
     private void onTestProjectParmConfirmButtonClicked() throws IOException, InterruptedException {
         // 首先清空旧的参数值
         TestArguments testArguments = Util.getTestArgFromGridPane(testProjectConfigPane, 1);
-
-        for (int i = 0; i < testArguments.values.size(); i++) {
-            System.out.println(testArguments.values.get(i));
+        if (testArguments == null) {  // 密码错误
+            return;
         }
+        System.out.println(testArguments.values.toString());
 
         String testProject = testProjectSelectBox.getValue();
         StringBuilder message2Update;
@@ -538,8 +544,92 @@ public class MainAppController {
                 new Thread(task).start();
                 break;
             case "写入性能":
+                dbOtherTestController.clearAll();
+                message2Update = new StringBuilder();
+                task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        updateMessage(message2Update.append("开始写入性能测试\n").toString());
+                        testItem = new WriteTester("写入性能", currentDBConnection, testArguments);
+                        updateMessage(message2Update.append("准备测试环境...\n").toString());
+                        try {
+                            testItem.testEnvPrepare();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            String message = e.getMessage();
+                            Util.popUpInfo(message, "Error");
+                        }
+                        updateMessage(message2Update.append("完成\n").toString());
+                        updateMessage(message2Update.append("测试中....\n").toString());
+                        try {
+                            testItem.startTest();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            String message = e.getMessage();
+                            Util.popUpInfo(message, "Error");
+                        }
+                        updateMessage(message2Update.append("测试完成\n").toString());
+                        updateMessage(message2Update.append("开始生成测试结果\n").toString());
+                        Platform.runLater(() -> {
+                            testResult = testItem.getTestResults();
+                            dbOtherTestController.displayTestResults(testResult);
+                            testTimeData = testItem.getTimeData();
+                            dbOtherTestController.setTimeData(testTimeData);
+
+                        });
+                        updateMessage(message2Update.append("生成完毕\n").toString());
+                        return null;
+                    }
+                };
+                // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
+                dbOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+
+                // 在新线程中执行任务
+                new Thread(task).start();
                 break;
             case "查询性能":
+                dbOtherTestController.clearAll();
+                message2Update = new StringBuilder();
+                task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        updateMessage(message2Update.append("开始查询性能测试\n").toString());
+                        testItem = new ReadTester("查询性能", currentDBConnection, testArguments);
+                        updateMessage(message2Update.append("准备测试环境...\n").toString());
+                        try {
+                            testItem.testEnvPrepare();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            String message = e.getMessage();
+                            Util.popUpInfo(message, "Error");
+                        }
+                        updateMessage(message2Update.append("完成\n").toString());
+                        updateMessage(message2Update.append("测试中....\n").toString());
+                        try {
+                            testItem.startTest();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            String message = e.getMessage();
+                            Util.popUpInfo(message, "Error");
+                        }
+                        updateMessage(message2Update.append("测试完成\n").toString());
+                        updateMessage(message2Update.append("开始生成测试结果\n").toString());
+                        Platform.runLater(() -> {
+                            testResult = testItem.getTestResults();
+                            dbOtherTestController.displayTestResults(testResult);
+                            testTimeData = testItem.getTimeData();
+                            dbOtherTestController.setTimeData(testTimeData);
+
+                        });
+                        updateMessage(message2Update.append("生成完毕\n").toString());
+                        return null;
+                    }
+                };
+                // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
+                dbOtherTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+
+                // 在新线程中执行任务
+                new Thread(task).start();
                 break;
             case "可靠性":
                 if (testObjectSelectBox.getValue().equals("InfluxDB") || testObjectSelectBox.getValue().equals("Lindorm") || testObjectSelectBox.getValue().equals("TDengine")) {

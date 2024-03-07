@@ -66,23 +66,54 @@ public class Util {
         TestArguments testArguments = new TestArguments();
 
         for (Node node : gridPane.getChildren()) {
-            // ????????
             Integer nodeRowIndex = GridPane.getRowIndex(node);
-            // ????????????????? 0
+            // 修正可能的null值
             int actualRowIndex = (nodeRowIndex == null) ? 0 : nodeRowIndex;
 
-            // ????? rowIndex ???????
+            // 只处理位于指定行及之后的行的控件
             if (actualRowIndex >= rowIndex) {
-                if (node instanceof TextField textField) {
-                    testArguments.values.add(textField.getText()); // ??TextField??
-                } else if (node instanceof ComboBox) {
-                    @SuppressWarnings("unchecked")
-                    ComboBox<String> comboBox = (ComboBox<String>) node;
-                    String selected = comboBox.getSelectionModel().getSelectedItem();
-                    if (selected != null) {
-                        testArguments.values.add(selected); // ??ComboBox????
+                // 获取当前控件所在列的索引
+                Integer nodeColIndex = GridPane.getColumnIndex(node);
+                int actualColIndex = (nodeColIndex == null) ? 0 : nodeColIndex;
+
+                // 检查当前节点是否是TextField或ComboBox
+                if (node instanceof TextField || node instanceof ComboBox) {
+                    // 尝试获取左侧的Label控件
+                    Label label = null;
+                    for (Node possibleLabelNode : gridPane.getChildren()) {
+                        Integer labelRow = GridPane.getRowIndex(possibleLabelNode);
+                        Integer labelCol = GridPane.getColumnIndex(possibleLabelNode);
+                        int actualLabelRow = (labelRow == null) ? 0 : labelRow;
+                        int actualLabelCol = (labelCol == null) ? 0 : labelCol;
+
+                        // 检查是否为当前TextField/ComboBox左侧的Label
+                        if (actualLabelRow == actualRowIndex && actualLabelCol == actualColIndex - 1) {
+                            if (possibleLabelNode instanceof Label) {
+                                label = (Label) possibleLabelNode;
+                                break;
+                            }
+                        }
+                    }
+
+                    // 如果找到了Label并且Label的内容是特定的文本，则进行特殊处理
+                    if (label != null && "本机sudo密码".equals(label.getText())) {
+                        // 这里处理TextField中的内容
+                        if (node instanceof TextField textField) {
+                            String textContent = textField.getText();
+                            // 在这里添加你的特定处理逻辑
+                            if (!Util.checkSudoPassword(textContent)) {
+                                Util.popUpInfo("本机超级权限密码错误，请重新输入", "错误");
+                                return null;
+                            }
+                        }
                     } else {
-                        testArguments.values.add(""); // ??????????
+                        // 对于非特定Label或其它情况的通用处理
+                        if (node instanceof TextField textField) {
+                            testArguments.values.add(textField.getText());
+                        } else if (node instanceof ComboBox comboBox) {
+                            String selected = (String) comboBox.getSelectionModel().getSelectedItem();
+                            testArguments.values.add(selected != null ? selected : "");
+                        }
                     }
                 }
             }
@@ -90,6 +121,37 @@ public class Util {
 
         return testArguments;
     }
+
+
+//    public static TestArguments getTestArgFromGridPane(GridPane gridPane, int rowIndex) {
+//        TestArguments testArguments = new TestArguments();
+//
+//        for (Node node : gridPane.getChildren()) {
+//            // ????????
+//            Integer nodeRowIndex = GridPane.getRowIndex(node);
+//            // ????????????????? 0
+//            int actualRowIndex = (nodeRowIndex == null) ? 0 : nodeRowIndex;
+//
+//            // ????? rowIndex ???????
+//            if (actualRowIndex >= rowIndex) {
+//                if (node instanceof TextField textField) {
+//                    testArguments.values.add(textField.getText()); // ??TextField??
+//
+//                } else if (node instanceof ComboBox) {
+//                    @SuppressWarnings("unchecked")
+//                    ComboBox<String> comboBox = (ComboBox<String>) node;
+//                    String selected = comboBox.getSelectionModel().getSelectedItem();
+//                    if (selected != null) {
+//                        testArguments.values.add(selected); // ??ComboBox????
+//                    } else {
+//                        testArguments.values.add(""); // ??????????
+//                    }
+//                }
+//            }
+//        }
+//
+//        return testArguments;
+//    }
 
     public static boolean checkSudoPassword(String password) {
         String command = "sudo -S ls /root"; // 示例命令，需要sudo权限
