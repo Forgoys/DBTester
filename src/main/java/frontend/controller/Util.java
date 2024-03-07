@@ -17,10 +17,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class Util {
-    public enum status {
-        SSH_UNCONNECT;
-    }
-
     public static void popUpInfo(String information, String title) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, information, ButtonType.OK);
         alert.setHeaderText(title);

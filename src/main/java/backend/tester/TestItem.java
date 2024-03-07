@@ -58,7 +58,7 @@ public abstract class TestItem implements Testable, Writable{
      * ssh远程连接句柄，通过该句柄与远程服务器进行交互。。直接使用MainAppController.sshConnection
      * 如果某项测试需要用到该句柄，则需在子类中初始化该句柄。
      */
-    protected SSHConnection sshStmt;
+//    protected SSHConnection sshStmt;
 
     /**
      * 数据库连接句柄，通过该句柄与远程数据库进行交互。直接使用MainAppController.dbConnection
@@ -83,15 +83,13 @@ public abstract class TestItem implements Testable, Writable{
 
     public TestItem(){}
 
-    public TestItem(String testName, SSHConnection sshStmt, DBConnection DBStmt) {
+    public TestItem(String testName, DBConnection DBStmt) {
         this.testName = testName;
-        this.sshStmt = sshStmt;
         this.DBStmt = DBStmt;
     }
 
-    public TestItem(String testName, SSHConnection sshStmt, DBConnection DBStmt, TestArguments testArgs) {
+    public TestItem(String testName, DBConnection DBStmt, TestArguments testArgs) {
         this.testName = testName;
-        this.sshStmt = sshStmt;
         this.DBStmt = DBStmt;
         this.testArgs = testArgs;
     }
