@@ -276,8 +276,13 @@ public class FioReadWriteTest extends TestItem {
             // 创建 BufferedWriter 对象
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             // 写入文本内容
-            bufferedWriter.write(content);
+//            bufferedWriter.write(content);
+//            bufferedWriter.newLine();
+
+            List<String> s = List.of(fioRWTestResult.values);
+            bufferedWriter.write(s.toString());
             bufferedWriter.newLine();
+
             // 关闭 BufferedWriter
             bufferedWriter.close();
             System.out.println("读写测试结果保存到：" + directory + "/" + fioReadWriteTestResultTxt);
