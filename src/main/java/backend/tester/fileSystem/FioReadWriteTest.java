@@ -14,6 +14,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.io.FileReader;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
+
+
 public class FioReadWriteTest extends TestItem {
     // 用户参数 目录 文件块大小 文件大小 读写方式
     private String directory;
@@ -176,10 +183,6 @@ public class FioReadWriteTest extends TestItem {
         System.out.println("FIO读写速度测试完成");
     }
 
-    @Override
-    public List<List<Double>> getTimeData() {
-        return null;
-    }
 
     // 将带宽从KiB/s或MiB/s转换为KiB/s
     private static double convertBWToMiB(String value, String unit) {
@@ -254,6 +257,11 @@ public class FioReadWriteTest extends TestItem {
         fioRWTestResult.names = TestResult.FIO_RW_TEST;
         fioRWTestResult.values = new String[]{readIOPS, readBW, readLat, writeIOPS, writeBW, writeLat};
         System.out.println(Arrays.toString(fioRWTestResult.values));
+
+        List<List<Double>> monitorResult = new ArrayList<>();
+        monitorResult = getTimeData();
+        System.out.println(monitorResult);
+
         System.out.println("FIO读写测试结果保存完成");
     }
 
@@ -263,6 +271,43 @@ public class FioReadWriteTest extends TestItem {
         return fioRWTestResult;
     }
 
+    // 返回系统资源数据
+    @Override
+    public List<List<Double>> getTimeData() {
+        List<List<Double>> monitorResult = new ArrayList<>();
+
+        String csvFile = directory + "/" + monitorResultCSV;
+        try (FileReader reader = new FileReader(csvFile);
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT)) {
+            for (CSVRecord record : csvParser) {
+                String iteration = record.get(0);
+                String userCPU = record.get(1);
+                String systemCPU = record.get(2);
+                String ioWaitCPU = record.get(3);
+                String memoryUsage = record.get(4);
+                System.out.println("Iteration: " + iteration + ", User CPU Usage (%): " + userCPU +
+                        ", System CPU Usage (%): " + systemCPU + ", I/O Wait CPU Usage (%): " + ioWaitCPU +
+                        ", Memory Usage (%): " + memoryUsage);
+                List<Double> list = new ArrayList<>();
+                list.add(Double.valueOf(systemCPU));
+                list.add(Double.valueOf(memoryUsage));
+                monitorResult.add(list);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        List<Double> systemCpuUsageList = new ArrayList<>();
+        List<Double> memoryUsageList = new ArrayList<>();
+        for (List<Double> list : monitorResult) {
+            systemCpuUsageList.add(list.get(0));
+            memoryUsageList.add(list.get(1));
+        }
+        monitorResult.clear();
+        monitorResult.add(systemCpuUsageList);
+        monitorResult.add(memoryUsageList);
+        return monitorResult;
+    }
 
     public String getDirectory() {
         return directory;
