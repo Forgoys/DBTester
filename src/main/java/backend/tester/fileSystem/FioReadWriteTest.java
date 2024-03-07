@@ -39,7 +39,7 @@ public class FioReadWriteTest extends TestItem {
     private String monitorResultCSV;
 
     // 测试结果保存文件
-    String fioReadWriteTestResult;
+    String fioReadWriteTestResultTxt;
 
     // sudo权限
     String localSudoPassword;
@@ -81,7 +81,7 @@ public class FioReadWriteTest extends TestItem {
 
         monitorScriptName = "monitor.sh";
         monitorResultCSV = "fioReadWriteTestMonitorResult.csv";
-        fioReadWriteTestResult = "fioReadWriteTestResult.txt";
+        fioReadWriteTestResultTxt = "fioReadWriteTestResult.txt";
     }
 
     public int executeCommand(String command) throws IOException, InterruptedException {
@@ -272,23 +272,15 @@ public class FioReadWriteTest extends TestItem {
         // 保存结果到文件
         try {
             // 创建 FileWriter 对象
-            FileWriter fileWriter = new FileWriter(directory + "/" + fioReadWriteTestResult);
+            FileWriter fileWriter = new FileWriter(directory + "/" + fioReadWriteTestResultTxt);
             // 创建 BufferedWriter 对象
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             // 写入文本内容
-            for (String s : fioRWTestResult.names) {
-                bufferedWriter.write(s);
-                bufferedWriter.write(",");
-            }
-            bufferedWriter.newLine();
-            for (String s : fioRWTestResult.values) {
-                bufferedWriter.write(s);
-                bufferedWriter.write(",");
-            }
+            bufferedWriter.write(content);
             bufferedWriter.newLine();
             // 关闭 BufferedWriter
             bufferedWriter.close();
-            System.out.println("读写测试结果保存到：" + directory + "/" + fioReadWriteTestResult);
+            System.out.println("读写测试结果保存到：" + directory + "/" + fioReadWriteTestResultTxt);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -400,7 +392,7 @@ public class FioReadWriteTest extends TestItem {
     @Override
     public void writeToFile(String resultPath) {
         // 把测试结果和系统资源结果文件保存到resultPath目录
-        String command = "cp " + directory + "/" + fioReadWriteTestResult + " " + directory + "/" + monitorResultCSV + " " + resultPath;
+        String command = "cp " + directory + "/" + fioReadWriteTestResultTxt + " " + directory + "/" + monitorResultCSV + " " + resultPath;
         int exitCode = 0;
         try {
             exitCode = executeCommand(command);
@@ -427,7 +419,7 @@ public class FioReadWriteTest extends TestItem {
         FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/autotuning/zf/glusterfs/software_test", "666", "4k", "16k", "%70随机读,%30随机写");
 //        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/parallels/Desktop/fs", "lhjlhj6929", "4k", "8k", "%70随机读,%30随机写");
         fioReadWriteTest.startTest();
-        String name = fioReadWriteTest.getResultDicName();
-        System.out.println(name);
+//        String name = fioReadWriteTest.getResultDicName();
+//        System.out.println(name);
     }
 }
