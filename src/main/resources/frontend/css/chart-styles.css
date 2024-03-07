@@ -5,5 +5,6 @@
 
 /* 隐藏数据点的圆圈 */
 .chart-line-symbol > .chart-line-symbol {
+    -fx-padding: 0;
     -fx-background-color: transparent, transparent; /* 设置数据点为透明 */
 }

@@ -51,10 +51,10 @@ public class FioReadWriteTest extends TestItem {
             case "顺序写":
                 rwIndex = "3";
                 break;
-            case "%70顺序读,%30顺序写":
+            case "70%顺序读,30%顺序写":
                 rwIndex = "4";
                 break;
-            case "%70随机读,%30随机写":
+            case "70%随机读,30%随机写":
                 rwIndex = "5";
                 break;
             default:

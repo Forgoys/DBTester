@@ -103,7 +103,9 @@ public class MiniFileTest extends TestItem {
         System.out.println("给脚本添加执行权限:" + miniFileWriteScriptName + " Exit code:" + exitCode);
 
         // 复制cifar数据集
+
         String localMiniFilePath = currentDirectory + "/src/main/resources/miniFile/" + miniFileName;
+        command = "cp -r " + localMiniFilePath + " " + directory;
         exitCode = executeCommand(command);
         System.out.println("复制cifar数据集:" + localMiniFilePath + " Exit code:" + exitCode);
 
@@ -228,7 +230,8 @@ public class MiniFileTest extends TestItem {
         }
         String content = textBuilder.toString();
 
-        Pattern patternIOPS_BW = Pattern.compile("(read|write): IOPS=(\\d+(?:\\.\\d+)?), BW=(\\d+(?:\\.\\d+)?)(KiB|MiB)/s");
+//        Pattern patternIOPS_BW = Pattern.compile("(read|write): IOPS=(\\d+(?:\\.\\d+)?), BW=(\\d+(?:\\.\\d+)?)(KiB|MiB)/s");
+        Pattern patternIOPS_BW = Pattern.compile("(read|write): IOPS=(\\d+(?:\\.\\d+)?k?), BW=(\\d+(?:\\.\\d+)?)(KiB|MiB)/s\n");
         Pattern patternLatency = Pattern.compile("(read|write):.*?\\n\\s+lat \\((nsec|usec|msec)\\):.*?avg=(\\d+(?:\\.\\d+)?)", Pattern.DOTALL);
 
         Matcher matcherIOPS_BW = patternIOPS_BW.matcher(content);
@@ -300,7 +303,7 @@ public class MiniFileTest extends TestItem {
     }
 
     public static void main(String[] args) throws Exception {
-        MiniFileTest miniFileTest = new MiniFileTest("/home/autotuning/zf/glusterfs/software_test", "666");
+        MiniFileTest miniFileTest = new MiniFileTest("/home/wlx/fsTest", "Admin@wlx");
         miniFileTest.startTest();
     }
 }
