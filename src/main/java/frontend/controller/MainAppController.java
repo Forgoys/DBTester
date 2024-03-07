@@ -275,24 +275,44 @@ public class MainAppController {
         TextField jdbcDriverNameTextField = new TextField();
         testObjectConfigPane.add(new Label("JDBC驱动"), 0, rowIndex);
         testObjectConfigPane.add(jdbcDriverNameTextField, 1, rowIndex++);
-        Button jdbcDriverButton = new Button("选择驱动");
-        jdbcDriverButton.setOnAction(e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("选择文件");
-            // 设置初始目录为程序的当前工作目录
-            fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
-            // 设置文件过滤器
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR 文件 (*.jar)", "*.jar"));
-            // 通过从任何一个组件获取Stage
-            Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
-            File selectedFile = fileChooser.showOpenDialog(stage);
-            if (selectedFile != null) {
-                jdbcDriverNameTextField.clear();
-                jdbcDriverNameTextField.setText(selectedFile.getAbsolutePath());
-            }
-        });
 
-        testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++);
+        String testObject = testObjectSelectBox.getValue();
+        jdbcDriverNameTextField.clear();
+        // 先自动找驱动文件
+        File driverFolder = new File(System.getProperty("user.dir") + File.separator + "JDBCDriver" + File.separator + testObject);
+        File selectedFile = null;
+        // 检查driverFolder是否存在且是一个目录
+        if (driverFolder.exists() && driverFolder.isDirectory()) {
+            File[] files = driverFolder.listFiles((dir, name) -> name.endsWith(".jar"));
+            // 检查是否找到了至少一个jar文件
+            if (files != null && files.length > 0) {
+                selectedFile = files[0]; // 选择第一个找到的JAR文件
+            }
+        }
+
+        // 如果找到了文件，更新文本字段。否则，准备并显示选择按钮
+        if (selectedFile != null) {
+            jdbcDriverNameTextField.setText(selectedFile.getAbsolutePath());
+        } else {
+            // 显示"未找到驱动"消息并提供一个按钮让用户手动选择文件
+            jdbcDriverNameTextField.setText("未找到驱动，请手动选择");
+
+            Button jdbcDriverButton = new Button("选择驱动");
+            jdbcDriverButton.setOnAction(e -> {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("选择文件");
+                fileChooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR 文件 (*.jar)", "*.jar"));
+                Stage stage = (Stage) testObjectSelectBox.getScene().getWindow();
+                File file = fileChooser.showOpenDialog(stage);
+                if (file != null) {
+                    jdbcDriverNameTextField.clear();
+                    jdbcDriverNameTextField.setText(file.getAbsolutePath());
+                }
+            });
+
+            testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++); // 不再使用rowIndex++，除非有其他元素会紧随其后添加
+        }
 
         Label dbURLLabel = new Label("数据库URL");
         TextField dbURLTextField = new TextField();
@@ -591,7 +611,7 @@ public class MainAppController {
                         updateMessage(message2Update.append("开始小文件测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
 
-                        testItem = new MiniFileTest(testArguments.values.get(0));
+                        testItem = new MiniFileTest(testArguments.values.get(0), testArguments.values.get(1));
                         testItem.startTest();
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());

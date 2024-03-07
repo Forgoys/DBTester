@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,62 +23,88 @@ public class MiniFileTest extends TestItem {
     private String miniFileScriptName;
     private String miniFileScriptDirectory;
 
-    // 远程数据目录
-    private String remoteMiniFileDataPath;
-    private String remoteIp;
-    private String remoteName;
+    // sudo权限
+    String localSudoPassword;
 
     // 指令运行结果
     TestResult fioMiniFileTestResult = new TestResult();
+    // 脚本执行后结果保存在txt文件
+    String fioMiniFileTestResultPath;
 
-    public MiniFileTest() {}
+    public MiniFileTest() {
+    }
 
-    public MiniFileTest(String directory) {
-        this.directory = directory;
+    public MiniFileTest(String directory, String localSudoPassword) {
+        this.directory = directory + "/miniFileTest";
+        this.localSudoPassword = localSudoPassword;
+
         miniFileName = "cifar-10-batches-bin";
-        miniFileDirectory = directory + "/" + miniFileName;
+        miniFileDirectory = this.directory + "/" + miniFileName;
         miniFileScriptName = "miniFileTest.sh";
-        miniFileScriptDirectory = directory + "/" + miniFileScriptName;
-
-        remoteMiniFileDataPath = "/home/wlx/zf/test_data_prepare/miniFileData";
-        remoteIp = "10.181.8.216";
-
+        miniFileScriptDirectory = this.directory + "/" + miniFileScriptName;
+        fioMiniFileTestResultPath = this.directory + "/" + "miniFileTestResult.txt";
     }
 
     // 准备测试数据 准备测试工具 准备测试脚本 配置文件.ini
     @Override
-    public void testEnvPrepare() throws Exception {
-        String command = "scp -r " + remoteMiniFileDataPath + " " + directory;
-//        scp -r wlx@10.181.8.216:/home/wlx/zf/test_data_prepare/miniFileData .
+    public void testEnvPrepare() throws IOException, InterruptedException {
+        String currentDirectory = System.getProperty("user.dir");
+        System.out.println("Current directory: " + currentDirectory);
+        String localScriptPath = currentDirectory + "/src/main/resources/scripts/" + miniFileScriptName;
 
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        // 创建miniFileTest小文件测试文件夹
+        System.out.println("创建文件夹:" + directory);
+        String command = "mkdir -p " + directory;
+        processBuilder.command("bash", "-c", command);
+        Process process = processBuilder.start();
+
+        // 等待进程执行完毕
+        int exitCode = process.waitFor();
+        System.out.println("创建小文件测试文件夹:" + directory + " Exit code:" + exitCode);
+
+        // 复制miniFileTest小文件测试脚本
+        command = "cp " + localScriptPath + " " + directory;
+        processBuilder.command("bash", "-c", command);
         System.out.println(command);
+        process = processBuilder.start();
+        // 等待进程执行完毕
+        exitCode = process.waitFor();
+        System.out.println("复制reliableTest可靠性测试脚本:" + miniFileScriptName + " Exit code:" + exitCode);
 
-//        // 创建一个 ProcessBuilder 对象
-//        ProcessBuilder processBuilder = new ProcessBuilder();
-//        processBuilder.command("bash", "-c", command);
-//
-//        // 启动进程
-//        Process process = processBuilder.start();
-//
-//        // 等待进程执行完毕
-//        int exitCode = process.waitFor();
-//        System.out.println("Exit code: " + exitCode);
+        // 给脚本添加执行权限
+        command = "chmod +x " + directory + "/" + miniFileScriptName;
+        processBuilder.command("bash", "-c", command);
+        System.out.println(command);
+        process = processBuilder.start();
+        // 等待进程执行完毕
+        exitCode = process.waitFor();
+        System.out.println("给脚本添加执行权限:" + miniFileScriptName + " Exit code:" + exitCode);
 
+        // 复制cifar数据集
+        String localMiniFilePath = currentDirectory + "/src/main/resources/miniFile/" + miniFileName;
+        command = "cp -r " + localMiniFilePath + " " + directory;
+        processBuilder.command("bash", "-c", command);
+        System.out.println(command);
+        process = processBuilder.start();
+        // 等待进程执行完毕
+        exitCode = process.waitFor();
+        System.out.println("复制cifar数据集:" + miniFileName + " Exit code:" + exitCode);
     }
 
     @Override
     public void startTest() throws IOException, InterruptedException {
-//        获取参数
-//        String directory;
-//        String miniFileName;
-//        String miniFileDirectory;
-//        String miniFileScriptName;
-//        String miniFileScriptDirectory;
 
-        // 执行脚本指令
-        String fioCommand = miniFileScriptDirectory + miniFileDirectory;
+        System.out.println("小文件测试环境准备");
+        testEnvPrepare();
+        System.out.println("小文件测试环境准备完成");
 
-        String password = "666";
+        System.out.println("小文件测试开始");
+
+        // 执行脚本指令 参数：cifar路径
+        String fioCommand = miniFileScriptDirectory + " " + miniFileDirectory + " " + fioMiniFileTestResultPath;
+
+        String password = localSudoPassword;
         fioCommand = "echo " + password + " | sudo -S " + fioCommand;
         System.out.println(fioCommand);
 
@@ -108,65 +135,83 @@ public class MiniFileTest extends TestItem {
         int exitCode = process.waitFor();
         System.out.println("Exit code: " + exitCode);
 
-//        fioResultSave(results);
+        fioResultSave(results);
+    }
+
+    // 将带宽从KiB/s或MiB/s转换为KiB/s
+    private static double convertBWToMiB(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "KiB":
+                return numericalValue;
+            case "MiB":
+                return numericalValue * 1000;
+            default:
+                return 0;
+        }
+    }
+
+    // 将延迟从nsec、usec或msec转换为usec
+    private static double convertLatencyToMsec(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "nsec":
+                return numericalValue / 1000;
+            case "usec":
+                return numericalValue;
+            case "msec":
+                return numericalValue * 1000;
+            default:
+                return 0;
+        }
     }
 
     public void fioResultSave(List<String> results) {
         StringBuilder textBuilder = new StringBuilder();
         for (String result : results) {
             textBuilder.append(result);
+            textBuilder.append(System.lineSeparator());
         }
-        String text = textBuilder.toString();
+        String content = textBuilder.toString();
 
-        // 分别定义read和write的正则表达式
-//        String regexRead = "read: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
-        String regexRead = "read: IOPS=([\\d.]+[kMG]?), BW=([\\d.]+[MiB|GiB|TiB]+/s).*lat \\((usec|msec)\\):.*avg=([\\d.]+)";
+        Pattern patternIOPS_BW = Pattern.compile("(read|write): IOPS=(\\d+(?:\\.\\d+)?), BW=(\\d+(?:\\.\\d+)?)(KiB|MiB)/s");
+        Pattern patternLatency = Pattern.compile("(read|write):.*?\\n\\s+lat \\((nsec|usec|msec)\\):.*?avg=(\\d+(?:\\.\\d+)?)", Pattern.DOTALL);
 
-        String regexWrite = "write: IOPS=(\\d+), BW=(\\d+)(KiB/s|kB/s).*?lat \\((usec|msec)\\):.*?avg=(\\d+\\.\\d+),";
+        Matcher matcherIOPS_BW = patternIOPS_BW.matcher(content);
+        Matcher matcherLatency = patternLatency.matcher(content);
 
-        // 对读的部分处理
-        Pattern pattern = Pattern.compile(regexRead, Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(text);
-        String readIops = "0";
-        String readBw = "0";
+        String readIOPS = "0";
+        String readBW = "0";
+        String writeIOPS = "0";
+        String writeBW = "0";
         String readLat = "0";
-        if (matcher.find()) {
-            readIops = matcher.group(1);
-            readBw = matcher.group(2);
-            String unit = matcher.group(3); // 保留带宽单位
-            String latUnit = matcher.group(4);
-            double avgLat = Double.parseDouble(matcher.group(5));
-            if ("msec".equals(latUnit)) {
-                avgLat *= 1000; // 如果单位是msec，则乘以1000
-            }
-            readLat = String.valueOf(avgLat);
-            // 打印结果
-            System.out.println("read:IOPS=" + readIops + ", BW=" + readBw + unit + ", Avg Latency=" + readLat + "usec");
-        }
-
-        // 对写的部分处理
-        pattern = Pattern.compile(regexWrite, Pattern.DOTALL);
-        matcher = pattern.matcher(text);
-        String writeIops = "0";
-        String writeBw = "0";
         String writeLat = "0";
-        while (matcher.find()) {
-            writeIops = matcher.group(1);
-            writeBw = matcher.group(2);
-            String unit = matcher.group(3); // 保留带宽单位
-            String latUnit = matcher.group(4);
-            double avgLat = Double.parseDouble(matcher.group(5));
-            if ("msec".equals(latUnit)) {
-                avgLat *= 1000; // 如果单位是msec，则乘以1000
+
+        while (matcherIOPS_BW.find()) {
+            double bw = convertBWToMiB(matcherIOPS_BW.group(3), matcherIOPS_BW.group(4));
+            if ("read".equals(matcherIOPS_BW.group(1))) {
+                readIOPS = matcherIOPS_BW.group(2);
+                readBW = String.valueOf(bw);
+            } else if ("write".equals(matcherIOPS_BW.group(1))) {
+                writeIOPS = matcherIOPS_BW.group(2);
+                writeBW = String.valueOf(bw);
             }
-            writeLat = String.valueOf(avgLat);
-            // 打印结果
-            System.out.println("write:IOPS=" + writeIops + ", BW=" + writeBw + unit + ", Avg Latency=" + writeLat + "usec");
         }
 
+        while (matcherLatency.find()) {
+            double lat = convertLatencyToMsec(matcherLatency.group(3), matcherLatency.group(2));
+            if ("read".equals(matcherLatency.group(1))) {
+                readLat = String.valueOf(lat);
+            } else if ("write".equals(matcherLatency.group(1))) {
+                writeLat = String.valueOf(lat);
+            }
+        }
         // 添加结果到TestResult类
         fioMiniFileTestResult.names = TestResult.FIO_MINIFILE_TEST;
-        fioMiniFileTestResult.values = new String[]{readIops, readBw, readLat, writeIops, writeBw, writeLat};
+        fioMiniFileTestResult.values = new String[]{readIOPS, readBW, readLat, writeIOPS, writeBW, writeLat};
+
+        System.out.println(Arrays.toString(fioMiniFileTestResult.values));
+        System.out.println("FIO小文件测试结果保存完成");
     }
 
     @Override
@@ -200,8 +245,8 @@ public class MiniFileTest extends TestItem {
         return null;
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        MiniFileTest miniFileTest = new MiniFileTest("/home/autotuning/zf/glusterfs/software_test");
+    public static void main(String[] args) throws Exception {
+        MiniFileTest miniFileTest = new MiniFileTest("/home/autotuning/zf/glusterfs/software_test", "666");
         miniFileTest.startTest();
     }
 }
