@@ -390,7 +390,7 @@ public class TPCHTester extends TestItem {
     public static void main(String[] args) {
 
         DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
-                "jdbc:oscar://10.181.8.146:2004/TPCH_5",
+                "jdbc:oscar://10.181.8.146:2005/ADAPTTEST",
                 "SYSDBA",
                 "szoscar55");
         dbConnection.connect();
