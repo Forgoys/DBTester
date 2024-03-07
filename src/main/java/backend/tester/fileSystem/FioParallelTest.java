@@ -219,10 +219,10 @@ public class FioParallelTest extends TestItem {
             // 创建 BufferedWriter 对象
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             // 写入文本内容
-//            bufferedWriter.write(content);
-//            bufferedWriter.newLine();
-            List<String> s = List.of(fioParallelTestResult.values);
-            bufferedWriter.write(s.toString());
+            for (String s : fioParallelTestResult.values) {
+                bufferedWriter.write(s);
+                bufferedWriter.write(",");
+            }
             bufferedWriter.newLine();
             // 关闭 BufferedWriter
             bufferedWriter.close();
@@ -282,8 +282,31 @@ public class FioParallelTest extends TestItem {
 
     @Override
     public TestAllResult readFromFile(String resultPath) {
+        String filePath = resultPath + "/" + "fioParallelTestResult.txt";
+//        List<String> result = new ArrayList<>();
+        String[] result = new String[0];
+        try {
+            // 创建文件对象
+            File file = new File(filePath);
+            // 创建 BufferedReader 以读取文件内容
+            BufferedReader reader = null;
+            reader = new BufferedReader(new FileReader(file));
+            String line;
+            line = reader.readLine();
+//            result = Arrays.asList(line).toArray(new String[0]);
+            result = line.split(",");
+            System.out.println(Arrays.toString(result));
+            // 关闭 BufferedReader
+            reader.close();
+        } catch (IOException e) {
+            // 处理读取文件时可能发生的异常
+            e.printStackTrace();
+        }
 
-        return null;
+        TestResult testResult = new TestResult();
+        testResult.names = TestResult.FIO_PARALLEL_TEST;
+        testResult.values = result;
+        return new TestAllResult(testResult);
     }
 
     @Override
@@ -296,5 +319,6 @@ public class FioParallelTest extends TestItem {
         fioParallelTest.startTest();
         String name = fioParallelTest.getResultDicName();
         System.out.println(name);
+        fioParallelTest.readFromFile("/home/autotuning/zf/glusterfs/software_test/parallelTest");
     }
 }
