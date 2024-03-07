@@ -693,6 +693,8 @@ public class MainAppController {
                         Platform.runLater(() -> {
                             testResult = testItem.getTestResults();
                             fsReadWriteTestController.displayTestResults(testResult);
+                            testTimeData = testItem.getTimeData();
+                            fsReadWriteTestController.setTimeData(testTimeData);
                         });
                         updateMessage(message2Update.append("生成完毕\n").toString());
                         return null;
@@ -954,7 +956,7 @@ public class MainAppController {
                     tmpTestItem = new FioReadWriteTest();
                     testAllResult = tmpTestItem.readFromFile(absolutePath);
                     fsReadWriteTestController.displayTestResults(testAllResult.testResult);
-//                    fsReadWriteTestController.setTimeData(testAllResult.timeDataResult);
+                    fsReadWriteTestController.setTimeData(testAllResult.timeDataResult);
                     break;
                 case "并发度测试":
                     fsOtherTestController.clearAll();

@@ -84,7 +84,7 @@ public class FSReadWriteTestController {
         memoryUsageLineChart.getData().clear();
     }
 
-    private void updateCharts() {
+    void updateCharts() {
         // 确保图例可见
         cpuUsageLineChart.setLegendVisible(true);
         memoryUsageLineChart.setLegendVisible(true);

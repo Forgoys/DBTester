@@ -162,4 +162,34 @@ public class PressTester extends TestItem{
         status = Status.RUNNING;
         // 执行过程通过一个taopress.py的程序执行来完成，这个程序的输入是dbuser,dbpassword,dbname,testTime,clients
     }
+
+    @Override
+    public List<List<Double>> getTimeData() {
+        return null;
+    }
+
+    @Override
+    public TestResult getTestResults() {
+        return null;
+    }
+
+    @Override
+    public String getResultDicName() {
+        return null;
+    }
+
+    @Override
+    public void writeToFile(String resultPath) {
+
+    }
+
+    @Override
+    public TestAllResult readFromFile(String resultPath) {
+        return null;
+    }
+
+    @Override
+    public List<List<Double>> readFromFile1(String resultPath) {
+        return null;
+    }
 }

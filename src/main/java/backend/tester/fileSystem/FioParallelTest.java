@@ -268,8 +268,17 @@ public class FioParallelTest extends TestItem {
     @Override
     public void writeToFile(String resultPath) {
         // 把测试结果和系统资源结果文件保存到resultPath目录
-        String command = "cp " + directory + "/" + fioParallelTestResultTxt + " " + directory + "/" + monitorResultCSV + " " + resultPath;
+
         int exitCode = 0;
+        try {
+            exitCode = executeCommand("mkdir -p " + resultPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        String command = "cp " + directory + "/" + fioParallelTestResultTxt + " " + directory + "/" + monitorResultCSV + " " + resultPath;
         try {
             exitCode = executeCommand(command);
         } catch (IOException e) {

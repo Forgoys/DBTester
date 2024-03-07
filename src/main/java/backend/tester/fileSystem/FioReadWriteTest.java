@@ -389,9 +389,16 @@ public class FioReadWriteTest extends TestItem {
     // 把fio测试结果和系统资源结果保存到这个目录
     @Override
     public void writeToFile(String resultPath) {
+        int exitCode = 0;
+        try {
+            exitCode = executeCommand("mkdir -p " + resultPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         // 把测试结果和系统资源结果文件保存到resultPath目录
         String command = "cp " + directory + "/" + fioReadWriteTestResultTxt + " " + directory + "/" + monitorResultCSV + " " + resultPath;
-        int exitCode = 0;
         try {
             exitCode = executeCommand(command);
         } catch (IOException e) {
