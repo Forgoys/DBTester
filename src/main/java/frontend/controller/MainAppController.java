@@ -591,7 +591,7 @@ public class MainAppController {
                         updateMessage(message2Update.append("开始小文件测试\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
 
-                        testItem = new MiniFileTest(testArguments.values.get(0));
+                        testItem = new MiniFileTest(testArguments.values.get(0), testArguments.values.get(1));
                         testItem.startTest();
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
