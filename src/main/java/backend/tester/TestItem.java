@@ -138,6 +138,37 @@ public abstract class TestItem implements Testable, Writable{
         }
     }
 
+    public static void execCommandWithOutPrint(File workDir, String cmd, String args) {
+        if(workDir != null && (!workDir.exists() || !workDir.isDirectory())) {
+            System.out.println("工作路径设置不正确");
+        }
+        // 执行数据生成脚本
+        try {
+            // 构建进程
+            ProcessBuilder builder = new ProcessBuilder();
+            if(workDir != null)
+                builder.directory(workDir);
+            // 设置命令及参数
+            List<String> command = new ArrayList<>();
+            command.add(cmd);
+            if(!args.isEmpty()) {
+                args = args.trim();
+                args = " " + args;
+                command.add(args);
+            }
+            builder.command(command);
+            // 启动进程
+            Process process = builder.start();
+            // 等待进程结束
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                System.err.println("Command execution failed with error code " + exitCode);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static String execCommandsWithReturn(File workDir, String... commands) {
         if(workDir != null && (!workDir.exists() || !workDir.isDirectory())) {
             System.out.println("工作路径设置不正确");

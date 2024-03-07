@@ -67,12 +67,10 @@ public class DBConnection {
         } // 可以根据需要添加更多的数据库品牌
 
         // 解析端口号
-        try {
-            URI uri = new URI(url);
-            this.port = uri.getPort();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        int portIndex = url.lastIndexOf(":");
+        int slashIndex = url.indexOf("/", portIndex);
+        String portString = url.substring(portIndex + 1, slashIndex);
+        port = Integer.parseInt(portString);
 
         // 尝试解析数据库名
         int dbNameStart = url.lastIndexOf('/') + 1;

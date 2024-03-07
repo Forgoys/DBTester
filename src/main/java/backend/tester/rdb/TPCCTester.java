@@ -386,7 +386,6 @@ public class TPCCTester extends TestItem {
         return testResult;
     }
 
-
     @Override
     public String getResultDicName() {
         return null;
@@ -400,11 +399,6 @@ public class TPCCTester extends TestItem {
     @Override
     public TestAllResult readFromFile(String resultPath) {
 
-        return null;
-    }
-
-    @Override
-    public List<List<Double>> readFromFile1(String resultPath) {
         return null;
     }
 

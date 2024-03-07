@@ -21,9 +21,9 @@ public class TPCHTester extends TestItem {
     /**
      * 相关脚本
      */
-    private static final String DATA_GENERATE_SCRIPT = "generate_data.sh";
-    private static final String[] DATA_IMPORT_SCRIPTS = new String[]{"importData_oscar.sh"};
-    private static final String MONITOR_SCRIPT = "monitorDB.sh";
+    private static final String DATA_GENERATE_SCRIPT = "./generate_data.sh";
+    private static final String[] DATA_IMPORT_SCRIPTS = new String[]{"./importData_oscar.sh"};
+    private static final String AUTOTEST_SCRIPT = "./auto_test_one.sh";
 
 
     public  String testHomePath;
@@ -94,7 +94,7 @@ public class TPCHTester extends TestItem {
 
 
         // tpch工具所在根目录
-        tpchToolPath = testHomePath + "tpch-tool/";
+        tpchToolPath = testHomePath + "tpch-tool/dbgen/";
         File tpchToolDir = new File(tpchToolPath);
         if(!tpchToolDir.exists()) {
             throw new Exception("未检测到tpch相关工具: " + tpchToolPath);
@@ -156,17 +156,8 @@ public class TPCHTester extends TestItem {
             resDir.mkdirs();
         }
         /*                                    正式执行测试                                       */
-        // 启动系统资源监测脚本
-        String cmd = String.format("%s %d %s %s &", MONITOR_SCRIPT, 2, resultDirectory+"monitor.csv", diskNameOfDB);
-        String out = execCommandsWithReturn(new File(tpchToolPath), cmd);
-        String pid = null;
-        if(!out.isEmpty()) {
-            pid = out.trim().split(" ")[1];
-        }
-        // 开始测试
-        executeSQLFilesInDirectory(sqlDir);
-        // 关闭系统资源监测脚本
-        execCommandsWithReturn("kill " + "pid");
+        String cmd = String.format("%s %s %s %s %s", AUTOTEST_SCRIPT, DBStmt.getDBName(), DBStmt.getPort(), resultDirectory, diskNameOfDB);
+        execCommands(new File(tpchToolPath), cmd);
         this.status = Status.FINISHED;
     }
 
@@ -248,7 +239,7 @@ public class TPCHTester extends TestItem {
         try (BufferedReader br = new BufferedReader(new FileReader(cfgFile))) {
             String firstLine = br.readLine(); // 读取第一行
             if (firstLine != null) {
-                String[] parts = firstLine.split(","); // 使用逗号分割
+                String[] parts = firstLine.split("\\|"); // 分割
                 if (parts.length == 2 && parts[0].equals("size")) {
                     try {
                         int value = Integer.parseInt(parts[1].trim()); // 获取数字部分
@@ -270,11 +261,14 @@ public class TPCHTester extends TestItem {
 
 
     private void createDataSet(String fileDir) throws Exception {
+        // 生成数据文件存放目录
+        File file = new File(fileDir);
+        file.mkdirs();
         // 执行数据生成脚本
         String cmd = String.format("%s %d %s", DATA_GENERATE_SCRIPT, dataSize, dataSetPath);
         execCommands(new File(tpchToolPath), cmd);
         // 额外再生成一个config.csv，保存当前数据集大小
-        execCommands(new File(dataSetPath), String.format("echo 'size,%d' > config.csv ", dataSize));
+//        execCommands(new File(dataSetPath), String.format("echo 'size|%d' > config.csv ", dataSize));
         System.out.println("数据生成成功！保存在：" + dataSetPath);
     }
 
@@ -282,26 +276,30 @@ public class TPCHTester extends TestItem {
     private void importDataSetToDB() throws Exception {
         // 检查数据库中是否已有数据
         String sqlRes = DBStmt.executeSQL("select cfg_value from config where cfg_name='size';");
-        if (!sqlRes.contains(String.valueOf(dataSize))) {
+        if (sqlRes == null || !sqlRes.contains(String.valueOf(dataSize))) {
             // 删除旧表
+            System.out.println("删除旧表...");
             List<String> outList = DBStmt.executeSQLFile(tpchToolPath + "drop_table.sql");
-            for(String str : outList) {
-                System.out.println(str);
-            }
+//            for(String str : outList) {
+//                System.out.println(str);
+//            }
 
             // 建表
+            System.out.println("重新建表...");
             outList = DBStmt.executeSQLFile(tpchToolPath + "create_table.sql");
-            for(String str : outList) {
-                System.out.println(str);
-            }
+//            for(String str : outList) {
+//                System.out.println(str);
+//            }
 
             // 建约束
+            System.out.println("建立约束...");
             outList = DBStmt.executeSQLFile(tpchToolPath + "add_restraint.sql");
-            for(String str : outList) {
-                System.out.println(str);
-            }
+//            for(String str : outList) {
+//                System.out.println(str);
+//            }
 
             // 导数据
+            System.out.println("导入数据...");
             String cmd = String.format("%s %s %d %s", DATA_IMPORT_SCRIPTS[0], DBStmt.getDBName(), DBStmt.getPort(), dataSetPath);
             execCommands(new File(tpchToolPath), cmd);
         }
@@ -369,7 +367,7 @@ public class TPCHTester extends TestItem {
 
     @Override
     public String getResultDicName() {
-        return null;
+        return new File(resultDirectory).getName();
     }
 
     @Override
@@ -382,21 +380,16 @@ public class TPCHTester extends TestItem {
         return null;
     }
 
-    @Override
-    public List<List<Double>> readFromFile1(String resultPath) {
-        return null;
-    }
-
     public static void main(String[] args) {
+
         DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
-                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
+                "jdbc:oscar://10.181.8.146:2004/TPCH_5",
                 "SYSDBA",
                 "szoscar55");
         dbConnection.connect();
 
         TestArguments arguments = new TestArguments();
-        arguments.values.add("5");
-
+        arguments.values.add("1"); // 测试规模
 
         TPCHTester tester = new TPCHTester("tpch", "/home/wlx/DBTestTools", dbConnection, arguments);
 
@@ -410,8 +403,8 @@ public class TPCHTester extends TestItem {
 
             TestResult results = tester.getTestResults();
 
-            results = null;
-
+            int i = 0;
+            i++;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
