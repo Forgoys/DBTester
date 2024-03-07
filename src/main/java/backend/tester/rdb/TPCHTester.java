@@ -377,6 +377,10 @@ public class TPCHTester extends TestItem {
             System.out.println("还未生成结果文件");
             return ;
         }
+        File file = new File(resultPath);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
         String cmd = String.format("cp -r %s* %s", resultDirectory, resultPath);
         execCommands(cmd);
     }

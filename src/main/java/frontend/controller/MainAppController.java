@@ -863,7 +863,7 @@ public class MainAppController {
     private void onExportTestResultClick() {
         String testObject = testObjectSelectBox.getValue();
         String testProject = testProjectSelectBox.getValue();
-        String testResultDicName = testItem.getResultDicName();   // 张超群  实现这个函数，返回存放结果数据文件的文件夹名字
+        String testResultDicName = testItem.getResultDicName();
         String absolutePath = DirectoryManager.buildAbsolutePath(testObject, testProject, testResultDicName);
         testItem.writeToFile(absolutePath);
     }
