@@ -40,6 +40,13 @@ public class TestArguments {
             new ArgumentProperty("数据规模", new String[]{"5", "10", "20"}),
     };
 
+    public static final ArgumentProperty[] PRESSURE_TEST_ARG_PROPERTIES = new ArgumentProperty[]{
+
+            new ArgumentProperty("线程数", new String[]{"16", "32", "64", "128", "256"}),
+
+            new ArgumentProperty("测试时长(min)", new String[]{"1", "3", "5"}),
+    };
+
     /**
      * influxdb-comparision工具时序数据库测试的参数属性
      */
