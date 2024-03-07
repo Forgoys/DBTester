@@ -68,7 +68,7 @@ public class ReadTester extends TestItem{
         query_type = testArgs.values.get(1);
         clients = Integer.parseInt(testArgs.values.get(2));
         password = testArgs.values.get(3);
-        //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tool/TSDB";
+        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tool/TSDB";
         SetTag();
     }
     public static void checkDBStatusAndExist(String dataBaseName) {
