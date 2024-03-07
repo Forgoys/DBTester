@@ -388,11 +388,17 @@ public class WriteTester extends TestItem {
                     matcher.group(6)  // 44.72
                 };
             }
+            System.out.println("0的匹配结果");
+            // 显示所有匹配的内容，用循环写
+            for (int i = 0; i <= matcher.groupCount(); i++) {
+                System.out.println(matcher.group(i));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }   
         return testResult;
     }
+    // 返回指定文件中的测试结果
     public TestResult getTestResults1(String resultPath) {
         String result = "";
         testResult = new TestResult();
@@ -403,6 +409,7 @@ public class WriteTester extends TestItem {
             for (File file : files) {
                 if (file.getName().matches(".*\\.txt$")) {
                     String fileName = file.getAbsolutePath();
+                    System.out.println(fileName);
                     try {
                         File resultfile = new File(fileName);
                         BufferedReader reader = new BufferedReader(new FileReader(resultfile));
@@ -411,7 +418,7 @@ public class WriteTester extends TestItem {
                             result = line;
                         }
                         reader.close();
-            
+                        System.out.println(result);
                         // 使用正则表达式提取需要的值
                         Pattern pattern = Pattern.compile("loaded (\\d+) items in (\\d+\\.\\d+)sec with (\\d+) workers \\(mean point rate (\\d+\\.\\d+)/s, mean value rate (\\d+\\.\\d+)/s, (\\d+\\.\\d+)MB/sec from stdin\\)");
                         Matcher matcher = pattern.matcher(result);
@@ -425,26 +432,60 @@ public class WriteTester extends TestItem {
                                 matcher.group(6)  // 44.72
                             };
                         }
+                        System.err.println("1的匹配结果");
+                        // 显示所有匹配的内容，用循环写
+                        for (int i = 0; i <= matcher.groupCount(); i++) {
+                            System.out.println(matcher.group(i));
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                    break; //只读第一个txt文件
                 }
-                break; //只读第一个
             }
         }   
         return testResult;
     }
     @Override
     public List<List<Double>> getTimeData() {
-        /*
-        String fileName = scenarioToFile.get(scenario);
-        DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH.mm");
-        String time = dateFormat.format(new Date());
-        String filename = scenarioToFile.get(scenario).substring(fileName.indexOf("_s") + 1, fileName.indexOf(".gz")) + 
-            "_w" + clients + "_" + time + ".txt"; 
-        */
-        String usageFilePath = testHomePath + "/usage/";
-        return readFromFile1(usageFilePath);
+        // 首先修改csv文件的读写权限
+        String fileName = testHomePath + "/usage/taosd_usage_write_" + tag + ".csv";
+        try{
+            String command = "echo " + password + " | sudo -S chown $USER " + fileName;
+            // 执行命令
+            ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
+            processBuilder.directory(new File(testHomePath));
+            Process process = processBuilder.start();
+            process.waitFor();
+            // 检查命令执行结果
+            if (process.exitValue() != 0) {
+                throw new RuntimeException("修改CSV文件权限失败, sudo权限不足");
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("修改CSV文件权限失败, sudo权限不足");
+        }
+        List<List<Double>> result = new ArrayList<>();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(fileName));
+            String line;
+            // 跳过表头
+            reader.readLine();
+            while ((line = reader.readLine()) != null) {
+                String[] values = line.split(",");
+                List<Double> row = new ArrayList<>();
+                // 从第二列开始读取数据
+                for (int i = 1; i < values.length; i++) {
+                    row.add(Double.parseDouble(values[i]));
+                }
+                result.add(row);
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        this.timeDataList = result;
+        return result;
     }
     // 调用testHomePath路径中的monitor.sh脚本，将结果保存到testHomePath/usage文件夹中
     // 执行脚本要用sudo命令，密码可由SSHConnection类中的getPassword()获取
@@ -537,6 +578,7 @@ public class WriteTester extends TestItem {
             for (File file : files) {
                 if (file.getName().matches(".*\\.csv$")) {
                     String fileName = file.getAbsolutePath();
+                    System.out.println(fileName);
                     try {
                         BufferedReader reader = new BufferedReader(new FileReader(fileName));
                         String line;
@@ -555,8 +597,8 @@ public class WriteTester extends TestItem {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    break; //只读第一个符合的
                 }
-                break;
             }
         }
         /*
@@ -623,10 +665,10 @@ public class WriteTester extends TestItem {
     }
     public static void main(String[] args) {
         String homePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
-        String resultPath = homePath;
+        String resultPath = homePath + "/result";
         TestArguments arguments = new TestArguments();
         arguments.values = new ArrayList<>();
-        arguments.values.add("100台*30天");
+        arguments.values.add("10台*1天");
         arguments.values.add("16");
         DBConnection DBStmt = new DBConnection("root","taosdata","devops");
         //WriteTester(String testName, String homePath, String sudoPassord, DBConnection DBStmt,TestArguments testArgs)
@@ -635,10 +677,12 @@ public class WriteTester extends TestItem {
             //tester.SetTag();
             tester.testEnvPrepare();
             tester.startTest();
-            tester.writeToFile(resultPath);
-            System.out.println(tester.getTestResults1(resultPath).values[0]);
+            //tester.writeToFile(resultPath);
+            //tester.getTestResults();
+            //tester.getTestResults1(resultPath);
+            //System.out.println(tester.getTestResults1(resultPath).values[0]);
             System.out.println(tester.getTimeData());
-            System.out.println(tester.readFromFile1(resultPath));
+            //System.out.println(tester.readFromFile1(resultPath));
         } catch (Exception e) {
             e.printStackTrace();
         }
