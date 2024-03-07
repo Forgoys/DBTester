@@ -36,7 +36,12 @@ public class DBConnection {
 
     public DBConnection() {
     }
-
+    // 涛思不用jdbc
+    public DBConnection(String username, String password, String dbName) {
+        this.username = username;
+        this.password = password;
+        this.dbName = dbName;
+    }
     public DBConnection(String jdbcDriverPath, String dbURL, String username, String password) {
         this.jdbcDriverPath = jdbcDriverPath;
         this.dbURL = dbURL;
