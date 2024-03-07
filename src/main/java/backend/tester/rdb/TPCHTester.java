@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * 目前仅支持神通数据库，若需要支持另外两数据库，需要新增脚本文件
+ */
 public class TPCHTester extends TestItem {
 
     /**
@@ -19,11 +22,11 @@ public class TPCHTester extends TestItem {
     public static final String[] DATA_SET_FILE_NAMES = "nation.csv region.csv part.csv supplier.csv partsupp.csv customer.csv orders.csv lineitem.csv config.csv".split(" ");
 
     /**
-     * 相关脚本
+     * 相关脚本，数组形式的需要针对每个数据库都写一个版本
      */
     private static final String DATA_GENERATE_SCRIPT = "./generate_data.sh";
     private static final String[] DATA_IMPORT_SCRIPTS = new String[]{"./importData_oscar.sh"};
-    private static final String AUTOTEST_SCRIPT = "./auto_test_one.sh";
+    private static final String[] AUTOTEST_SCRIPTS = new String[]{"./auto_test_one.sh"};
 
 
     public  String testHomePath;
