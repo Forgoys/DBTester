@@ -71,7 +71,9 @@ public class TPCHTester extends TestItem {
 
     private void initialization() throws Exception{
 
-        toolsRootPath = "/home/wlx/DBTestTools";
+        // 获取工具包根目录
+        File projectDir = new File(System.getProperty("user.dir"));
+        toolsRootPath = String.format("%s/%s/", projectDir.getParentFile().getAbsolutePath(), TOOLS_ROOT_NAME);
 
         // 检查工具目录
         File toolRootDir = new File(toolsRootPath);
@@ -113,7 +115,7 @@ public class TPCHTester extends TestItem {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
         String formatDateTime = formatter.format(localDateTime);
         // 结果目录格式类似于/home/wlx/cx/result20_oscar_2024-03-05_21-22-34/
-        resultDirectory = String.format("%s%d_%s_%s/", testHomePath + "results/", dataSize, DBStmt.getDbBrandName(), formatDateTime);
+        resultDirectory = String.format("%s%s/%dGB_%s/", testHomePath, "results", dataSize, formatDateTime);
     }
 
     /**
@@ -389,7 +391,6 @@ public class TPCHTester extends TestItem {
 
     public static void main(String[] args) {
 
-        System.out.println(System.getProperty("user.dir"));
 //        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
 //                "jdbc:oscar://10.181.8.146:2005/ADAPTTEST",
 //                "SYSDBA",
