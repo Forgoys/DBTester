@@ -25,10 +25,17 @@ public abstract class TestItem implements Testable, Writable{
     protected String testName;
 
     /**
-     * 软件相关工具、脚本所在的根目录
-     * 此目录下可再分为三个子目录分别用于关系数据库、时序数据库和文件系统     *
+     * 软件相关工具、脚本所在的根目录名字
      */
-    protected String toolRootPath;
+    public static final String TOOLS_ROOT_NAME = "tools";
+
+    /**
+     * 软件相关工具、脚本所在的根目录名字
+     * 此目录下再分为三个子目录分别用于关系数据库、时序数据库和文件系统
+     * 此根目录与项目为同一级，可以通过获取项目所在路径来获取该路径的值
+     * 例如获取项目路径为/home/uname/package/DBTster, 那该变量的值就为/home/uname/package/tools
+     */
+    protected String toolsRootPath;
 
     public enum Status {
         /**

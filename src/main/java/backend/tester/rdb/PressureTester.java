@@ -352,12 +352,12 @@ public class PressureTester extends TestItem {
      */
     private void initialization() throws Exception{
 
-        toolRootPath = "/home/wlx/DBTestTools";
+        toolsRootPath = "/home/wlx/DBTestTools";
 
         // 检查工具目录
-        File toolRootDir = new File(toolRootPath);
+        File toolRootDir = new File(toolsRootPath);
         if(!toolRootDir.exists() || !toolRootDir.isDirectory()) {
-            throw new Exception("未检测到工具目录:：" + toolRootPath);
+            throw new Exception("未检测到工具目录:：" + toolsRootPath);
         }
 
 
@@ -366,10 +366,10 @@ public class PressureTester extends TestItem {
 //        diskNameOfDB = "sdd";
 
         // 创建压力测试测试目录
-        if(!toolRootPath.endsWith("/")) {
-            toolRootPath += "/";
+        if(!toolsRootPath.endsWith("/")) {
+            toolsRootPath += "/";
         }
-        testHomePath = toolRootPath + "/RDB_test/pressure_test/";
+        testHomePath = toolsRootPath + "/RDB_test/pressure_test/";
 
         // sql查询语句所在目录
         sqlsPath = testHomePath + "queries/";
