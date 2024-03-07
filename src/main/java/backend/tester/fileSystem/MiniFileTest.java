@@ -31,20 +31,23 @@ public class MiniFileTest extends TestItem {
 
     // 指令运行结果
     TestResult fioMiniFileTestResult = new TestResult();
+    // 脚本执行后结果保存在txt文件
+    String fioMiniFileTestResultPath;
 
     public MiniFileTest() {
     }
 
     public MiniFileTest(String directory, String localSudoPassword) {
-        this.directory = directory;
-        miniFileName = "cifar-10-batches-bin";
+        this.directory = directory + "/miniFileTest";
         this.localSudoPassword = localSudoPassword;
 
+        miniFileName = "cifar-10-batches-bin";
         miniFileDirectory = this.directory + "/" + miniFileName;
         miniFileReadScriptName = "miniFileReadTest.sh";
         miniFileReadScriptPath = this.directory + "/" + miniFileReadScriptName;
         miniFileWriteScriptName = "miniFileWriteTest.sh";
         miniFileWriteScriptPath = this.directory + "/" + miniFileWriteScriptName;
+        fioMiniFileTestResultPath = this.directory + "/" + "miniFileTestResult.txt";
 
         miniFileWriteNum = "100";
     }
@@ -185,6 +188,10 @@ public class MiniFileTest extends TestItem {
     }
 
     public void fioResultSave(List<String> results) {
+        if (results.isEmpty()) {
+            System.out.println("小文件读取测试输出为空");
+            return;
+        }
         StringBuilder textBuilder = new StringBuilder();
         for (String result : results) {
             textBuilder.append(result);
@@ -224,7 +231,6 @@ public class MiniFileTest extends TestItem {
                 writeLat = String.valueOf(lat);
             }
         }
-
         // 添加结果到TestResult类
         fioMiniFileTestResult.names = TestResult.FIO_MINIFILE_TEST;
         fioMiniFileTestResult.values = new String[]{readIOPS, readBW, readLat, writeIOPS, writeBW, writeLat};
@@ -264,7 +270,7 @@ public class MiniFileTest extends TestItem {
         return null;
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws Exception {
         MiniFileTest miniFileTest = new MiniFileTest("/home/autotuning/zf/glusterfs/software_test", "666");
         miniFileTest.startTest();
     }
