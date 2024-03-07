@@ -121,7 +121,7 @@ public class ReadTester extends TestItem{
         // 检查数据集是否存在
         if (!checkDataSetExist()) {
             dataGenerate();
-            throw new RuntimeException("数据集不存在,将自动创建数据集");
+            //throw new RuntimeException("数据集不存在,将自动创建数据集");
         }
         status = Status.READY;
     }

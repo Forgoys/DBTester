@@ -50,8 +50,8 @@ public class DBAdaptTestController {
                     MainAppController.currentDBConnection.executeSQL("DROP TABLE IF EXISTS DataTypeSupportTest;");
                     return MainAppController.currentDBConnection.executeSQL(sqlText);
                 } else if (testObject.equals("TDengine")){
-                    DBConnection.tdengineExecSQL("DROP TABLE IF EXISTS DataTypeSupportTest;");
-                    return DBConnection.tdengineExecSQL(sqlText);
+                    DBConnection.tdengineExecSQL("DROP TABLE IF EXISTS DataTypeSupportTest;", MainAppController.currentDBConnection);
+                    return DBConnection.tdengineExecSQL(sqlText, MainAppController.currentDBConnection);
                 }
                 return "未知的测试对象类型。";
             }
