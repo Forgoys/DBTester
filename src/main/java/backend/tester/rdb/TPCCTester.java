@@ -117,8 +117,7 @@ public class TPCCTester extends TestItem {
         LocalDateTime localDateTime = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
         String formatDateTime = formatter.format(localDateTime);
-        // 结果目录格式类似于/home/wlx/cx/20_oscar_2024-03-05_212234/
-        resultDirectory = String.format("%s%d_%s_%s/", testHomePath + "result", dataSize, DBStmt.getDbBrandName(), formatDateTime);
+        resultDirectory = String.format("%s%d_%s_%s/", testHomePath + "results/", dataSize, DBStmt.getDbBrandName(), formatDateTime);
 
         // 检查测试参数是否正确
         if (this.testArgs == null) {
@@ -384,6 +383,11 @@ public class TPCCTester extends TestItem {
 
 
     @Override
+    public String getResultDicName() {
+        return new File(resultDirectory).getName();
+    }
+
+    @Override
     public void writeToFile(String resultPath) {
 
     }
@@ -394,35 +398,35 @@ public class TPCCTester extends TestItem {
         return null;
     }
 
-    public static void main(String[] args) {
-        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
-                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
-                "SYSDBA",
-                "szoscar55");
-        dbConnection.connect();
-
-        TestArguments arguments = new TestArguments();
-        arguments.values = new ArrayList<>();
-        arguments.values.add("20");
-        arguments.values.add("128");
-        arguments.values.add("16");
-        arguments.values.add("1");
-
-        TPCCTester tester = new TPCCTester("tpcc", dbConnection, arguments);
-
-        try {
-            tester.testEnvPrepare();
-
-            tester.startTest();
-
-            List<List<Double>> tmpTimeData = tester.getTimeData();
-
-            TestResult results = tester.getTestResults();
-
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        dbConnection.disconnect();
-    }
+//    public static void main(String[] args) {
+//        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
+//                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
+//                "SYSDBA",
+//                "szoscar55");
+//        dbConnection.connect();
+//
+//        TestArguments arguments = new TestArguments();
+//        arguments.values = new ArrayList<>();
+//        arguments.values.add("20");
+//        arguments.values.add("128");
+//        arguments.values.add("16");
+//        arguments.values.add("1");
+//
+//        TPCCTester tester = new TPCCTester("tpcc", dbConnection, arguments);
+//
+//        try {
+//            tester.testEnvPrepare();
+//
+//            tester.startTest();
+//
+//            List<List<Double>> tmpTimeData = tester.getTimeData();
+//
+//            TestResult results = tester.getTestResults();
+//
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        dbConnection.disconnect();
+//    }
 }
