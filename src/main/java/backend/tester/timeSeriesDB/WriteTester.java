@@ -183,15 +183,14 @@ public class WriteTester extends TestItem {
             String line;
             while ((line = inputReader.readLine()) != null) {
                 // 打印命令行指令的执行结果
-                System.out.println(line);
     
-                // 检查是否存在错误信息
-                if (line.contains("Authentication failure") || line.contains("Invalid user")) {
+                // 检查是否存在"Authentication failure"的错误信息
+                if (line.contains("Authentication failure") || line.contains("Invalid user") ){
                     return false;
                 }
             }
     
-            // 如果没有
+            // 如果没有"Authentication failure"的错误信息，那么认为命令执行成功
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -543,8 +542,21 @@ public class WriteTester extends TestItem {
         }
         // 将taosd_usage_write_tag.csv和write_tag.txt文件中的数据复制到resultPath中
         try {
-            String command1 = "cp " + testHomePath + "/usage/taosd_usage_write_" + tag + ".csv " + resultPath;
-            String command2 = "cp " + testHomePath + "/usage/write_" + tag + ".txt " + resultPath;
+            // 在resultPath新建getResultDicName()文件夹
+            String command0 = "mkdir " + resultPath + "/" + getResultDicName();
+            // 执行命令
+            ProcessBuilder processBuilder0 = new ProcessBuilder("/bin/bash", "-c", command0);
+            processBuilder0.directory(new File(testHomePath));
+            Process process0 = processBuilder0.start();
+            process0.waitFor();
+            // 检查命令执行结果
+            if (process0.exitValue() != 0) {
+                throw new RuntimeException("新建文件夹失败");
+            }
+
+            String resultpath = resultPath + "/" + getResultDicName();
+            String command1 = "cp " + testHomePath + "/usage/taosd_usage_write_" + tag + ".csv " + resultpath;
+            String command2 = "cp " + testHomePath + "/usage/write_" + tag + ".txt " + resultpath;
         
             // 执行命令
             ProcessBuilder processBuilder1 = new ProcessBuilder("/bin/bash", "-c", command1);
@@ -682,7 +694,7 @@ public class WriteTester extends TestItem {
         arguments.values.add("10台*1天");
         arguments.values.add("16");
         arguments.values.add("Admin@wlx");
-        DBConnection DBStmt = new DBConnection("root","taosdata","devops");
+        DBConnection DBStmt = new DBConnection("devops","root","taosdata");
         WriteTester tester = new WriteTester("Write", DBStmt, arguments);
         try {
             //tester.SetTag();
