@@ -117,6 +117,10 @@ public class FSReadWriteTestController {
         }
         memoryUsageLineChart.getData().addAll(memoryUsageSeries);
 
+
+        Util.customizeChartSeriesStyle(cpuUsageLineChart);
+        Util.customizeChartSeriesStyle(memoryUsageLineChart);
+
         // 请求布局更新，确保数据变化反映到UI上
         cpuUsageLineChart.requestLayout();
         memoryUsageLineChart.requestLayout();
