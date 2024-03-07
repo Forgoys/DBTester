@@ -314,7 +314,6 @@ public class MainAppController {
             testObjectConfigPane.add(jdbcDriverButton, 1, rowIndex++); // 不再使用rowIndex++，除非有其他元素会紧随其后添加
         }
 
-
         Label dbURLLabel = new Label("数据库URL");
         TextField dbURLTextField = new TextField();
         dbURLTextField.setId("dbURLTextField");
