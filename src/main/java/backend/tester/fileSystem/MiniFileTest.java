@@ -20,8 +20,11 @@ public class MiniFileTest extends TestItem {
     private String directory;
     private String miniFileName;
     private String miniFileDirectory;
-    private String miniFileScriptName;
-    private String miniFileScriptDirectory;
+    private String miniFileReadScriptName;
+    private String miniFileReadScriptPath;
+    private String miniFileWriteScriptName;
+    private String miniFileWriteScriptPath;
+    private String miniFileWriteNum; // 文件写入数量
 
     // sudo权限
     String localSudoPassword;
@@ -40,9 +43,22 @@ public class MiniFileTest extends TestItem {
 
         miniFileName = "cifar-10-batches-bin";
         miniFileDirectory = this.directory + "/" + miniFileName;
-        miniFileScriptName = "miniFileTest.sh";
-        miniFileScriptDirectory = this.directory + "/" + miniFileScriptName;
+        miniFileReadScriptName = "miniFileReadTest.sh";
+        miniFileReadScriptPath = this.directory + "/" + miniFileReadScriptName;
+        miniFileWriteScriptName = "miniFileWriteTest.sh";
+        miniFileWriteScriptPath = this.directory + "/" + miniFileWriteScriptName;
         fioMiniFileTestResultPath = this.directory + "/" + "miniFileTestResult.txt";
+
+        miniFileWriteNum = "100";
+    }
+
+    public int executeCommand(String command) throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command("bash", "-c", command);
+        Process process = processBuilder.start();
+        // 等待进程执行完毕
+        int exitCode = process.waitFor();
+        return exitCode;
     }
 
     // 准备测试数据 准备测试工具 准备测试脚本 配置文件.ini
@@ -50,60 +66,42 @@ public class MiniFileTest extends TestItem {
     public void testEnvPrepare() throws IOException, InterruptedException {
         String currentDirectory = System.getProperty("user.dir");
         System.out.println("Current directory: " + currentDirectory);
-        String localScriptPath = currentDirectory + "/src/main/resources/scripts/" + miniFileScriptName;
+        String localReadScriptPath = currentDirectory + "/src/main/resources/scripts/" + miniFileReadScriptName;
+        String localWriteScriptPath = currentDirectory + "/src/main/resources/scripts/" + miniFileWriteScriptName;
 
-        ProcessBuilder processBuilder = new ProcessBuilder();
+        int exitCode = 0;
         // 创建miniFileTest小文件测试文件夹
-        System.out.println("创建文件夹:" + directory);
         String command = "mkdir -p " + directory;
-        processBuilder.command("bash", "-c", command);
-        Process process = processBuilder.start();
-
-        // 等待进程执行完毕
-        int exitCode = process.waitFor();
+        exitCode = executeCommand(command);
         System.out.println("创建小文件测试文件夹:" + directory + " Exit code:" + exitCode);
 
         // 复制miniFileTest小文件测试脚本
-        command = "cp " + localScriptPath + " " + directory;
-        processBuilder.command("bash", "-c", command);
-        System.out.println(command);
-        process = processBuilder.start();
-        // 等待进程执行完毕
-        exitCode = process.waitFor();
-        System.out.println("复制reliableTest可靠性测试脚本:" + miniFileScriptName + " Exit code:" + exitCode);
+        command = "cp " + localReadScriptPath + " " + directory;
+        exitCode = executeCommand(command);
+        System.out.println("miniFileTest小文件测试脚本:" + miniFileReadScriptName + " Exit code:" + exitCode);
+
+        // 复制miniFileTest小文件测试脚本
+        command = "cp " + localWriteScriptPath + " " + directory;
+        exitCode = executeCommand(command);
+        System.out.println("miniFileTest小文件测试脚本:" + miniFileWriteScriptName + " Exit code:" + exitCode);
 
         // 给脚本添加执行权限
-        command = "chmod +x " + directory + "/" + miniFileScriptName;
-        processBuilder.command("bash", "-c", command);
-        System.out.println(command);
-        process = processBuilder.start();
-        // 等待进程执行完毕
-        exitCode = process.waitFor();
-        System.out.println("给脚本添加执行权限:" + miniFileScriptName + " Exit code:" + exitCode);
+        command = "chmod +x " + directory + "/" + miniFileReadScriptName;
+        exitCode = executeCommand(command);
+        System.out.println("给脚本添加执行权限:" + miniFileReadScriptName + " Exit code:" + exitCode);
+
+        // 给脚本添加执行权限
+        command = "chmod +x " + directory + "/" + miniFileWriteScriptName;
+        exitCode = executeCommand(command);
+        System.out.println("给脚本添加执行权限:" + miniFileWriteScriptName + " Exit code:" + exitCode);
 
         // 复制cifar数据集
         String localMiniFilePath = currentDirectory + "/src/main/resources/miniFile/" + miniFileName;
-        command = "cp -r " + localMiniFilePath + " " + directory;
-        processBuilder.command("bash", "-c", command);
-        System.out.println(command);
-        process = processBuilder.start();
-        // 等待进程执行完毕
-        exitCode = process.waitFor();
-        System.out.println("复制cifar数据集:" + miniFileName + " Exit code:" + exitCode);
+        exitCode = executeCommand(command);
+        System.out.println("复制cifar数据集:" + localMiniFilePath + " Exit code:" + exitCode);
     }
 
-    @Override
-    public void startTest() throws IOException, InterruptedException {
-
-        System.out.println("小文件测试环境准备");
-        testEnvPrepare();
-        System.out.println("小文件测试环境准备完成");
-
-        System.out.println("小文件测试开始");
-
-        // 执行脚本指令 参数：cifar路径
-        String fioCommand = miniFileScriptDirectory + " " + miniFileDirectory + " " + fioMiniFileTestResultPath;
-
+    public void miniFileReadWriteTest(String fioCommand, List<String> results) throws IOException, InterruptedException {
         String password = localSudoPassword;
         fioCommand = "echo " + password + " | sudo -S " + fioCommand;
         System.out.println(fioCommand);
@@ -121,7 +119,6 @@ public class MiniFileTest extends TestItem {
 
         // 读取进程的输出
         String line;
-        List<String> results = new ArrayList<>();
         while ((line = reader.readLine()) != null) {
             results.add(line);
         }
@@ -134,6 +131,30 @@ public class MiniFileTest extends TestItem {
         // 等待进程执行完毕
         int exitCode = process.waitFor();
         System.out.println("Exit code: " + exitCode);
+    }
+
+    @Override
+    public void startTest() throws IOException, InterruptedException {
+
+        System.out.println("小文件测试环境准备");
+        testEnvPrepare();
+        System.out.println("小文件测试环境准备完成");
+
+        System.out.println("小文件测试开始");
+
+        List<String> results = new ArrayList<>();
+
+        // 执行读取测试脚本指令 参数：cifar路径
+        System.out.println("小文件读取测试开始");
+        String miniFileReadCommand = miniFileReadScriptPath + " " + miniFileDirectory;
+        miniFileReadWriteTest(miniFileReadCommand, results);
+        System.out.println("小文件读取测试完成");
+
+        // 执行读取测试脚本指令 参数：cifar路径
+        System.out.println("小文件写入测试开始");
+        String miniFileWriteCommand = miniFileWriteScriptPath + " " + miniFileDirectory + " " + miniFileWriteNum;
+        miniFileReadWriteTest(miniFileWriteCommand, results);
+        System.out.println("小文件写入测试完成");
 
         fioResultSave(results);
     }
@@ -167,6 +188,10 @@ public class MiniFileTest extends TestItem {
     }
 
     public void fioResultSave(List<String> results) {
+        if (results.isEmpty()) {
+            System.out.println("小文件读取测试输出为空");
+            return;
+        }
         StringBuilder textBuilder = new StringBuilder();
         for (String result : results) {
             textBuilder.append(result);
