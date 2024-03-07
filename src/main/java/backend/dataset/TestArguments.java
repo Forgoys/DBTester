@@ -98,6 +98,8 @@ public class TestArguments {
     public static final ArgumentProperty[] FIO_MINIFILE_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试目录，用户输入
             new ArgumentProperty("测试目录"),
+            // sudo密码，用户输入
+            new ArgumentProperty("本机sudo密码"),
     };
 
     // fio可靠性测试参数属性
