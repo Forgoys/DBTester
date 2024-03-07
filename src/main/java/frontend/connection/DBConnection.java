@@ -201,9 +201,9 @@ public class DBConnection {
         return builder.toString();
     }
     // 涛思不用jdbc
-    public String tdengineExecSQL(String sql) {
+    public static String tdengineExecSQL(String sql, DBConnection dbConnection) {
         
-        String command = "taos -u" + this.username + " -p" + this.password + " -s '" + sql + "'";
+        String command = "taos -u" + dbConnection.username + " -p" + dbConnection.password + " -s '" + sql + "'";
         String output = "";
     
         try {
