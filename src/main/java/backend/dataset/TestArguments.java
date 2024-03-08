@@ -138,7 +138,7 @@ public class TestArguments {
                 return TPCH_ARG_PROPERTIES;
             case "可靠性":
                 if (testObject.equals("InfluxDB") || testObject.equals("TDengine") || testObject.equals("Lindorm")) {
-                    ;
+                    return INFLUXCOMP_PRESS_ARG_PROPERTIES;
                 } else {
                     return PRESSURE_TEST_ARG_PROPERTIES;
                 }

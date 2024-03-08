@@ -9,6 +9,7 @@ import backend.tester.fileSystem.ReliableTest;
 import backend.tester.rdb.PressureTester;
 import backend.tester.rdb.TPCCTester;
 import backend.tester.rdb.TPCHTester;
+import backend.tester.timeSeriesDB.PressTester;
 import backend.tester.timeSeriesDB.ReadTester;
 import backend.tester.timeSeriesDB.WriteTester;
 import eu.hansolo.tilesfx.Test;
@@ -646,6 +647,45 @@ public class MainAppController {
                 break;
             case "可靠性":
                 if (testObjectSelectBox.getValue().equals("InfluxDB") || testObjectSelectBox.getValue().equals("Lindorm") || testObjectSelectBox.getValue().equals("TDengine")) {
+                    dbReliabilityTestController.clearAll();
+                    message2Update = new StringBuilder();
+                    task = new Task<Void>() {
+                        @Override
+                        protected Void call() throws Exception {
+                            updateMessage(message2Update.append("开始可靠性测试\n").toString());
+                            testItem = new PressTester("可靠性测试", currentDBConnection, testArguments);
+                            updateMessage(message2Update.append("准备测试环境...\n").toString());
+                            try {
+                                testItem.testEnvPrepare();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                String message = e.getMessage();
+                                Util.popUpInfo(message, "Error");
+                            }
+                            updateMessage(message2Update.append("完成\n").toString());
+                            updateMessage(message2Update.append("测试中....\n").toString());
+                            try {
+                                testItem.startTest();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                String message = e.getMessage();
+                                Util.popUpInfo(message, "Error");
+                            }
+                            updateMessage(message2Update.append("测试完成\n").toString());
+                            updateMessage(message2Update.append("开始生成测试结果\n").toString());
+                            Platform.runLater(() -> {
+                                testResult = testItem.getTestResults();
+                                dbReliabilityTestController.displayTestResults(testResult);
+                            });
+                            updateMessage(message2Update.append("生成完毕\n").toString());
+                            return null;
+                        }
+                    };
+                    // 可选：绑定任务属性到UI组件，比如进度条、状态标签等
+                    dbReliabilityTestController.currentStepTextArea.textProperty().bind(task.messageProperty());
+
+                    // 在新线程中执行任务
+                    new Thread(task).start();
                     ;
                 } else {
                     dbReliabilityTestController.clearAll();
@@ -926,7 +966,7 @@ public class MainAppController {
 
         if (testProject != null) {
             loadTestProjectResultView(testProject);  // 载入测试结果展示UI
-
+            System.out.println(testProject);
             switch (testProject) {
                 case "TPC-C":
                     dbOtherTestController.clearAll();
@@ -950,16 +990,23 @@ public class MainAppController {
                     dbOtherTestController.setTimeData(testAllResult.timeDataResult);
                     break;
                 case "查询性能":
+                    dbOtherTestController.clearAll();
+                    tmpTestItem = new ReadTester();
+                    testAllResult = tmpTestItem.readFromFile(absolutePath);  // 张超群 读取absolutePath下的两个结果文件，把结果写到testAllResult里
+                    dbOtherTestController.displayTestResults(testAllResult.testResult);
+                    dbOtherTestController.setTimeData(testAllResult.timeDataResult);
                     break;
                 case "可靠性":
                     if (testObject.equals("InfluxDB") || testObject.equals("Lindorm") || testObject.equals("TDengine")) {
-                        ;
+                        dbReliabilityTestController.clearAll();
+                        tmpTestItem = new PressTester();
+                        testAllResult = tmpTestItem.readFromFile(absolutePath);
+                        dbReliabilityTestController.displayTestResults(testAllResult.testResult);
                     } else {
                         dbReliabilityTestController.clearAll();
                         tmpTestItem = new PressureTester();
                         testAllResult = tmpTestItem.readFromFile(absolutePath);
                         dbReliabilityTestController.displayTestResults(testAllResult.testResult);
-                        break;
                     }
                     break;
                 case "读写速度测试":

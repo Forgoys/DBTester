@@ -51,8 +51,13 @@ public class PressTester extends TestItem{
             testTime = String.valueOf(Integer.parseInt(testTime) * 60);
         }
         clients = Integer.parseInt(testArgs.values.get(1));
-        //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
+        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
     }
+
+    public PressTester() {
+
+    }
+
     @Override
     public void testEnvPrepare() {
         status = Status.UNPREPARED;
