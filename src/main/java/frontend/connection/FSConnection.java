@@ -16,6 +16,7 @@ public class FSConnection {
 
     private TextField fsServerPathTextField;
     private TextField fsMountPathTextField;
+    private String fileSystemOption; // 挂载方式
 
     // sudo权限
     String localSudoPassword;
@@ -23,26 +24,21 @@ public class FSConnection {
     public FSConnection() {
     }
 
-    public FSConnection(String fsUrl, String mountPath, String localSudoPassword) {
+    public FSConnection(String fileSystemOption, String localSudoPassword, String fsUrl, String mountPath) {
+        this.fileSystemOption = fileSystemOption;
+        this.localSudoPassword = localSudoPassword;
         this.fsUrl = fsUrl;
         this.mountPath = mountPath;
-        this.localSudoPassword = localSudoPassword;
-
-    }
-
-    public FSConnection(String fsUrl, String mountPath) {
-        this.fsUrl = fsUrl;
-        this.mountPath = mountPath;
-        this.localSudoPassword = localSudoPassword;
-
     }
 
     /**
      * 挂载文件系统
      */
-    public void mountFS() {
+    public String mountFS() {
         // 实现挂载文件系统的逻辑
         System.out.println("挂载文件系统...");
+        List<String> mountResult = new ArrayList<>();
+
         // 根据之前设置的文件系统配置参数进行文件系统挂载
         try {
             // 获取参数
@@ -51,7 +47,7 @@ public class FSConnection {
             System.out.println("文件系统路径:" + fsServerPath);
             System.out.println("本地目录路径:" + fsMountPath);
             // 构建 mount 挂载命令
-            String mountCommand = "mount -t glusterfs " + fsServerPath + " " + fsMountPath;
+            String mountCommand = "mount -t " + fileSystemOption + " " + fsServerPath + " " + fsMountPath;
             mountCommand = "echo " + localSudoPassword + " | sudo -S " + mountCommand;
 
             System.out.println(mountCommand);
@@ -65,7 +61,6 @@ public class FSConnection {
             InputStream inputStream = process.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             // 读取进程的输出
-            List<String> mountResult = new ArrayList<>();
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
@@ -86,16 +81,17 @@ public class FSConnection {
             int exitCode = process.waitFor();
             System.out.println("Exit code: " + exitCode);
 
-            // 判断是否挂载成功
-            if (exitCode == 0) {
-                System.out.println("Mount successful");
-                mountFlag = true;
-            } else {
-                System.out.println("Mount failed");
-            }
+//            // 判断是否挂载成功
+//            if (exitCode == 0) {
+//                System.out.println("Mount successful");
+//                mountFlag = true;
+//            } else {
+//                System.out.println("Mount failed");
+//            }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+        return mountResult.toString();
     }
 
     /**
@@ -124,7 +120,7 @@ public class FSConnection {
     }
 
     public static void main(String[] args) {
-        FSConnection fSConnection = new FSConnection("10.181.8.145:/gv3", "/home/autotuning/zf/glusterfs/software_test/mountTest", "666");
+        FSConnection fSConnection = new FSConnection("glusterfs", "666", "10.181.8.145:/gv3", "/home/autotuning/zf/glusterfs/software_test/mountTest");
         fSConnection.mountFS();
     }
 }

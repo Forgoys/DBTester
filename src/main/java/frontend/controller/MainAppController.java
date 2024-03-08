@@ -271,7 +271,7 @@ public class MainAppController {
             return;
         }
         // 创建FSConnection对象
-        FSConnection fsConnection = new FSConnection(testArguments.values.get(0), testArguments.values.get(1)), testArguments.values.get(2), testArguments.values.get(3);
+        FSConnection fsConnection = new FSConnection(testArguments.values.get(0), testArguments.values.get(1), testArguments.values.get(2), testArguments.values.get(3));
 
         // 假设mountFS()方法实际执行挂载逻辑
         String mountRst = fsConnection.mountFS();
