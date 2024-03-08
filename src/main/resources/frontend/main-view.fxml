@@ -26,12 +26,12 @@
           <items>
               <MenuItem fx:id="exportTestResult" mnemonicParsing="false" onAction="#onExportTestResultClick" text="导出测试结果" />
               <MenuItem fx:id="importTestResult" mnemonicParsing="false" onAction="#onImportTestResultClick" text="导入测试结果" />
-            <MenuItem mnemonicParsing="false" text="Quit" />
+            <MenuItem fx:id="quit" mnemonicParsing="false" onAction="#onQuitClick" text="退出" />
           </items>
         </Menu>
         <Menu mnemonicParsing="false" text="帮助">
           <items>
-            <MenuItem mnemonicParsing="false" text="关于" />
+            <MenuItem fx:id="about" mnemonicParsing="false" onAction="#onAboutClick" text="关于" />
           </items>
         </Menu>
       </menus>
