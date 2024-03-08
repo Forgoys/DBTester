@@ -28,13 +28,15 @@ public class PressTester extends TestItem{
 
     private static String testTime = "1分钟";
     private static int clients = 10;
+    private static int success = 0;
+    private static int failure = 0;
     // 测试工具路径，存在二进制文件、config文件夹(内含两个toml文件)、monitor_write.sh、monitor_read.sh，以及用于存储数据集和结果的data和usage文件夹
     public static String testHomePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
     // testHomePath为当前测试工具的路径
 
     // 指定要检查的文件名列表
     public static final String[] DATA_SET_FILE_NAMES = {"bulk_data_gen","bulk_load_tdengine","bulk_query_gen","query_benchmarker_tdengine",
-        "taos_queries.csv","config/TDDashboardSchema.toml","config/TDengineSchema.toml","data","usage"};
+        "taos_queries.csv","taospress.py","config/TDDashboardSchema.toml","config/TDengineSchema.toml","data","usage"};
 
     public PressTester(String testName, DBConnection DBStmt,TestArguments testArgs) {
         this.testName = testName;
@@ -49,7 +51,7 @@ public class PressTester extends TestItem{
             testTime = String.valueOf(Integer.parseInt(testTime) * 60);
         }
         clients = Integer.parseInt(testArgs.values.get(1));
-        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tool/TSDB";
+        //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
     }
     @Override
     public void testEnvPrepare() {
@@ -76,6 +78,7 @@ public class PressTester extends TestItem{
     // 遍历DATA_SET_FILE_NAMES数组，检查每个文件和文件夹是否存在
     private boolean checkTestToolExist() {
         for (String fileName : DATA_SET_FILE_NAMES) {
+            System.out.println(fileName);
             File file = new File(testHomePath, fileName);
             if (!file.exists()) {
                 return false;
@@ -161,35 +164,118 @@ public class PressTester extends TestItem{
         }
         status = Status.RUNNING;
         // 执行过程通过一个taopress.py的程序执行来完成，这个程序的输入是dbuser,dbpassword,dbname,testTime,clients
-    }
+        // 例如：python taopress.py --user root --password taosdata --database devops --threadnum 5 --test_time 5
+        // 这个程序的输出最后两行是：
+        // Thread success count:  5051
+        // Thread failure count:  0
+        // 通过这两行可以得到成功次数和失败次数，赋值给success和failure
+        // 执行taopress.py程序
+        // 切换到testHomePath目录下
 
-    @Override
-    public List<List<Double>> getTimeData() {
-        return null;
+        String command = "python taospress.py --user " + dbuser + " --password " + dbpassword + 
+                        " --database " + dbname + " --threadnum " + clients + " --test_time " + testTime;
+        System.out.println(command);
+        //Process process = Runtime.getRuntime().exec(command);
+        ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
+        processBuilder.directory(new File(testHomePath)); // 设置工作目录
+        Process process = processBuilder.start();
+
+        try {
+            // 读取程序的输出
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            Pattern patternSuccess = Pattern.compile("Thread success count:\\s+(\\d+)");
+            Pattern patternFailure = Pattern.compile("Thread failure count:\\s+(\\d+)");
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+                Matcher matcherSuccess = patternSuccess.matcher(line);
+                Matcher matcherFailure = patternFailure.matcher(line);
+                if (matcherSuccess.find()) {
+                    success = Integer.parseInt(matcherSuccess.group(1));
+                }
+                if (matcherFailure.find()) {
+                    failure = Integer.parseInt(matcherFailure.group(1));
+                }
+            }
+            process.waitFor();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
+        // 输出success和failure
+        System.out.println("Thread success count:  " + success);
+        System.out.println("Thread failure count:  " + failure);
+        status = Status.FINISHED;
     }
 
     @Override
     public TestResult getTestResults() {
+        testResult = new TestResult();
+        testResult.names = TestResult.INFLUXCOMP_PRESS_RES_NAMES;
+        testResult.values = new String[]{String.valueOf(success), String.valueOf(failure)};
+        return testResult;
+    }
+    @Override
+    public List<List<Double>> getTimeData(){
         return null;
     }
-
     @Override
-    public String getResultDicName() {
-        return null;
+    public void writeToFile(String resultPath){
+        try {
+            String directoryPath = resultPath + "/" + getResultDicName();
+            File directory = new File(directoryPath);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            FileWriter fileWriter = new FileWriter(directoryPath + "/result_press.txt");
+            fileWriter.write("Thread success count:  " + success + "\n");
+            fileWriter.write("Thread failure count:  " + failure + "\n");
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-
-    @Override
-    public void writeToFile(String resultPath) {
-
-    }
-
     @Override
     public TestAllResult readFromFile(String resultPath) {
-        return null;
+        TestAllResult result = new TestAllResult();
+        
+        result.timeDataResult = readFromFile1(resultPath);
+        result.testResult = getTestResults();
+        return result;
     }
-
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
         return null;
+    }
+    @Override
+    public String getResultDicName() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        return testName + "-" + dateFormat.format(new Date());
+    }
+
+    public static void main(String[] args) {
+        String homePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
+        String resultPath = homePath + "/result";
+        TestArguments arguments = new TestArguments();
+        arguments.values = new ArrayList<>();
+        arguments.values.add("1分钟");
+        arguments.values.add("10");
+        DBConnection DBStmt = new DBConnection("devops","root","taosdata");
+        //WriteTester(String testName, String homePath, String sudoPassord, DBConnection DBStmt,TestArguments testArgs)
+        PressTester tester = new PressTester("Press", DBStmt, arguments);
+        try {
+            //tester.SetTag();
+            tester.testEnvPrepare();
+            tester.startTest();
+            tester.writeToFile(resultPath);
+            tester.getTestResults();//获取本测试结果
+            //System.out.println(tester.getTestResults().values[0]);
+            //System.out.println(tester.getTimeData());//获取本测试的监控数据
+            System.out.println(tester.readFromFile(resultPath).testResult.values[0]);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

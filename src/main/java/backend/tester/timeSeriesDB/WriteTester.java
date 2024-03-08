@@ -45,7 +45,7 @@ public class WriteTester extends TestItem {
     // 场景与数据集文件名的映射关系
     private static Map<String, String> scenarioToFile = new HashMap<String,String>();
     static {
-        scenarioToFile.put("10台*1天", "tdengine_s10_1d.gz");
+        scenarioToFile.put("10台*10天", "tdengine_s10_10d.gz");
         scenarioToFile.put("100台*30天", "tdengine_s100_30d.gz");
         scenarioToFile.put("4000台*3天", "tdengine_s4000_3d.gz");
         scenarioToFile.put("2万台*3小时", "tdengine_s20000_3h.gz");
@@ -73,7 +73,7 @@ public class WriteTester extends TestItem {
         scenario = testArgs.values.get(0);
         clients = Integer.parseInt(testArgs.values.get(1));
         password = testArgs.values.get(2);
-        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
+        //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         SetTag();
     }
     // 张超群  写一个static函数，检验数据库连接状态，输入String dataBaseName，调用Util.popUpInfo输出数据库连接状态，服务是否启动，数据库是否存在
@@ -235,9 +235,9 @@ public class WriteTester extends TestItem {
             String scaleVar = "100";
             String timestampEnd = "2018-01-31T00:00:00Z";
             switch (scenario) {
-                case "10台*1天":
+                case "10台*10天":
                     scaleVar = "10";
-                    timestampEnd = "2018-01-02T00:00:00Z";
+                    timestampEnd = "2018-01-11T00:00:00Z";
                     break;
                 case "100台*30天":
                     scaleVar = "100";
@@ -457,71 +457,25 @@ public class WriteTester extends TestItem {
         }   
         return testResult;
     }
-
-    public List<List<Double>> getTimeData1() {
-        // 如果已经生成系统资源监测list，则直接返回
-        if (this.timeDataList != null && !this.timeDataList.isEmpty()) {
-            return this.timeDataList;
-        }
-        // 从文件读取监测数据
-        // 系统资源监视结果文件路径
-        String fileName = testHomePath + "/usage/taosd_usage_write_" + tag + ".csv";
-        File file = new File(fileName);
-        List<Double> userCpuUsageList = new ArrayList<>();
-        List<Double> memoryUsageList = new ArrayList<>();
-        List<Double> diskReadSpeedList = new ArrayList<>();
-        List<Double> diskWriteSpeedList = new ArrayList<>();
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            boolean headerSkipped = false;
-            while ((line = br.readLine()) != null) {
-                if (!headerSkipped) {
-                    headerSkipped = true;
-                    continue; // 跳过标题行
-                }
-                System.out.println(line);
-                String[] parts = line.split(",");
-                System.out.println(Arrays.toString(parts));
-                if (parts.length >= 4) { // 确保有足够的字段
-                    userCpuUsageList.add(Double.parseDouble(parts[1]));
-                    memoryUsageList.add(Double.parseDouble(parts[2]));
-                    diskReadSpeedList.add(Double.parseDouble(parts[3]));
-                    diskWriteSpeedList.add(Double.parseDouble(parts[4]));
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        timeDataList = new ArrayList<>();
-        timeDataList.add(userCpuUsageList);
-        timeDataList.add(memoryUsageList);
-        timeDataList.add(diskReadSpeedList);
-        timeDataList.add(diskWriteSpeedList);
-        System.out.println(timeDataList.toString());
-        return timeDataList;
-    }
-
     @Override
     public List<List<Double>> getTimeData() {
         // 首先修改csv文件的读写权限
         String fileName = testHomePath + "/usage/taosd_usage_write_" + tag + ".csv";
-//        try{
-////            String command = "echo " + password + " | sudo -S chown $USER " + fileName;
-//            System.out.println(command);
-//            // 执行命令
-//            ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
-//            processBuilder.directory(new File(testHomePath));
-//            Process process = processBuilder.start();
-//            process.waitFor();
-//            // 检查命令执行结果
-//            if (process.exitValue() != 0) {
-//                throw new RuntimeException("修改CSV文件权限失败, sudo权限不足");
-//            }
-//        }catch (Exception e) {
-//            e.printStackTrace();
-//            throw new RuntimeException("修改CSV文件权限失败, sudo权限不足");
-//        }
+        try{
+            String command = "echo " + password + " | sudo -S chown $USER " + fileName;
+            // 执行命令
+            ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
+            processBuilder.directory(new File(testHomePath));
+            Process process = processBuilder.start();
+            process.waitFor();
+            // 检查命令执行结果
+            if (process.exitValue() != 0) {
+                throw new RuntimeException("修改CSV文件权限失败, sudo权限不足");
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("修改CSV文件权限失败, sudo权限不足");
+        }
         List<List<Double>> result = new ArrayList<>();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(fileName));
@@ -530,7 +484,6 @@ public class WriteTester extends TestItem {
             reader.readLine();
             while ((line = reader.readLine()) != null) {
                 String[] values = line.split(",");
-                System.out.println(Arrays.toString(values));
                 List<Double> row = new ArrayList<>();
                 // 从第二列开始读取数据
                 for (int i = 1; i < values.length; i++) {
@@ -542,7 +495,6 @@ public class WriteTester extends TestItem {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(result);
         // 将result进行转置
         List<List<Double>> transposedResult = new ArrayList<>();
         for (int i = 0; i < result.get(0).size(); i++) {
@@ -758,7 +710,7 @@ public class WriteTester extends TestItem {
         String resultPath = homePath + "/result";
         TestArguments arguments = new TestArguments();
         arguments.values = new ArrayList<>();
-        arguments.values.add("10台*1天");
+        arguments.values.add("10台*10天");
         arguments.values.add("16");
         arguments.values.add("Admin@wlx");
         DBConnection DBStmt = new DBConnection("devops","root","taosdata");
@@ -767,11 +719,11 @@ public class WriteTester extends TestItem {
             //tester.SetTag();
             tester.testEnvPrepare();
             tester.startTest();
-//            tester.writeToFile(resultPath);
-//            tester.getTestResults();//获取本测试结果
-//            tester.getTestResults1(resultPath);
+            //tester.writeToFile(resultPath);
+            //tester.getTestResults();//获取本测试结果
+            //tester.getTestResults1(resultPath);
             //System.out.println(tester.getTestResults1(resultPath).values[0]);
-            System.out.println(tester.getTimeData1());//获取本测试的监控数据
+            System.out.println(tester.getTimeData());//获取本测试的监控数据
             //System.out.println(tester.readFromFile1(resultPath));
         } catch (Exception e) {
             e.printStackTrace();
