@@ -279,34 +279,4 @@ public class PressTester extends TestItem{
             e.printStackTrace();
         }
     }
-
-    @Override
-    public List<List<Double>> getTimeData() {
-        return null;
-    }
-
-    @Override
-    public TestResult getTestResults() {
-        return null;
-    }
-
-    @Override
-    public String getResultDicName() {
-        return null;
-    }
-
-    @Override
-    public void writeToFile(String resultPath) {
-
-    }
-
-    @Override
-    public TestAllResult readFromFile(String resultPath) {
-        return null;
-    }
-
-    @Override
-    public List<List<Double>> readFromFile1(String resultPath) {
-        return null;
-    }
 }
