@@ -10,8 +10,8 @@ public class DirectoryManager {
      */
     public static void createDirectories() {
         String[] rootFolders = {"PolarDB", "神通数据库", "OpenGauss", "TDengine", "InfluxDB", "Lindorm", "GlusterFS", "OceanFS"};
-        String[] subFoldersForFirstThree = {"TPC-C", "TPC-H", "可靠性", "适配性"};
-        String[] subFoldersForNextThree = {"写入性能", "查询性能", "可靠性", "适配性"};
+        String[] subFoldersForFirstThree = {"TPC-C", "TPC-H", "可靠性"};
+        String[] subFoldersForNextThree = {"写入性能", "查询性能", "可靠性"};
         String[] subFoldersForLastTwo = {"读写速度测试", "并发度测试", "小文件测试", "可靠性测试"};
 
         String basePath = System.getProperty("user.dir") + File.separator + "results";

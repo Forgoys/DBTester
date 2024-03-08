@@ -124,6 +124,26 @@ public class Util {
         return testArguments;
     }
 
+    public static boolean checkAllFilled(TestArguments testArguments) {
+        if (testArguments == null) {
+            return false;
+        }
+        for (String s : testArguments.values) {
+            if (s.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean checkAllFilled(String... args) {
+        for (String s : args) {
+            if (s.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 //    public static TestArguments getTestArgFromGridPane(GridPane gridPane, int rowIndex) {
 //        TestArguments testArguments = new TestArguments();

@@ -21,7 +21,7 @@ public class MainApp extends Application {
         stage.setScene(scene);
         stage.setTitle("国产数据库与文件系统测试原型软件");
         scene.getStylesheets().add(getClass().getResource("/frontend/css/font.css").toExternalForm());
-        Image appIcon = new Image(MainApp.class.getResourceAsStream("/icons/appIcon32.jpg"));
+        Image appIcon = new Image(MainApp.class.getResourceAsStream("/icons/appIcon1024.png"));
         stage.getIcons().add(appIcon);
 
         stage.setOnCloseRequest(event -> controller.closeAll());
