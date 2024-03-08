@@ -914,6 +914,10 @@ public class MainAppController {
      */
     @FXML
     private void onExportTestResultClick() {
+        if (testItem == null) {
+            Util.popUpInfo("请先测试", "错误");
+            return;
+        }
         String testObject = testObjectSelectBox.getValue();
         String testProject = testProjectSelectBox.getValue();
         String testResultDicName = testItem.getResultDicName();

@@ -229,7 +229,7 @@ public class PressTester extends TestItem{
     @Override
     public void writeToFile(String resultPath){
         try {
-            String directoryPath = resultPath + "/" + getResultDicName();
+            String directoryPath = resultPath;
             File directory = new File(directoryPath);
             if (!directory.exists()) {
                 directory.mkdirs();
