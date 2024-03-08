@@ -382,6 +382,13 @@ public class MainAppController {
      * @param rowIndex 从gridPane的第几行开始装参数配置的“参数名-输入框”对
      */
     private int configureFSConnectUI(int rowIndex) {
+        Label fsTypeLabel = new Label("文件系统类型");
+        ComboBox<String> fsTypeComBox = new ComboBox<>();
+        fsTypeComBox.setId("fsTypeComBox");
+        fsTypeComBox.getItems().addAll("GlusterFS", "NFS");
+        testObjectConfigPane.add(fsTypeLabel, 0, rowIndex);
+        testObjectConfigPane.add(fsTypeComBox, 1, rowIndex++);
+
         Label fsServerPathLabel = new Label("服务器卷路径");
         TextField fsServerPathTextField = new TextField();
         fsServerPathTextField.setId("fsServerPathTextField");
