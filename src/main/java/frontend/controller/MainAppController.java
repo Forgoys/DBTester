@@ -1089,7 +1089,7 @@ public class MainAppController {
         // 创建并配置一个信息对话框
         Alert aboutAlert = new Alert(Alert.AlertType.INFORMATION);
         aboutAlert.setTitle("关于");
-        aboutAlert.setHeaderText("国产数据库与文件系统原型软件");
+        aboutAlert.setHeaderText("国产数据库与文件系统测试原型软件");
         aboutAlert.setContentText("版本: 1.0");
 
         // 显示对话框并等待用户响应
