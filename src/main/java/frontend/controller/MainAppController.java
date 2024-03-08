@@ -68,7 +68,7 @@ public class MainAppController {
     static String testObjectOut = null;
 
     TestItem testItem;
-//    @FXML
+    //    @FXML
 //    private TitledPane sshConnectionTitledPane;
     @FXML
     private TitledPane testObjectConfigTitledPane;

@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FSConnection {
     private String fsUrl; // 文件系统路径
@@ -14,11 +16,25 @@ public class FSConnection {
 
     private TextField fsServerPathTextField;
     private TextField fsMountPathTextField;
-    public FSConnection() {}
+
+    // sudo权限
+    String localSudoPassword;
+
+    public FSConnection() {
+    }
+
+    public FSConnection(String fsUrl, String mountPath, String localSudoPassword) {
+        this.fsUrl = fsUrl;
+        this.mountPath = mountPath;
+        this.localSudoPassword = localSudoPassword;
+
+    }
 
     public FSConnection(String fsUrl, String mountPath) {
         this.fsUrl = fsUrl;
         this.mountPath = mountPath;
+        this.localSudoPassword = localSudoPassword;
+
     }
 
     /**
@@ -35,7 +51,11 @@ public class FSConnection {
             System.out.println("文件系统路径:" + fsServerPath);
             System.out.println("本地目录路径:" + fsMountPath);
             // 构建 mount 挂载命令
-            String mountCommand = "sudo mount -t glusterfs " + fsServerPath + " " + fsMountPath;
+            String mountCommand = "mount -t glusterfs " + fsServerPath + " " + fsMountPath;
+            mountCommand = "echo " + localSudoPassword + " | sudo -S " + mountCommand;
+
+            System.out.println(mountCommand);
+
             // 创建一个 ProcessBuilder 对象
             ProcessBuilder processBuilder = new ProcessBuilder();
             processBuilder.command("bash", "-c", mountCommand);
@@ -45,10 +65,14 @@ public class FSConnection {
             InputStream inputStream = process.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             // 读取进程的输出
+            List<String> mountResult = new ArrayList<>();
             String line;
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
+                mountResult.add(line);
             }
+            System.out.println("挂载输出：" + mountResult.toString());
+
             // 获取进程的错误流
             InputStream errorStream = process.getErrorStream();
             BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
@@ -97,5 +121,10 @@ public class FSConnection {
 
     public void setMountPath(String mountPath) {
         this.mountPath = mountPath;
+    }
+
+    public static void main(String[] args) {
+        FSConnection fSConnection = new FSConnection("10.181.8.145:/gv3", "/home/autotuning/zf/glusterfs/software_test/mountTest", "666");
+        fSConnection.mountFS();
     }
 }
