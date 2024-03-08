@@ -271,7 +271,6 @@ public class PressTester extends TestItem{
             tester.startTest();
             tester.writeToFile(resultPath);
             tester.getTestResults();//获取本测试结果
-            //tester.getTestResults1(resultPath);
             //System.out.println(tester.getTestResults().values[0]);
             //System.out.println(tester.getTimeData());//获取本测试的监控数据
             System.out.println(tester.readFromFile(resultPath).testResult.values[0]);

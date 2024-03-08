@@ -40,7 +40,7 @@ public class ReadTester extends TestItem{
     // 场景与数据集文件名的映射关系
     private static Map<String, String> scenarioToFile = new HashMap<>();
     static {
-        scenarioToFile.put("10台*1天", "tdengine_s10_1d.gz");
+        scenarioToFile.put("10台*10天", "tdengine_s10_10d.gz");
         scenarioToFile.put("100台*30天", "tdengine_s100_30d.gz");
         scenarioToFile.put("4000台*3天", "tdengine_s4000_3d.gz");
         scenarioToFile.put("2万台*3小时", "tdengine_s20000_3h.gz");
@@ -225,9 +225,9 @@ public class ReadTester extends TestItem{
             String scaleVar = "100";
             String timestampEnd = "2018-01-31T00:00:00Z";
             switch (scenario) {
-                case "10台*1天":
+                case "10台*10天":
                     scaleVar = "10";
-                    timestampEnd = "2018-01-02T00:00:00Z";
+                    timestampEnd = "2018-01-11T00:00:00Z";
                     break;
                 case "100台*30天":
                     scaleVar = "100";
@@ -257,7 +257,7 @@ public class ReadTester extends TestItem{
                     " -format=\"tdengine\" -db=devops " +
                     "-timestamp-start=\"2018-01-01T00:00:00Z\" " +
                     "-timestamp-end=\"" + timestampEnd + "\" " +
-                    "-query-type=" + query_type + " -queries=100000 > " + testHomePath + "/data/"+ tagdat + ".dat";
+                    "-query-type=" + query_type + " -queries=100000> " + testHomePath + "/data/"+ tagdat + ".dat";
             // 执行命令
             System.out.println(command);
             ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
@@ -620,7 +620,7 @@ public class ReadTester extends TestItem{
         TestArguments arguments = new TestArguments();
         arguments.values = new ArrayList<>();
         arguments.values.add("100台*30天");
-        arguments.values.add("1-host-1-hr");
+        arguments.values.add("8-host-1-hr");
         arguments.values.add("16");
         arguments.values.add("Admin@wlx");
         DBConnection DBStmt = new DBConnection("devops","root","taosdata");
