@@ -163,7 +163,7 @@ public class TPCHTester extends TestItem {
             resDir.mkdirs();
         }
         /*                                    正式执行测试                                       */
-        String cmd = String.format("%s %s %s %s %s", AUTOTEST_SCRIPT, DBStmt.getDBName(), DBStmt.getPort(), resultDirectory, diskNameOfDB);
+        String cmd = String.format("%s %s %s %s %s", AUTOTEST_SCRIPTS[0], DBStmt.getDBName(), DBStmt.getPort(), resultDirectory, diskNameOfDB);
         execCommands(new File(tpchToolPath), cmd);
         this.status = Status.FINISHED;
     }
