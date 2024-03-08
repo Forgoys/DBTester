@@ -271,17 +271,17 @@ public class MainAppController {
             return;
         }
         // 创建FSConnection对象
-        FSConnection fsConnection = new FSConnection(testArguments.values.get(0), testArguments.values.get(1));
+        FSConnection fsConnection = new FSConnection(testArguments.values.get(0), testArguments.values.get(1)), testArguments.values.get(2), testArguments.values.get(3);
 
         // 假设mountFS()方法实际执行挂载逻辑
-        fsConnection.mountFS();
+        String mountRst = fsConnection.mountFS();
 
         // 检查是否挂载成功，这里需要在FSConnection的mountFS方法内实现具体的挂载逻辑和成功失败的检测
-        if (fsConnection.isMounted()) {
+        if (mountRst == null) {
             Util.popUpInfo("文件系统挂载成功！", "挂载成功");
             testProjectConfigTitledPane.setDisable(false);
         } else {
-            Util.popUpInfo("文件系统挂载失败，请检查参数！", "挂载失败");
+            Util.popUpInfo(mountRst, "错误");
         }
     }
 
@@ -389,6 +389,12 @@ public class MainAppController {
         testObjectConfigPane.add(fsTypeLabel, 0, rowIndex);
         testObjectConfigPane.add(fsTypeComBox, 1, rowIndex++);
 
+        Label sudoPasswordLabel = new Label("本机sudo密码");
+        PasswordField sudoPasswordPasswordField = new PasswordField();
+        sudoPasswordPasswordField.setId("sudoPasswordPasswordField");
+        testObjectConfigPane.add(sudoPasswordLabel, 0, rowIndex);
+        testObjectConfigPane.add(sudoPasswordPasswordField, 1, rowIndex++);
+
         Label fsServerPathLabel = new Label("服务器卷路径");
         TextField fsServerPathTextField = new TextField();
         fsServerPathTextField.setId("fsServerPathTextField");
@@ -489,7 +495,7 @@ public class MainAppController {
                         } catch (Exception e) {
                             e.printStackTrace();
                             String message = e.getMessage();
-                            Util.popUpInfo(message, "Error");
+                            Util.popUpInfo(message, "错误");
                         }
                         updateMessage(message2Update.append("完成\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
@@ -498,7 +504,7 @@ public class MainAppController {
                         } catch (Exception e) {
                             e.printStackTrace();
                             String message = e.getMessage();
-                            Util.popUpInfo(message, "Error");
+                            Util.popUpInfo(message, "错误");
                         }
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
@@ -533,7 +539,7 @@ public class MainAppController {
                         } catch (Exception e) {
                             e.printStackTrace();
                             String message = e.getMessage();
-                            Util.popUpInfo(message, "Error");
+                            Util.popUpInfo(message, "错误");
                         }
                         updateMessage(message2Update.append("完成\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
@@ -542,7 +548,7 @@ public class MainAppController {
                         } catch (Exception e) {
                             e.printStackTrace();
                             String message = e.getMessage();
-                            Util.popUpInfo(message, "Error");
+                            Util.popUpInfo(message, "错误");
                         }
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
@@ -577,7 +583,7 @@ public class MainAppController {
                         } catch (Exception e) {
                             e.printStackTrace();
                             String message = e.getMessage();
-                            Util.popUpInfo(message, "Error");
+                            Util.popUpInfo(message, "错误");
                         }
                         updateMessage(message2Update.append("完成\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
@@ -586,7 +592,7 @@ public class MainAppController {
                         } catch (Exception e) {
                             e.printStackTrace();
                             String message = e.getMessage();
-                            Util.popUpInfo(message, "Error");
+                            Util.popUpInfo(message, "错误");
                         }
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
@@ -622,7 +628,7 @@ public class MainAppController {
                         } catch (Exception e) {
                             e.printStackTrace();
                             String message = e.getMessage();
-                            Util.popUpInfo(message, "Error");
+                            Util.popUpInfo(message, "错误");
                         }
                         updateMessage(message2Update.append("完成\n").toString());
                         updateMessage(message2Update.append("测试中....\n").toString());
@@ -631,7 +637,7 @@ public class MainAppController {
                         } catch (Exception e) {
                             e.printStackTrace();
                             String message = e.getMessage();
-                            Util.popUpInfo(message, "Error");
+                            Util.popUpInfo(message, "错误");
                         }
                         updateMessage(message2Update.append("测试完成\n").toString());
                         updateMessage(message2Update.append("开始生成测试结果\n").toString());
@@ -667,7 +673,7 @@ public class MainAppController {
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 String message = e.getMessage();
-                                Util.popUpInfo(message, "Error");
+                                Util.popUpInfo(message, "错误");
                             }
                             updateMessage(message2Update.append("完成\n").toString());
                             updateMessage(message2Update.append("测试中....\n").toString());
@@ -676,7 +682,7 @@ public class MainAppController {
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 String message = e.getMessage();
-                                Util.popUpInfo(message, "Error");
+                                Util.popUpInfo(message, "错误");
                             }
                             updateMessage(message2Update.append("测试完成\n").toString());
                             updateMessage(message2Update.append("开始生成测试结果\n").toString());
@@ -708,7 +714,7 @@ public class MainAppController {
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 String message = e.getMessage();
-                                Util.popUpInfo(message, "Error");
+                                Util.popUpInfo(message, "错误");
                             }
                             updateMessage(message2Update.append("完成\n").toString());
                             updateMessage(message2Update.append("测试中....\n").toString());
@@ -717,7 +723,7 @@ public class MainAppController {
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 String message = e.getMessage();
-                                Util.popUpInfo(message, "Error");
+                                Util.popUpInfo(message, "错误");
                             }
                             updateMessage(message2Update.append("测试完成\n").toString());
                             updateMessage(message2Update.append("开始生成测试结果\n").toString());
