@@ -13,6 +13,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 目前仅支持神通数据库，若需要支持另外两数据库，需要新增脚本文件
+ */
 public class TPCCTester extends TestItem {
 
 
@@ -21,6 +24,13 @@ public class TPCCTester extends TestItem {
      */
     public static final String[] DATA_SET_FILE_NAMES = {"config.csv", "cust-hist.csv", "customer.csv", "district.csv", "item.csv",
             "new-order.csv", "order.csv", "order-line.csv", "stock.csv", "warehouse.csv"};
+
+    /**
+     * 相关脚本，数组形式的需要针对每个数据库都写一个版本
+     */
+    private static final String DATA_GENERATE_SCRIPT = "./runLoader.sh";
+    private static final String[] DATA_IMPORT_SCRIPTS = new String[]{"./import_data_TPCC.sh"};
+    private static final String AUTOTEST_SCRIPT = "./auto_test_one.sh";
 
     /**
      * 模板配置文件名字

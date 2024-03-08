@@ -77,6 +77,29 @@ public class PressTester extends TestItem{
         if (!checkDBExist()) {
             throw new RuntimeException("数据库名不存在(库名必须为devops!!!,请先完成一个同场景的写入测试以生成devops)");
         }
+        // 检查是否是python3.7及以后的版本，以及是否安装taos包
+        try {
+            Process process = Runtime.getRuntime().exec("python3 --version");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!line.contains("3.7")) {
+                    throw new RuntimeException("请安装python3.7及以后的版本");
+                }
+            }
+            process = Runtime.getRuntime().exec("pip3 show taospy");
+            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("Name: taospy")) {
+                    break;
+                }
+            }
+            if (line == null) {
+                throw new RuntimeException("请安装taospy包: pip3 install taospy");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         status = Status.READY;
     }
 
@@ -247,8 +270,35 @@ public class PressTester extends TestItem{
         TestAllResult result = new TestAllResult();
         
         result.timeDataResult = readFromFile1(resultPath);
-        result.testResult = getTestResults();
+        result.testResult = getTestResults1(resultPath);
         return result;
+    }
+    public TestResult getTestResults1(String resultPath) {
+        testResult = new TestResult();
+        testResult.names = TestResult.INFLUXCOMP_PRESS_RES_NAMES;
+        try {
+            File dir = new File(resultPath);
+            File[] files = dir.listFiles();
+            if (files != null && files.length == 1) {
+                File file = files[0];
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line;
+                int success = 0;
+                int failure = 0;
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains("Thread success count:")) {
+                        success = Integer.parseInt(line.split(":")[1].trim());
+                    } else if (line.contains("Thread failure count:")) {
+                        failure = Integer.parseInt(line.split(":")[1].trim());
+                    }
+                }
+                reader.close();
+                testResult.values = new String[]{String.valueOf(success), String.valueOf(failure)};
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return testResult;
     }
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
@@ -257,12 +307,12 @@ public class PressTester extends TestItem{
     @Override
     public String getResultDicName() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-        return testName + "-" + dateFormat.format(new Date());
+        return testName + "-" + testTime + "_" + clients + dateFormat.format(new Date());
     }
 
     public static void main(String[] args) {
         String homePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
-        String resultPath = homePath + "/result";
+        String resultPath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare/result/Press-2024-03-08-11-46-13";
         TestArguments arguments = new TestArguments();
         arguments.values = new ArrayList<>();
         arguments.values.add("1分钟");
