@@ -247,7 +247,7 @@ public class PressTester extends TestItem{
     @Override
     public void writeToFile(String resultPath){
         try {
-            String directoryPath = resultPath + "/" + getResultDicName();
+            String directoryPath = resultPath;
             File directory = new File(directoryPath);
             if (!directory.exists()) {
                 directory.mkdirs();
@@ -265,8 +265,35 @@ public class PressTester extends TestItem{
         TestAllResult result = new TestAllResult();
         
         result.timeDataResult = readFromFile1(resultPath);
-        result.testResult = getTestResults();
+        result.testResult = getTestResults1(resultPath);
         return result;
+    }
+    public TestResult getTestResults1(String resultPath) {
+        testResult = new TestResult();
+        testResult.names = TestResult.INFLUXCOMP_PRESS_RES_NAMES;
+        try {
+            File dir = new File(resultPath);
+            File[] files = dir.listFiles();
+            if (files != null && files.length == 1) {
+                File file = files[0];
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+                String line;
+                int success = 0;
+                int failure = 0;
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains("Thread success count:")) {
+                        success = Integer.parseInt(line.split(":")[1].trim());
+                    } else if (line.contains("Thread failure count:")) {
+                        failure = Integer.parseInt(line.split(":")[1].trim());
+                    }
+                }
+                reader.close();
+                testResult.values = new String[]{String.valueOf(success), String.valueOf(failure)};
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return testResult;
     }
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
@@ -275,12 +302,12 @@ public class PressTester extends TestItem{
     @Override
     public String getResultDicName() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-        return testName + "-" + dateFormat.format(new Date());
+        return testName + "-" + testTime + "_" + clients + dateFormat.format(new Date());
     }
 
     public static void main(String[] args) {
         String homePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
-        String resultPath = homePath + "/result";
+        String resultPath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare/result/Press-2024-03-08-11-46-13";
         TestArguments arguments = new TestArguments();
         arguments.values = new ArrayList<>();
         arguments.values.add("1分钟");
