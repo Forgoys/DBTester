@@ -49,6 +49,11 @@ public class ReadTester extends TestItem{
     }
     private String tag;//形如s100_30d_w16_8-host-1hr_2021.06.01-12.00，txt后缀为结果，dat后缀为数据集文件，csv后缀为监控结果
     private String tagdat;
+
+    public ReadTester() {
+
+    }
+
     private void SetTag () {
         String fileName = scenarioToFile.get(scenario);
         DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH.mm");
@@ -526,7 +531,8 @@ public class ReadTester extends TestItem{
         // 将taosd_usage_read_tag.csv和read_tag.txt文件中的数据复制到resultPath中
         try {
             // 在resultPath新建getResultDicName()文件夹
-            String command0 = "mkdir " + resultPath + "/" + getResultDicName();
+            String command0 = "mkdir " + resultPath;
+            System.out.println(command0);
             // 执行命令
             ProcessBuilder processBuilder0 = new ProcessBuilder("/bin/bash", "-c", command0);
             processBuilder0.directory(new File(testHomePath));
@@ -536,7 +542,7 @@ public class ReadTester extends TestItem{
             if (process0.exitValue() != 0) {
                 throw new RuntimeException("新建文件夹失败");
             }
-            String resultpath = resultPath + "/" + getResultDicName();
+            String resultpath = resultPath;
             String command1 = "cp " + testHomePath + "/usage/taosd_usage_read_" + tag + ".csv " + resultpath;
             String command2 = "cp " + testHomePath + "/usage/read_" + tag + ".txt " + resultpath;
         
@@ -563,9 +569,10 @@ public class ReadTester extends TestItem{
     @Override
     public TestAllResult readFromFile(String resultPath) {
         TestAllResult result = new TestAllResult();
-        
+        System.out.println(resultPath);
         result.timeDataResult = readFromFile1(resultPath);
         result.testResult = getTestResults1(resultPath);
+
         return result;
     }
     // 实际实现了返回结果的一半功能，即监控数据

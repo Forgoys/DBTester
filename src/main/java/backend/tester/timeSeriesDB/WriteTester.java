@@ -553,7 +553,7 @@ public class WriteTester extends TestItem {
         // 将taosd_usage_write_tag.csv和write_tag.txt文件中的数据复制到resultPath中
         try {
             // 在resultPath新建getResultDicName()文件夹
-            String command0 = "mkdir " + resultPath + "/" + getResultDicName();
+            String command0 = "mkdir " + resultPath;
             // 执行命令
             ProcessBuilder processBuilder0 = new ProcessBuilder("/bin/bash", "-c", command0);
             processBuilder0.directory(new File(testHomePath));
@@ -564,10 +564,9 @@ public class WriteTester extends TestItem {
                 throw new RuntimeException("新建文件夹失败");
             }
 
-            String resultpath = resultPath + "/" + getResultDicName();
-            String command1 = "cp " + testHomePath + "/usage/taosd_usage_write_" + tag + ".csv " + resultpath;
-            String command2 = "cp " + testHomePath + "/usage/write_" + tag + ".txt " + resultpath;
-        
+            String command1 = "cp " + testHomePath + "/usage/taosd_usage_write_" + tag + ".csv " + resultPath;
+            String command2 = "cp " + testHomePath + "/usage/write_" + tag + ".txt " + resultPath;
+
             // 执行命令
             ProcessBuilder processBuilder1 = new ProcessBuilder("/bin/bash", "-c", command1);
             processBuilder1.directory(new File(testHomePath));
