@@ -280,10 +280,10 @@ public class MiniFileTest extends TestItem {
             // 创建 BufferedWriter 对象
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             // 写入文本内容
-//            bufferedWriter.write(content);
-//            bufferedWriter.newLine();
-            List<String> s = List.of(fioMiniFileTestResult.values);
-            bufferedWriter.write(s.toString());
+            for (String s : fioMiniFileTestResult.values) {
+                bufferedWriter.write(s);
+                bufferedWriter.write(",");
+            }
             bufferedWriter.newLine();
             // 关闭 BufferedWriter
             bufferedWriter.close();
@@ -329,8 +329,15 @@ public class MiniFileTest extends TestItem {
     @Override
     public void writeToFile(String resultPath) {
         // 把测试结果和系统资源结果文件保存到resultPath目录
-        String command = "cp " + directory + miniFileTestResultTxt + " " + directory + "/" + monitorResultCSV + " " + resultPath;
         int exitCode = 0;
+        try {
+            exitCode = executeCommand("mkdir -p " + resultPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        String command = "cp " + directory + "/" + miniFileTestResultTxt + " " + directory + "/" + monitorResultCSV + " " + resultPath;
         try {
             exitCode = executeCommand(command);
         } catch (IOException e) {
@@ -344,7 +351,31 @@ public class MiniFileTest extends TestItem {
     @Override
     public TestAllResult readFromFile(String resultPath) {
 
-        return null;
+        String filePath = resultPath + "/" + "fioMiniFileTestResult.txt";
+//        List<String> result = new ArrayList<>();
+        String[] result = new String[0];
+        try {
+            // 创建文件对象
+            File file = new File(filePath);
+            // 创建 BufferedReader 以读取文件内容
+            BufferedReader reader = null;
+            reader = new BufferedReader(new FileReader(file));
+            String line;
+            line = reader.readLine();
+//            result = Arrays.asList(line).toArray(new String[0]);
+            result = line.split(",");
+            System.out.println(Arrays.toString(result));
+            // 关闭 BufferedReader
+            reader.close();
+        } catch (IOException e) {
+            // 处理读取文件时可能发生的异常
+            e.printStackTrace();
+        }
+
+        TestResult testResult = new TestResult();
+        testResult.names = TestResult.FIO_MINIFILE_TEST;
+        testResult.values = result;
+        return new TestAllResult(testResult);
     }
 
     @Override
@@ -358,5 +389,6 @@ public class MiniFileTest extends TestItem {
         miniFileTest.startTest();
         String name = miniFileTest.getResultDicName();
         System.out.println(name);
+        miniFileTest.readFromFile("/home/autotuning/zf/glusterfs/software_test/miniFileTest");
     }
 }

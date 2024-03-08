@@ -467,6 +467,10 @@ public class PressureTester extends TestItem {
 
     @Override
     public void writeToFile(String resultPath) {
+        File file = new File(resultPath);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
         File retFile = new File(resultPath, "result.txt");
         PrintWriter pw = null;
         try {
@@ -493,6 +497,7 @@ public class PressureTester extends TestItem {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        testResult.names = TestResult.PRESSURE_TEST_RES_NAMES;
        return new TestAllResult(this.testResult);
     }
 

@@ -693,6 +693,8 @@ public class MainAppController {
                         Platform.runLater(() -> {
                             testResult = testItem.getTestResults();
                             fsReadWriteTestController.displayTestResults(testResult);
+                            testTimeData = testItem.getTimeData();
+                            fsReadWriteTestController.setTimeData(testTimeData);
                         });
                         updateMessage(message2Update.append("生成完毕\n").toString());
                         return null;
@@ -863,7 +865,7 @@ public class MainAppController {
     private void onExportTestResultClick() {
         String testObject = testObjectSelectBox.getValue();
         String testProject = testProjectSelectBox.getValue();
-        String testResultDicName = testItem.getResultDicName();   // 张超群  实现这个函数，返回存放结果数据文件的文件夹名字
+        String testResultDicName = testItem.getResultDicName();
         String absolutePath = DirectoryManager.buildAbsolutePath(testObject, testProject, testResultDicName);
         testItem.writeToFile(absolutePath);
     }
@@ -954,19 +956,21 @@ public class MainAppController {
                     tmpTestItem = new FioReadWriteTest();
                     testAllResult = tmpTestItem.readFromFile(absolutePath);
                     fsReadWriteTestController.displayTestResults(testAllResult.testResult);
-//                    fsReadWriteTestController.setTimeData(testAllResult.timeDataResult);
+                    fsReadWriteTestController.setTimeData(testAllResult.timeDataResult);
                     break;
                 case "并发度测试":
                     fsOtherTestController.clearAll();
                     tmpTestItem = new FioParallelTest();
                     testAllResult = tmpTestItem.readFromFile(absolutePath);
-                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+                    fsOtherTestController.displayTestResults(testAllResult.testResult);
+//                    System.out.println(testAllResult.testResult.toString());
                     break;
                 case "小文件测试":
                     fsOtherTestController.clearAll();
                     tmpTestItem = new MiniFileTest();
                     testAllResult = tmpTestItem.readFromFile(absolutePath);
-                    fsReadWriteTestController.displayTestResults(testAllResult.testResult);
+                    fsOtherTestController.displayTestResults(testAllResult.testResult);
+                    System.out.println(testAllResult.testResult.toString());
                     break;
                 case "可靠性测试":
                     fsReliabilityTestController.clearAll();
