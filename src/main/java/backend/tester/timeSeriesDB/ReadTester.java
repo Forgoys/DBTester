@@ -40,7 +40,7 @@ public class ReadTester extends TestItem{
     // 场景与数据集文件名的映射关系
     private static Map<String, String> scenarioToFile = new HashMap<>();
     static {
-        scenarioToFile.put("10台*1天", "tdengine_s10_1d.gz");
+        scenarioToFile.put("10台*10天", "tdengine_s10_10d.gz");
         scenarioToFile.put("100台*30天", "tdengine_s100_30d.gz");
         scenarioToFile.put("4000台*3天", "tdengine_s4000_3d.gz");
         scenarioToFile.put("2万台*3小时", "tdengine_s20000_3h.gz");
@@ -49,6 +49,11 @@ public class ReadTester extends TestItem{
     }
     private String tag;//形如s100_30d_w16_8-host-1hr_2021.06.01-12.00，txt后缀为结果，dat后缀为数据集文件，csv后缀为监控结果
     private String tagdat;
+
+    public ReadTester() {
+
+    }
+
     private void SetTag () {
         String fileName = scenarioToFile.get(scenario);
         DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd-HH.mm");
@@ -68,7 +73,7 @@ public class ReadTester extends TestItem{
         query_type = testArgs.values.get(1);
         clients = Integer.parseInt(testArgs.values.get(2));
         password = testArgs.values.get(3);
-        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tool/TSDB";
+        //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         SetTag();
     }
     public static void checkDBStatusAndExist(String dataBaseName) {
@@ -121,7 +126,7 @@ public class ReadTester extends TestItem{
         // 检查数据集是否存在
         if (!checkDataSetExist()) {
             dataGenerate();
-            throw new RuntimeException("数据集不存在,将自动创建数据集");
+            //throw new RuntimeException("数据集不存在,将自动创建数据集");
         }
         status = Status.READY;
     }
@@ -225,9 +230,9 @@ public class ReadTester extends TestItem{
             String scaleVar = "100";
             String timestampEnd = "2018-01-31T00:00:00Z";
             switch (scenario) {
-                case "10台*1天":
+                case "10台*10天":
                     scaleVar = "10";
-                    timestampEnd = "2018-01-02T00:00:00Z";
+                    timestampEnd = "2018-01-11T00:00:00Z";
                     break;
                 case "100台*30天":
                     scaleVar = "100";
@@ -257,7 +262,7 @@ public class ReadTester extends TestItem{
                     " -format=\"tdengine\" -db=devops " +
                     "-timestamp-start=\"2018-01-01T00:00:00Z\" " +
                     "-timestamp-end=\"" + timestampEnd + "\" " +
-                    "-query-type=" + query_type + " -queries=100000 > " + testHomePath + "/data/"+ tagdat + ".dat";
+                    "-query-type=" + query_type + " -queries=100000> " + testHomePath + "/data/"+ tagdat + ".dat";
             // 执行命令
             System.out.println(command);
             ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
@@ -467,8 +472,17 @@ public class ReadTester extends TestItem{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.timeDataList = result;
-        return result;
+        // 将result进行转置
+        List<List<Double>> transposedResult = new ArrayList<>();
+        for (int i = 0; i < result.get(0).size(); i++) {
+            List<Double> newRow = new ArrayList<>();
+            for (List<Double> row : result) {
+                newRow.add(row.get(i));
+            }
+            transposedResult.add(newRow);
+        }
+        this.timeDataList = transposedResult;
+        return transposedResult;
     }
     // 调用testHomePath路径中的monitor_read.sh脚本，将结果保存到testHomePath/usage文件夹中
     // 执行脚本要用sudo命令，密码可由SSHConnection类中的getPassword()获取
@@ -517,7 +531,8 @@ public class ReadTester extends TestItem{
         // 将taosd_usage_read_tag.csv和read_tag.txt文件中的数据复制到resultPath中
         try {
             // 在resultPath新建getResultDicName()文件夹
-            String command0 = "mkdir " + resultPath + "/" + getResultDicName();
+            String command0 = "mkdir " + resultPath;
+            System.out.println(command0);
             // 执行命令
             ProcessBuilder processBuilder0 = new ProcessBuilder("/bin/bash", "-c", command0);
             processBuilder0.directory(new File(testHomePath));
@@ -527,7 +542,7 @@ public class ReadTester extends TestItem{
             if (process0.exitValue() != 0) {
                 throw new RuntimeException("新建文件夹失败");
             }
-            String resultpath = resultPath + "/" + getResultDicName();
+            String resultpath = resultPath;
             String command1 = "cp " + testHomePath + "/usage/taosd_usage_read_" + tag + ".csv " + resultpath;
             String command2 = "cp " + testHomePath + "/usage/read_" + tag + ".txt " + resultpath;
         
@@ -554,9 +569,10 @@ public class ReadTester extends TestItem{
     @Override
     public TestAllResult readFromFile(String resultPath) {
         TestAllResult result = new TestAllResult();
-        
+        System.out.println(resultPath);
         result.timeDataResult = readFromFile1(resultPath);
         result.testResult = getTestResults1(resultPath);
+
         return result;
     }
     // 实际实现了返回结果的一半功能，即监控数据
@@ -593,8 +609,17 @@ public class ReadTester extends TestItem{
                 }
             }
         }
-        this.timeDataList = result;
-        return result;
+        // 将result进行转置
+        List<List<Double>> transposedResult = new ArrayList<>();
+        for (int i = 0; i < result.get(0).size(); i++) {
+            List<Double> newRow = new ArrayList<>();
+            for (List<Double> row : result) {
+                newRow.add(row.get(i));
+            }
+            transposedResult.add(newRow);
+        }
+        this.timeDataList = transposedResult;
+        return transposedResult;
     }
     public static void main(String[] args) {
         String homePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
@@ -602,7 +627,7 @@ public class ReadTester extends TestItem{
         TestArguments arguments = new TestArguments();
         arguments.values = new ArrayList<>();
         arguments.values.add("100台*30天");
-        arguments.values.add("1-host-1-hr");
+        arguments.values.add("8-host-1-hr");
         arguments.values.add("16");
         arguments.values.add("Admin@wlx");
         DBConnection DBStmt = new DBConnection("devops","root","taosdata");

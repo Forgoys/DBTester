@@ -45,7 +45,7 @@ public class WriteTester extends TestItem {
     // 场景与数据集文件名的映射关系
     private static Map<String, String> scenarioToFile = new HashMap<String,String>();
     static {
-        scenarioToFile.put("10台*1天", "tdengine_s10_1d.gz");
+        scenarioToFile.put("10台*10天", "tdengine_s10_10d.gz");
         scenarioToFile.put("100台*30天", "tdengine_s100_30d.gz");
         scenarioToFile.put("4000台*3天", "tdengine_s4000_3d.gz");
         scenarioToFile.put("2万台*3小时", "tdengine_s20000_3h.gz");
@@ -73,7 +73,7 @@ public class WriteTester extends TestItem {
         scenario = testArgs.values.get(0);
         clients = Integer.parseInt(testArgs.values.get(1));
         password = testArgs.values.get(2);
-        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tool/TSDB";
+        //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         SetTag();
     }
     // 张超群  写一个static函数，检验数据库连接状态，输入String dataBaseName，调用Util.popUpInfo输出数据库连接状态，服务是否启动，数据库是否存在
@@ -126,7 +126,7 @@ public class WriteTester extends TestItem {
         // 检查数据集是否存在
         if (!checkDataSetExist()) {
             dataGenerate();
-            throw new RuntimeException("数据集不存在,将自动创建数据集,请稍后再次检测");
+            //throw new RuntimeException("数据集不存在,将自动创建数据集,请稍后再次检测");
         }
         status = Status.READY;
     }
@@ -135,6 +135,7 @@ public class WriteTester extends TestItem {
     private boolean checkTestToolExist() {
         for (String fileName : DATA_SET_FILE_NAMES) {
             File file = new File(testHomePath, fileName);
+            System.out.println(file.getAbsoluteFile());
             if (!file.exists()) {
                 return false;
             }
@@ -234,9 +235,9 @@ public class WriteTester extends TestItem {
             String scaleVar = "100";
             String timestampEnd = "2018-01-31T00:00:00Z";
             switch (scenario) {
-                case "10台*1天":
+                case "10台*10天":
                     scaleVar = "10";
-                    timestampEnd = "2018-01-02T00:00:00Z";
+                    timestampEnd = "2018-01-11T00:00:00Z";
                     break;
                 case "100台*30天":
                     scaleVar = "100";
@@ -494,8 +495,17 @@ public class WriteTester extends TestItem {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.timeDataList = result;
-        return result;
+        // 将result进行转置
+        List<List<Double>> transposedResult = new ArrayList<>();
+        for (int i = 0; i < result.get(0).size(); i++) {
+            List<Double> newRow = new ArrayList<>();
+            for (List<Double> row : result) {
+                newRow.add(row.get(i));
+            }
+            transposedResult.add(newRow);
+        }
+        this.timeDataList = transposedResult;
+        return transposedResult;
     }
     // 调用testHomePath路径中的monitor_write.sh脚本，将结果保存到testHomePath/usage文件夹中
     // 执行脚本要用sudo命令，密码可由SSHConnection类中的getPassword()获取
@@ -543,7 +553,7 @@ public class WriteTester extends TestItem {
         // 将taosd_usage_write_tag.csv和write_tag.txt文件中的数据复制到resultPath中
         try {
             // 在resultPath新建getResultDicName()文件夹
-            String command0 = "mkdir " + resultPath + "/" + getResultDicName();
+            String command0 = "mkdir " + resultPath;
             // 执行命令
             ProcessBuilder processBuilder0 = new ProcessBuilder("/bin/bash", "-c", command0);
             processBuilder0.directory(new File(testHomePath));
@@ -554,10 +564,9 @@ public class WriteTester extends TestItem {
                 throw new RuntimeException("新建文件夹失败");
             }
 
-            String resultpath = resultPath + "/" + getResultDicName();
-            String command1 = "cp " + testHomePath + "/usage/taosd_usage_write_" + tag + ".csv " + resultpath;
-            String command2 = "cp " + testHomePath + "/usage/write_" + tag + ".txt " + resultpath;
-        
+            String command1 = "cp " + testHomePath + "/usage/taosd_usage_write_" + tag + ".csv " + resultPath;
+            String command2 = "cp " + testHomePath + "/usage/write_" + tag + ".txt " + resultPath;
+
             // 执行命令
             ProcessBuilder processBuilder1 = new ProcessBuilder("/bin/bash", "-c", command1);
             processBuilder1.directory(new File(testHomePath));
@@ -644,8 +653,17 @@ public class WriteTester extends TestItem {
             e.printStackTrace();
         }
         */
-        this.timeDataList = result;
-        return result;
+        // 将result进行转置
+        List<List<Double>> transposedResult = new ArrayList<>();
+        for (int i = 0; i < result.get(0).size(); i++) {
+            List<Double> newRow = new ArrayList<>();
+            for (List<Double> row : result) {
+                newRow.add(row.get(i));
+            }
+            transposedResult.add(newRow);
+        }
+        this.timeDataList = transposedResult;
+        return transposedResult;
     }
 
     // 删除数据库 devops
@@ -691,7 +709,7 @@ public class WriteTester extends TestItem {
         String resultPath = homePath + "/result";
         TestArguments arguments = new TestArguments();
         arguments.values = new ArrayList<>();
-        arguments.values.add("10台*1天");
+        arguments.values.add("10台*10天");
         arguments.values.add("16");
         arguments.values.add("Admin@wlx");
         DBConnection DBStmt = new DBConnection("devops","root","taosdata");
@@ -700,11 +718,11 @@ public class WriteTester extends TestItem {
             //tester.SetTag();
             tester.testEnvPrepare();
             tester.startTest();
-            tester.writeToFile(resultPath);
+            //tester.writeToFile(resultPath);
             //tester.getTestResults();//获取本测试结果
             //tester.getTestResults1(resultPath);
             //System.out.println(tester.getTestResults1(resultPath).values[0]);
-            //System.out.println(tester.getTimeData());//获取本测试的监控数据
+            System.out.println(tester.getTimeData());//获取本测试的监控数据
             //System.out.println(tester.readFromFile1(resultPath));
         } catch (Exception e) {
             e.printStackTrace();

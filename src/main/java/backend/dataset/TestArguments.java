@@ -51,16 +51,20 @@ public class TestArguments {
      * influxdb-comparision工具时序数据库测试的参数属性
      */
     public static final ArgumentProperty[] INFLUXCOMP_WRITE_ARG_PROPERTIES = new ArgumentProperty[] {
-            new ArgumentProperty("写入场景", new String[]{"10台*1天","100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟"}),
+            new ArgumentProperty("写入场景", new String[]{"10台*10天","100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟"}),
             new ArgumentProperty("客户端数", new String[]{"16","100"}),
             new ArgumentProperty("本机sudo密码")
     };
     public static final ArgumentProperty[] INFLUXCOMP_READ_ARG_PROPERTIES = new ArgumentProperty[] {
-            new ArgumentProperty("查询场景", new String[]{"100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟*"}),
+            new ArgumentProperty("查询场景", new String[]{"10台*10天","100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟*"}),
             new ArgumentProperty("查询类型", new String[]{"8-host-1-hr","1-host-1-hr","1-host-12-hr"}),
             new ArgumentProperty("客户端数", new String[]{"10","100"}),
             //new ArgumentProperty("查询语句数量",new String[]{"1万","5万","10万"})，固定为10万
             new ArgumentProperty("本机sudo密码")
+    };
+    public static final ArgumentProperty[] INFLUXCOMP_PRESS_ARG_PROPERTIES = new ArgumentProperty[] {
+            new ArgumentProperty("测试时间", new String[]{"1分钟","10分钟","100分钟"}),
+            new ArgumentProperty("客户端数", new String[]{"10","100","1000"})
     };
 
     /*
@@ -132,6 +136,12 @@ public class TestArguments {
                 return TPCC_ARG_PROPERTIES;
             case "TPC-H":
                 return TPCH_ARG_PROPERTIES;
+            case "可靠性":
+                if (testObject.equals("InfluxDB") || testObject.equals("TDengine") || testObject.equals("Lindorm")) {
+                    return INFLUXCOMP_PRESS_ARG_PROPERTIES;
+                } else {
+                    return PRESSURE_TEST_ARG_PROPERTIES;
+                }
             case "写入性能":
                 return INFLUXCOMP_WRITE_ARG_PROPERTIES;
             case "查询性能":

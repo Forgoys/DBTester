@@ -13,22 +13,24 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 目前仅支持神通数据库，若需要支持另外两数据库，需要新增脚本文件
+ */
 public class TPCCTester extends TestItem {
 
-    public static String testHomePath;
 
-    public static String toolHomePath;
-
-    public static String toolPath;
-
-    // 指定要检查的文件名列表
+    /**
+     * 要检查的文件名列表
+     */
     public static final String[] DATA_SET_FILE_NAMES = {"config.csv", "cust-hist.csv", "customer.csv", "district.csv", "item.csv",
             "new-order.csv", "order.csv", "order-line.csv", "stock.csv", "warehouse.csv"};
 
     /**
-     * 数据集路径
+     * 相关脚本，数组形式的需要针对每个数据库都写一个版本
      */
-    private String dataSetPath;
+    private static final String DATA_GENERATE_SCRIPT = "./runLoader.sh";
+    private static final String[] DATA_IMPORT_SCRIPTS = new String[]{"./import_data_TPCC.sh"};
+    private static final String AUTOTEST_SCRIPT = "./auto_test_one.sh";
 
     /**
      * 模板配置文件名字
@@ -36,13 +38,27 @@ public class TPCCTester extends TestItem {
     public static final String TMP_PROPS_NAME = "props";
 
     /**
+     * 相关路径
+     */
+    private String testHomePath;
+    private String toolHomePath;
+    private String toolPath;
+
+    /**
+     * 数据集路径
+     */
+    private String dataSetPath;
+
+    /**
      * 配置文件名
      */
     private String propsFileName;
+
     /**
      * 数据规模
      */
     private int dataSize = 20;
+
     /**
      * 并发进程数
      */
@@ -82,37 +98,17 @@ public class TPCCTester extends TestItem {
     }
 
 
+    private void initialization() throws Exception{
 
-    /**
-     * 测试环境准备：软件部署、数据集导入
-     */
-    @Override
-    public void testEnvPrepare() throws Exception {
+        // 获取工具包根目录
+        File projectDir = new File(System.getProperty("user.dir"));
+        toolsRootPath = String.format("%s/%s/", projectDir.getParentFile().getAbsolutePath(), TOOLS_ROOT_NAME);
 
-        toolsRootPath = "/home/wlx/cx/DBTester/";
-
-        // 安装数据库所在磁盘
-        diskNameOfDB = "sdd";
-
-        // 创建测试目录
-        String userName = execCommandsWithReturn("whoami");
-        testHomePath = "/home/" + userName + "/RDB_test/tpcc/";
-        File testHomePathFile = new File(testHomePath);
-        testHomePathFile.mkdirs();
-        // 测试文件目录
-        dataSetPath = testHomePath + "TPCC_Files/warehouses_" + dataSize + "/";
-
-        // 检查测试工具benchmarks是否存在
-        toolHomePath = "/home/wlx/cx/benchmarksql-5.0/";
-        toolPath = toolHomePath + "run/";
-//        prepareTools();
-
-        // 测试结果目录
-        LocalDateTime localDateTime = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
-        String formatDateTime = formatter.format(localDateTime);
-        // 结果目录格式类似于/home/wlx/cx/20_oscar_2024-03-05_212234/
-        resultDirectory = String.format("%s%d_%s_%s/", testHomePath + "result", dataSize, DBStmt.getDbBrandName(), formatDateTime);
+        // 检查工具目录
+        File toolRootDir = new File(toolsRootPath);
+        if(!toolRootDir.exists() || !toolRootDir.isDirectory()) {
+            throw new Exception("未检测到工具目录:：" + toolsRootPath);
+        }
 
         // 检查测试参数是否正确
         if (this.testArgs == null) {
@@ -125,6 +121,48 @@ public class TPCCTester extends TestItem {
         if (dataSize * 10 <= terminals) {
             throw new IllegalArgumentException("并发线程数需要小于10倍数据规模!");
         }
+
+        // 配置文件命名格式：“props_dbBrand_dataSize"
+        propsFileName = "props_" + DBStmt.getDbBrandName() + dataSize;
+
+        // 安装数据库所在磁盘
+        diskNameOfDB = "sdd";
+
+        // 创建tpcc测试目录
+        testHomePath = toolsRootPath + "RDB_test/tpcc/";
+        File testHomePathFile = new File(testHomePath);
+        if(!testHomePathFile.exists())
+            testHomePathFile.mkdirs();
+
+        /// 测试工具benchmarksql工具所在目录
+        toolHomePath = testHomePath + "benchmarksql-5.0/";
+        toolPath = toolHomePath + "run/";
+        File toolDir = new File(toolPath);
+        if(!toolDir.exists()) {
+            throw new Exception("未检测到benchmarksql工具");
+        }
+
+        // 测试数据保存目录
+        dataSetPath = String.format("%s%s_%d/", testHomePath, "TPCC_Files/warehouses", dataSize);
+
+        // 测试结果目录
+        LocalDateTime localDateTime = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
+        String formatDateTime = formatter.format(localDateTime);
+        // 结果目录格式类似于/home/wlx/cx/result20_oscar_2024-03-05_21-22-34/
+        resultDirectory = String.format("%s%s/%dwarehouses_%s/", testHomePath, "results", dataSize, formatDateTime);
+    }
+
+
+
+    /**
+     * 测试环境准备：软件部署、数据集导入
+     */
+    @Override
+    public void testEnvPrepare() throws Exception {
+
+        // 相关变量赋值
+        initialization();
 
         // 生成配置文件
         createPropsFile();
@@ -243,8 +281,7 @@ public class TPCCTester extends TestItem {
      * 根据模板配置文件创建配置文件
      */
     private void createPropsFile() throws Exception {
-        // 配置文件命名格式：“props_dbBrand_dataSize"
-        propsFileName = "props_" + DBStmt.getDbBrandName() + dataSize;
+
         // 删除旧的配置文件
         File oldFile = new File(toolPath + propsFileName);
         if (oldFile.exists()) {
@@ -355,6 +392,10 @@ public class TPCCTester extends TestItem {
 
     @Override
     public TestResult getTestResults() {
+        // 如果已经生成了结果，则直接返回
+        if(this.testResult != null) {
+            return this.testResult;
+        }
         // 读取结果文件
         String res = execCommandsWithReturn("tail -n 6 " + resultDirectory + "result.txt");
         if (!res.isEmpty()) {
@@ -378,18 +419,34 @@ public class TPCCTester extends TestItem {
 
     @Override
     public String getResultDicName() {
-        return null;
+        return new File(resultDirectory).getName();
     }
 
     @Override
     public void writeToFile(String resultPath) {
-
+        if(status != Status.FINISHED) {
+            System.out.println("还未生成结果文件");
+            return ;
+        }
+        File file = new File(resultPath);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        String cmd = String.format("cp -r %s* %s", resultDirectory, resultPath);
+        System.out.println(cmd);
+        execCommands(cmd);
     }
 
     @Override
     public TestAllResult readFromFile(String resultPath) {
-
-        return null;
+        if(resultPath == null) {
+            return null;
+        }
+        if(!resultPath.endsWith("/")) {
+            resultPath += "/";
+        }
+        this.resultDirectory = resultPath;
+        return new TestAllResult(getTestResults(), getTimeData());
     }
 
     @Override

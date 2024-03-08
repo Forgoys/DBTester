@@ -104,6 +104,8 @@ public class Util {
                             if (!Util.checkSudoPassword(textContent)) {
                                 Util.popUpInfo("本机超级权限密码错误，请重新输入", "错误");
                                 return null;
+                            } else {
+                                testArguments.values.add(textContent);
                             }
                         }
                     } else {
@@ -122,6 +124,26 @@ public class Util {
         return testArguments;
     }
 
+    public static boolean checkAllFilled(TestArguments testArguments) {
+        if (testArguments == null) {
+            return false;
+        }
+        for (String s : testArguments.values) {
+            if (s.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean checkAllFilled(String... args) {
+        for (String s : args) {
+            if (s.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 //    public static TestArguments getTestArgFromGridPane(GridPane gridPane, int rowIndex) {
 //        TestArguments testArguments = new TestArguments();

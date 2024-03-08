@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * 目前仅支持神通数据库，若需要支持另外两数据库，需要新增脚本文件
+ */
 public class TPCHTester extends TestItem {
 
     /**
@@ -19,11 +22,11 @@ public class TPCHTester extends TestItem {
     public static final String[] DATA_SET_FILE_NAMES = "nation.csv region.csv part.csv supplier.csv partsupp.csv customer.csv orders.csv lineitem.csv config.csv".split(" ");
 
     /**
-     * 相关脚本
+     * 相关脚本，数组形式的需要针对每个数据库都写一个版本
      */
     private static final String DATA_GENERATE_SCRIPT = "./generate_data.sh";
     private static final String[] DATA_IMPORT_SCRIPTS = new String[]{"./importData_oscar.sh"};
-    private static final String AUTOTEST_SCRIPT = "./auto_test_one.sh";
+    private static final String[] AUTOTEST_SCRIPTS = new String[]{"./auto_test_one.sh"};
 
 
     public  String testHomePath;
@@ -71,7 +74,9 @@ public class TPCHTester extends TestItem {
 
     private void initialization() throws Exception{
 
-        toolsRootPath = "/home/wlx/DBTestTools";
+        // 获取工具包根目录
+        File projectDir = new File(System.getProperty("user.dir"));
+        toolsRootPath = String.format("%s/%s/", projectDir.getParentFile().getAbsolutePath(), TOOLS_ROOT_NAME);
 
         // 检查工具目录
         File toolRootDir = new File(toolsRootPath);
@@ -113,7 +118,7 @@ public class TPCHTester extends TestItem {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss");
         String formatDateTime = formatter.format(localDateTime);
         // 结果目录格式类似于/home/wlx/cx/result20_oscar_2024-03-05_21-22-34/
-        resultDirectory = String.format("%s%d_%s_%s/", testHomePath + "results/", dataSize, DBStmt.getDbBrandName(), formatDateTime);
+        resultDirectory = String.format("%s%s/%dGB_%s/", testHomePath, "results", dataSize, formatDateTime);
     }
 
     /**
@@ -158,7 +163,7 @@ public class TPCHTester extends TestItem {
             resDir.mkdirs();
         }
         /*                                    正式执行测试                                       */
-        String cmd = String.format("%s %s %s %s %s", AUTOTEST_SCRIPT, DBStmt.getDBName(), DBStmt.getPort(), resultDirectory, diskNameOfDB);
+        String cmd = String.format("%s %s %s %s %s", AUTOTEST_SCRIPTS[0], DBStmt.getDBName(), DBStmt.getPort(), resultDirectory, diskNameOfDB);
         execCommands(new File(tpchToolPath), cmd);
         this.status = Status.FINISHED;
     }
@@ -315,7 +320,7 @@ public class TPCHTester extends TestItem {
         }
         // 从文件读取监测数据
         // 系统资源监视结果文件路径
-        File file = new File(resultDirectory + "monitor.csv");
+        File file = new File(resultDirectory, "monitor.csv");
         List<Double> userCpuUsageList = new ArrayList<>();
         List<Double> memoryUsageList = new ArrayList<>();
         List<Double> diskReadSpeedList = new ArrayList<>();
@@ -351,12 +356,9 @@ public class TPCHTester extends TestItem {
 
     @Override
     public TestResult getTestResults() {
-        if(this.status != Status.FINISHED) {
-            System.out.println("测试正在进行中，请稍等");
-            return null;
-        }
         // 读取结果文件
-        try(BufferedReader br = new BufferedReader(new FileReader(resultDirectory + "result.txt"))) {
+        File retFile = new File(this.resultDirectory,  "result.txt");
+        try(BufferedReader br = new BufferedReader(new FileReader(retFile))) {
             testResult = new TestResult();
             testResult.values = br.readLine().split(" ");
             testResult.names = TestResult.TPCH_RES_NAMES;
@@ -374,12 +376,28 @@ public class TPCHTester extends TestItem {
 
     @Override
     public void writeToFile(String resultPath) {
-
+        if(status != Status.FINISHED) {
+            System.out.println("还未生成结果文件");
+            return ;
+        }
+        File file = new File(resultPath);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        String cmd = String.format("cp -r %s* %s", resultDirectory, resultPath);
+        execCommands(cmd);
     }
 
     @Override
     public TestAllResult readFromFile(String resultPath) {
-        return null;
+        if(resultPath == null) {
+            return null;
+        }
+        if(!resultPath.endsWith("/")) {
+            resultPath += "/";
+        }
+        this.resultDirectory = resultPath;
+        return new TestAllResult(getTestResults(), getTimeData());
     }
 
     @Override
@@ -389,7 +407,6 @@ public class TPCHTester extends TestItem {
 
     public static void main(String[] args) {
 
-        System.out.println(System.getProperty("user.dir"));
 //        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
 //                "jdbc:oscar://10.181.8.146:2005/ADAPTTEST",
 //                "SYSDBA",
