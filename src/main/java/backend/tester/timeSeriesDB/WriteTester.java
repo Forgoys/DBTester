@@ -73,7 +73,7 @@ public class WriteTester extends TestItem {
         scenario = testArgs.values.get(0);
         clients = Integer.parseInt(testArgs.values.get(1));
         password = testArgs.values.get(2);
-        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
+        //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         SetTag();
     }
     // 张超群  写一个static函数，检验数据库连接状态，输入String dataBaseName，调用Util.popUpInfo输出数据库连接状态，服务是否启动，数据库是否存在
@@ -719,9 +719,9 @@ public class WriteTester extends TestItem {
             //tester.SetTag();
             tester.testEnvPrepare();
             tester.startTest();
-            tester.writeToFile(resultPath);
-            tester.getTestResults();//获取本测试结果
-            tester.getTestResults1(resultPath);
+            //tester.writeToFile(resultPath);
+            //tester.getTestResults();//获取本测试结果
+            //tester.getTestResults1(resultPath);
             //System.out.println(tester.getTestResults1(resultPath).values[0]);
             System.out.println(tester.getTimeData());//获取本测试的监控数据
             //System.out.println(tester.readFromFile1(resultPath));
