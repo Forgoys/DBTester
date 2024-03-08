@@ -28,9 +28,10 @@ public class TPCHTester extends TestItem {
     private static final String[] DATA_IMPORT_SCRIPTS = new String[]{"./importData_oscar.sh"};
     private static final String[] AUTOTEST_SCRIPTS = new String[]{"./auto_test_one.sh"};
 
-
+    /**
+     * 相关路径
+     */
     public  String testHomePath;
-
     public  String tpchToolPath;
 
     /**
@@ -168,40 +169,6 @@ public class TPCHTester extends TestItem {
         this.status = Status.FINISHED;
     }
 
-    private void executeSQLFilesInDirectory(String sqlFilesPath) {
-
-        File directory = new File(sqlFilesPath);
-        File[] files = directory.listFiles((dir, name) -> name.endsWith(".sql"));
-
-        if (files == null) {
-            System.out.println("指定目录中没有 SQL 文件");
-            return ;
-        }
-
-        double totalTime = 0;
-        try (FileWriter writer = new FileWriter(resultDirectory+"result.txt")) {
-            testResult.values = new String[files.length];
-            for(int i = 1; i <= files.length; i++) {
-
-                long startTime = System.currentTimeMillis();
-                File file = new File(sqlFilesPath, "db" + i + ".sql");
-                List<String> res= DBStmt.executeSQLFile(file.getAbsolutePath());
-                for(String str : res) {
-                    System.out.println(str);
-                }
-                long endTime = System.currentTimeMillis();
-                double executionTime = (endTime - startTime) / 1000.0;
-                totalTime += executionTime;
-                if(i != 1) {
-                    writer.write(" ");
-                }
-                writer.write(String.format("%.3f", executionTime));
-            }
-            writer.write(String.format(" %.3f", totalTime));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * 检查工具是否存在
