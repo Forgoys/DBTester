@@ -1,8 +1,6 @@
 package frontend.connection;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -229,6 +227,56 @@ public class DBConnection {
         }
     
         return output;
+    }
+
+    private static boolean checkDBUserPassword(DBConnection dbConnection) {
+        try {
+            // 输入指令：taos -u"root" -p"taosdata"能进入taos命令行
+            String[] command = {"/bin/bash", "-c", "taos -u" + dbConnection.username + " -p" + dbConnection.password + " 2>&1"};
+            Process process = Runtime.getRuntime().exec(command);
+
+            // 向进程写入输入
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+            writer.write("q\n");
+            writer.flush();
+            writer.close();
+
+            // 读取命令行指令的输入流
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = inputReader.readLine()) != null) {
+                // 打印命令行指令的执行结果
+
+                // 检查是否存在"Authentication failure"的错误信息
+                if (line.contains("Authentication failure") || line.contains("Invalid user") ){
+                    return false;
+                }
+            }
+
+            // 如果没有"Authentication failure"的错误信息，那么认为命令执行成功
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean checkDBExist(DBConnection dbConnection) {
+        try {
+            String[] command = {"/bin/bash", "-c", "taos -u" + dbConnection.username + " -p" + dbConnection.password + " -s \"use " + dbConnection.dbName + ";\" 2>&1"};
+            Process process = Runtime.getRuntime().exec(command);
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = inputReader.readLine()) != null) {
+                if (line.contains("Database not exist")) {
+                    return false;
+                }
+            }
+            return (checkDBUserPassword(dbConnection));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // 检查数据库连接状态

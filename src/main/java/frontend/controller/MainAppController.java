@@ -236,31 +236,41 @@ public class MainAppController {
     private void connectDatabase() {
         // 获取UI上的参数
         TestArguments connectArg = Util.getTestArgFromGridPane(testObjectConfigPane, 1);
+        if (!Util.checkAllFilled(connectArg)) {
+            Util.popUpInfo("请检查参数", "连接失败");
+            return;
+        }
         System.out.println(connectArg.values.toString());
         // 创建DBConnection对象
         if (connectArg.values.size() == 4) {
             currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2), connectArg.values.get(3));
+            // 尝试连接数据库
+            if (currentDBConnection.connect()) {
+                Util.popUpInfo("数据库连接成功！", "连接成功");
+                testProjectConfigTitledPane.setDisable(false);
+            } else {
+                Util.popUpInfo("数据库连接失败，请检查参数！", "连接失败");
+            }
         } else if (connectArg.values.size() == 3) {  // TDengine只需要三个参数
             currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2));
-            return;
+            if (DBConnection.checkDBExist(currentDBConnection)) {
+                Util.popUpInfo("数据库连接成功！", "连接成功");
+            } else {
+                Util.popUpInfo("数据库连接失败，请检查参数！", "连接失败");
+            }
         }
 
-        // 尝试连接数据库
-        if (currentDBConnection.connect()) {
-            Util.popUpInfo("数据库连接成功！", "连接成功");
-            testProjectConfigTitledPane.setDisable(false);
-        } else {
-            Util.popUpInfo("数据库连接失败，请检查参数！", "连接失败");
-        }
     }
 
     private void mountFileSystem() {
         // 获取UI上的参数
-        String fsUrl = ((TextField) testObjectConfigPane.lookup("#fsServerPathTextField")).getText();
-        String mountPath = ((TextField) testObjectConfigPane.lookup("#fsMountPathTextField")).getText();
-
+        TestArguments testArguments = Util.getTestArgFromGridPane(testObjectConfigPane, 1);
+        if (!Util.checkAllFilled(testArguments)) {
+            Util.popUpInfo("请检查参数", "连接失败");
+            return;
+        }
         // 创建FSConnection对象
-        FSConnection fsConnection = new FSConnection(fsUrl, mountPath);
+        FSConnection fsConnection = new FSConnection(testArguments.values.get(0), testArguments.values.get(1));
 
         // 假设mountFS()方法实际执行挂载逻辑
         fsConnection.mountFS();
@@ -576,6 +586,7 @@ public class MainAppController {
                             testResult = testItem.getTestResults();
                             dbOtherTestController.displayTestResults(testResult);
                             testTimeData = testItem.getTimeData();
+                            System.out.println(testTimeData.toString());
                             dbOtherTestController.setTimeData(testTimeData);
 
                         });

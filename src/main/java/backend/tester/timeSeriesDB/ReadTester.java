@@ -68,7 +68,7 @@ public class ReadTester extends TestItem{
         query_type = testArgs.values.get(1);
         clients = Integer.parseInt(testArgs.values.get(2));
         password = testArgs.values.get(3);
-        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tool/TSDB";
+        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         SetTag();
     }
     public static void checkDBStatusAndExist(String dataBaseName) {
@@ -619,7 +619,7 @@ public class ReadTester extends TestItem{
         String resultPath = homePath + "/result";
         TestArguments arguments = new TestArguments();
         arguments.values = new ArrayList<>();
-        arguments.values.add("100台*30天");
+        arguments.values.add("10台*1天");
         arguments.values.add("1-host-1-hr");
         arguments.values.add("16");
         arguments.values.add("Admin@wlx");

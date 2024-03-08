@@ -37,7 +37,7 @@
                 <Font size="18.0" />
             </font>
         </Label>
-        <TableView fx:id="resultsTableView" prefHeight="80.0" prefWidth="248.0" VBox.vgrow="ALWAYS">
+        <TableView fx:id="resultsTableView" prefHeight="130.0" prefWidth="248.0" VBox.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="metricsColumn" text="性能指标" />
                 <TableColumn fx:id="resultColumn" text="结果" />
