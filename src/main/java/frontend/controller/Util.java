@@ -31,6 +31,39 @@ public class Util {
         return alert.showAndWait();
     }
 
+//    public static void popUpInfo(String information, String title) {
+//        Alert alert = new Alert(Alert.AlertType.INFORMATION, information, ButtonType.OK);
+//        alert.setHeaderText(title);
+//
+//        // ???????????
+//        DialogPane dialogPane = alert.getDialogPane();
+//        dialogPane.setPrefWidth(400); // ???????????????????
+//        dialogPane.setContentText(information);
+//
+//        // ??CSS??????????
+//        dialogPane.getStylesheets().add(YourClassName.class.getResource("myStyleSheet.css").toExternalForm());
+//        dialogPane.getStyleClass().add("dialog-pane");
+//
+//        alert.showAndWait();
+//    }
+//
+//    public static Optional<ButtonType> popUpChoose(String information, String title) {
+//        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, information, ButtonType.OK, ButtonType.NO);
+//        alert.setHeaderText(title);
+//
+//        // ???????????
+//        DialogPane dialogPane = alert.getDialogPane();
+//        dialogPane.setPrefWidth(400); // ???????????????????
+//        dialogPane.setContentText(information);
+//
+//        // ??CSS??????????
+//        dialogPane.getStylesheets().add(YourClassName.class.getResource("myStyleSheet.css").toExternalForm());
+//        dialogPane.getStyleClass().add("dialog-pane");
+//
+//        return alert.showAndWait();
+//    }
+
+
     /**
      * 清除gridPane第一行之后的所有行，第一行是测试对象或项目的下拉列表，后面是相关的参数配置
      * @param gridPane 装了测试对象或项目的gridPane

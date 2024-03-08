@@ -277,7 +277,7 @@ public class MainAppController {
         String mountRst = fsConnection.mountFS();
 
         // 检查是否挂载成功，这里需要在FSConnection的mountFS方法内实现具体的挂载逻辑和成功失败的检测
-        if (mountRst == null) {
+        if (mountRst.isEmpty()) {
             Util.popUpInfo("文件系统挂载成功！", "挂载成功");
             testProjectConfigTitledPane.setDisable(false);
         } else {
@@ -385,7 +385,7 @@ public class MainAppController {
         Label fsTypeLabel = new Label("文件系统类型");
         ComboBox<String> fsTypeComBox = new ComboBox<>();
         fsTypeComBox.setId("fsTypeComBox");
-        fsTypeComBox.getItems().addAll("GlusterFS", "NFS");
+        fsTypeComBox.getItems().addAll("glusterfs", "nfs");
         testObjectConfigPane.add(fsTypeLabel, 0, rowIndex);
         testObjectConfigPane.add(fsTypeComBox, 1, rowIndex++);
 

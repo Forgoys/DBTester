@@ -35,63 +35,54 @@ public class FSConnection {
      * 挂载文件系统
      */
     public String mountFS() {
-        // 实现挂载文件系统的逻辑
-        System.out.println("挂载文件系统...");
-        List<String> mountResult = new ArrayList<>();
+        // ?????????????
+        System.out.println("Starting to mount filesystem...");
+        StringBuilder outputResult = new StringBuilder();
 
-        // 根据之前设置的文件系统配置参数进行文件系统挂载
         try {
-            // 获取参数
+            // ????????????????
             String fsServerPath = fsUrl;
             String fsMountPath = mountPath;
-            System.out.println("文件系统路径:" + fsServerPath);
-            System.out.println("本地目录路径:" + fsMountPath);
-            // 构建 mount 挂载命令
-            String mountCommand = "mount -t " + fileSystemOption + " " + fsServerPath + " " + fsMountPath;
-            mountCommand = "echo " + localSudoPassword + " | sudo -S " + mountCommand;
+            System.out.println("Filesystem server path: " + fsServerPath);
+            System.out.println("Filesystem mount path: " + fsMountPath);
 
-            System.out.println(mountCommand);
+            // ??????
+            String mountCommand = "echo " + localSudoPassword + " | sudo -S mount -t " + fileSystemOption + " " + fsServerPath + " " + fsMountPath;
 
-            // 创建一个 ProcessBuilder 对象
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            processBuilder.command("bash", "-c", mountCommand);
-            // 启动进程
+            System.out.println("Executing command: " + mountCommand);
+
+            // ??ProcessBuilder??????
+            ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", mountCommand);
             Process process = processBuilder.start();
-            // 获取进程的输出流
-            InputStream inputStream = process.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            // 读取进程的输出
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-                mountResult.add(line);
-            }
-            System.out.println("挂载输出：" + mountResult.toString());
 
-            // 获取进程的错误流
-            InputStream errorStream = process.getErrorStream();
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
-
-            // 读取进程的错误输出
-            while ((line = errorReader.readLine()) != null) {
-                System.err.println(line);
+            // ?????????
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    outputResult.append(line).append("\n");
+                }
             }
 
-            // 等待进程执行完毕
+            // ???????????
+            try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                String line;
+                while ((line = errorReader.readLine()) != null) {
+                    outputResult.append(line).append("\n");
+                }
+            }
+
+            // ?????????????
             int exitCode = process.waitFor();
             System.out.println("Exit code: " + exitCode);
 
-//            // 判断是否挂载成功
-//            if (exitCode == 0) {
-//                System.out.println("Mount successful");
-//                mountFlag = true;
-//            } else {
-//                System.out.println("Mount failed");
-//            }
+            // ?????????
+            System.out.println("Mount operation result:\n" + outputResult.toString());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+            // ????????????
+            outputResult.append("Exception occurred: ").append(e.getMessage());
         }
-        return mountResult.toString();
+        return outputResult.toString();
     }
 
     /**
