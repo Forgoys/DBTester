@@ -337,7 +337,7 @@ public class MiniFileTest extends TestItem {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        String command = "cp " + directory + miniFileTestResultTxt + " " + directory + "/" + monitorResultCSV + " " + resultPath;
+        String command = "cp " + directory + "/" + miniFileTestResultTxt + " " + directory + "/" + monitorResultCSV + " " + resultPath;
         try {
             exitCode = executeCommand(command);
         } catch (IOException e) {

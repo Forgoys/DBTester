@@ -51,12 +51,12 @@ public class TestArguments {
      * influxdb-comparision工具时序数据库测试的参数属性
      */
     public static final ArgumentProperty[] INFLUXCOMP_WRITE_ARG_PROPERTIES = new ArgumentProperty[] {
-            new ArgumentProperty("写入场景", new String[]{"10台*1天","100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟"}),
+            new ArgumentProperty("写入场景", new String[]{"10台*10天","100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟"}),
             new ArgumentProperty("客户端数", new String[]{"16","100"}),
             new ArgumentProperty("本机sudo密码")
     };
     public static final ArgumentProperty[] INFLUXCOMP_READ_ARG_PROPERTIES = new ArgumentProperty[] {
-            new ArgumentProperty("查询场景", new String[]{"100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟*"}),
+            new ArgumentProperty("查询场景", new String[]{"10台*10天","100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟*"}),
             new ArgumentProperty("查询类型", new String[]{"8-host-1-hr","1-host-1-hr","1-host-12-hr"}),
             new ArgumentProperty("客户端数", new String[]{"10","100"}),
             //new ArgumentProperty("查询语句数量",new String[]{"1万","5万","10万"})，固定为10万

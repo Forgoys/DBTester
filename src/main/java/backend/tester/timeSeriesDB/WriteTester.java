@@ -45,7 +45,7 @@ public class WriteTester extends TestItem {
     // 场景与数据集文件名的映射关系
     private static Map<String, String> scenarioToFile = new HashMap<String,String>();
     static {
-        scenarioToFile.put("10台*1天", "tdengine_s10_1d.gz");
+        scenarioToFile.put("10台*10天", "tdengine_s10_10d.gz");
         scenarioToFile.put("100台*30天", "tdengine_s100_30d.gz");
         scenarioToFile.put("4000台*3天", "tdengine_s4000_3d.gz");
         scenarioToFile.put("2万台*3小时", "tdengine_s20000_3h.gz");
@@ -73,7 +73,7 @@ public class WriteTester extends TestItem {
         scenario = testArgs.values.get(0);
         clients = Integer.parseInt(testArgs.values.get(1));
         password = testArgs.values.get(2);
-        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
+        //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         SetTag();
     }
     // 张超群  写一个static函数，检验数据库连接状态，输入String dataBaseName，调用Util.popUpInfo输出数据库连接状态，服务是否启动，数据库是否存在
@@ -235,9 +235,9 @@ public class WriteTester extends TestItem {
             String scaleVar = "100";
             String timestampEnd = "2018-01-31T00:00:00Z";
             switch (scenario) {
-                case "10台*1天":
+                case "10台*10天":
                     scaleVar = "10";
-                    timestampEnd = "2018-01-02T00:00:00Z";
+                    timestampEnd = "2018-01-11T00:00:00Z";
                     break;
                 case "100台*30天":
                     scaleVar = "100";
@@ -710,7 +710,7 @@ public class WriteTester extends TestItem {
         String resultPath = homePath + "/result";
         TestArguments arguments = new TestArguments();
         arguments.values = new ArrayList<>();
-        arguments.values.add("10台*1天");
+        arguments.values.add("10台*10天");
         arguments.values.add("16");
         arguments.values.add("Admin@wlx");
         DBConnection DBStmt = new DBConnection("devops","root","taosdata");
@@ -719,9 +719,9 @@ public class WriteTester extends TestItem {
             //tester.SetTag();
             tester.testEnvPrepare();
             tester.startTest();
-            tester.writeToFile(resultPath);
-            tester.getTestResults();//获取本测试结果
-            tester.getTestResults1(resultPath);
+            //tester.writeToFile(resultPath);
+            //tester.getTestResults();//获取本测试结果
+            //tester.getTestResults1(resultPath);
             //System.out.println(tester.getTestResults1(resultPath).values[0]);
             System.out.println(tester.getTimeData());//获取本测试的监控数据
             //System.out.println(tester.readFromFile1(resultPath));
