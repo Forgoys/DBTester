@@ -387,7 +387,7 @@ public class MainAppController {
         Label fsTypeLabel = new Label("文件系统类型");
         ComboBox<String> fsTypeComBox = new ComboBox<>();
         fsTypeComBox.setId("fsTypeComBox");
-        fsTypeComBox.getItems().addAll("glusterfs", "nfs");
+        fsTypeComBox.getItems().addAll("glusterfs", "nfs", "ftp");
         testObjectConfigPane.add(fsTypeLabel, 0, rowIndex);
         testObjectConfigPane.add(fsTypeComBox, 1, rowIndex++);
 
