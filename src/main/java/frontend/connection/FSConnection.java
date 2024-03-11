@@ -35,27 +35,28 @@ public class FSConnection {
      * 挂载文件系统
      */
     public String mountFS() {
-        // ?????????????
+        // 实现挂载文件系统的逻辑
         System.out.println("Starting to mount filesystem...");
         StringBuilder outputResult = new StringBuilder();
 
+        // 根据之前设置的文件系统配置参数进行文件系统挂载
         try {
-            // ????????????????
+            // 获取参数
             String fsServerPath = fsUrl;
             String fsMountPath = mountPath;
             System.out.println("Filesystem server path: " + fsServerPath);
             System.out.println("Filesystem mount path: " + fsMountPath);
 
-            // ??????
+            // 构建 mount 挂载命令
             String mountCommand = "echo " + localSudoPassword + " | sudo -S mount -t " + fileSystemOption + " " + fsServerPath + " " + fsMountPath;
 
             System.out.println("Executing command: " + mountCommand);
 
-            // ??ProcessBuilder??????
+            // 创建一个 ProcessBuilder 对象
             ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", mountCommand);
             Process process = processBuilder.start();
 
-            // ?????????
+            // 读取进程的输出
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
@@ -63,7 +64,7 @@ public class FSConnection {
                 }
             }
 
-            // ???????????
+            // 获取进程的错误流
             try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
                 String line;
                 while ((line = errorReader.readLine()) != null) {
@@ -71,15 +72,13 @@ public class FSConnection {
                 }
             }
 
-            // ?????????????
+            // 等待进程执行完毕
             int exitCode = process.waitFor();
             System.out.println("Exit code: " + exitCode);
 
-            // ?????????
             System.out.println("Mount operation result:\n" + outputResult.toString());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            // ????????????
             outputResult.append("Exception occurred: ").append(e.getMessage());
         }
         return outputResult.toString();

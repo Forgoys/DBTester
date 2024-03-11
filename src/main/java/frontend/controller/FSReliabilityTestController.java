@@ -5,11 +5,50 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+
+import java.util.Collections;
 import java.util.List;
 import javafx.geometry.Side;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 
 public class FSReliabilityTestController {
+    @FXML
+    private Label iopsReadMaxLabel;
+    @FXML
+    private Label iopsReadMinLabel;
+    @FXML
+    private Label iopsReadAvgLabel;
+    @FXML
+    private Label iopsWriteMaxLabel;
+    @FXML
+    private Label iopsWriteMinLabel;
+    @FXML
+    private Label iopsWriteAvgLabel;
+    @FXML
+    private Label bdReadMaxLabel;
+    @FXML
+    private Label bdReadMinLabel;
+    @FXML
+    private Label bdReadAvgLabel;
+    @FXML
+    private Label bdWriteMaxLabel;
+    @FXML
+    private Label bdWriteMinLabel;
+    @FXML
+    private Label bdWriteAvgLabel;
+    @FXML
+    private Label latencyReadMaxLabel;
+    @FXML
+    private Label latencyReadMinLabel;
+    @FXML
+    private Label latencyReadAvgLabel;
+    @FXML
+    private Label latencyWriteMaxLabel;
+    @FXML
+    private Label latencyWriteMinLabel;
+    @FXML
+    private Label latencyWriteAvgLabel;
 
     @FXML
     private LineChart<String, Number> iopsLineChart;
@@ -103,10 +142,39 @@ public class FSReliabilityTestController {
         Util.customizeChartSeriesStyle(bandwidthLineChart);
         Util.customizeChartSeriesStyle(latencyLineChart);
 
+        // 更新IOPS统计标签
+        updateStatisticsLabels(timeData.get(0), iopsReadMaxLabel, iopsReadMinLabel, iopsReadAvgLabel); // 读IOPS
+        updateStatisticsLabels(timeData.get(1), iopsWriteMaxLabel, iopsWriteMinLabel, iopsWriteAvgLabel); // 写IOPS
+
+        // 更新带宽统计标签
+        updateStatisticsLabels(timeData.get(2), bdReadMaxLabel, bdReadMinLabel, bdReadAvgLabel); // 读带宽
+        updateStatisticsLabels(timeData.get(3), bdWriteMaxLabel, bdWriteMinLabel, bdWriteAvgLabel); // 写带宽
+
+        // 更新延迟统计标签
+        updateStatisticsLabels(timeData.get(4), latencyReadMaxLabel, latencyReadMinLabel, latencyReadAvgLabel); // 读延迟
+        updateStatisticsLabels(timeData.get(5), latencyWriteMaxLabel, latencyWriteMinLabel, latencyWriteAvgLabel); // 写延迟
+
         // 请求布局更新，确保数据变化反映到UI上
         iopsLineChart.requestLayout();
         bandwidthLineChart.requestLayout();
         latencyLineChart.requestLayout();
+    }
+
+    private void updateStatisticsLabels(List<Double> data, Label maxLabel, Label minLabel, Label avgLabel) {
+        if (data.isEmpty()) {
+            maxLabel.setText("最大值: N/A");
+            minLabel.setText("最小值: N/A");
+            avgLabel.setText("平均值: N/A");
+            return;
+        }
+
+        double max = Collections.max(data);
+        double min = Collections.min(data);
+        double avg = data.stream().mapToDouble(a -> a).average().orElse(0);
+
+        maxLabel.setText(String.format("最大值: %.2f", max));
+        minLabel.setText(String.format("最小值: %.2f", min));
+        avgLabel.setText(String.format("平均值: %.2f", avg));
     }
 
     public void clearAll() {

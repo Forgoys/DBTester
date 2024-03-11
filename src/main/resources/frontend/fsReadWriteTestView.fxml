@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.layout.HBox?>
 <VBox fillWidth="true" spacing="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.controller.FSReadWriteTestController">
     <padding>
         <Insets bottom="10" left="10" right="10" top="10" />
@@ -61,23 +62,37 @@
             </font>
         </Label>
         <VBox spacing="10" VBox.vgrow="ALWAYS"> <!-- Changed HBox to VBox for vertical layout -->
-            <LineChart fx:id="cpuUsageLineChart" prefHeight="200" prefWidth="200" VBox.vgrow="ALWAYS">
-                <xAxis>
-                    <CategoryAxis fx:id="cpuTimeAxis" label="采样点" />
-                </xAxis>
-                <yAxis>
-                    <NumberAxis fx:id="cpuAxis" label="CPU (%)" upperBound="90.0" />
-                </yAxis>
-            </LineChart>
+            <VBox>
+                <LineChart fx:id="cpuUsageLineChart" prefHeight="300" prefWidth="200" VBox.vgrow="ALWAYS">
+                    <xAxis>
+                        <CategoryAxis fx:id="cpuTimeAxis" label="采样点" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="cpuAxis" label="CPU (%)" upperBound="90.0" />
+                    </yAxis>
+                </LineChart>
+                <HBox spacing="10">
+                    <Label fx:id="cpuMaxLabel" text="最大值: " />
+                    <Label fx:id="cpuMinLabel" text="最小值: " />
+                    <Label fx:id="cpuAvgLabel" text="平均值: " />
+                </HBox>
+            </VBox>
 
-            <LineChart fx:id="memoryUsageLineChart" prefHeight="200" prefWidth="200" VBox.vgrow="ALWAYS">
-                <xAxis>
-                    <CategoryAxis fx:id="memoryTimeAxis" label="采样点" />
-                </xAxis>
-                <yAxis>
-                    <NumberAxis fx:id="memoryAxis" label="内存 (%)" upperBound="40.0" />
-                </yAxis>
-            </LineChart>
+            <VBox>
+                <LineChart fx:id="memoryUsageLineChart" prefHeight="300" prefWidth="200" VBox.vgrow="ALWAYS">
+                    <xAxis>
+                        <CategoryAxis fx:id="memoryTimeAxis" label="采样点" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="memoryAxis" label="内存 (%)" upperBound="40.0" />
+                    </yAxis>
+                </LineChart>
+                <HBox spacing="10">
+                    <Label fx:id="memoryMaxLabel" text="最大值: " />
+                    <Label fx:id="memoryMinLabel" text="最小值: " />
+                    <Label fx:id="memoryAvgLabel" text="平均值: " />
+                </HBox>
+            </VBox>
 
         </VBox>
 

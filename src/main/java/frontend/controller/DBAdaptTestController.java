@@ -50,6 +50,13 @@ public class DBAdaptTestController {
                     MainAppController.currentDBConnection.executeSQL("DROP TABLE IF EXISTS DataTypeSupportTest;");
                     return MainAppController.currentDBConnection.executeSQL(sqlText);
                 } else if (testObject.equals("TDengine")){
+                    try {
+                        String[] command = {"/bin/bash", "-c", "source ~/.bashrc"};
+                        Process process = Runtime.getRuntime().exec(command);
+                        process.waitFor();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     DBConnection.tdengineExecSQL("DROP TABLE IF EXISTS DataTypeSupportTest;", MainAppController.currentDBConnection);
                     return DBConnection.tdengineExecSQL(sqlText, MainAppController.currentDBConnection);
                 }
@@ -81,5 +88,7 @@ public class DBAdaptTestController {
 //            sqlOutputTextArea.setText(result);
 //        }
         // 检查数据库连接
+        // 执行source ~/.bashrc命令，使得taos命令可以直接使用
+
     }
 }

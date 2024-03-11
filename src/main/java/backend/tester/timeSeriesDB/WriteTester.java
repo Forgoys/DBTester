@@ -75,6 +75,17 @@ public class WriteTester extends TestItem {
         password = testArgs.values.get(2);
         //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         SetTag();
+        sourceBashrc();
+    }
+    // 执行source ~/.bashrc命令，使得taos命令可以直接使用
+    public static void sourceBashrc() {
+        try {
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc"};
+            Process process = Runtime.getRuntime().exec(command);
+            process.waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     // 张超群  写一个static函数，检验数据库连接状态，输入String dataBaseName，调用Util.popUpInfo输出数据库连接状态，服务是否启动，数据库是否存在
     // 利用checkDBStatus()和checkDBExist()函数，检查服务是否启动，数据库是否存在

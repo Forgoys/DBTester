@@ -18,6 +18,7 @@ import frontend.connection.FSConnection;
 import frontend.connection.SSHConnection;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -254,6 +255,7 @@ public class MainAppController {
             }
         } else if (connectArg.values.size() == 3) {  // TDengine只需要三个参数
             currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2));
+            
             if (DBConnection.checkDBExist(currentDBConnection)) {
                 Util.popUpInfo("数据库连接成功！", "连接成功");
             } else {
@@ -1075,4 +1077,24 @@ public class MainAppController {
     public static String getTestObject() {
         return testObjectOut;
     }
+
+    @FXML
+    public void onQuitClick(ActionEvent actionEvent) {
+        // 关闭JavaFX应用程序
+        Platform.exit();
+    }
+
+
+    @FXML
+    public void onAboutClick(ActionEvent actionEvent) {
+        // 创建并配置一个信息对话框
+        Alert aboutAlert = new Alert(Alert.AlertType.INFORMATION);
+        aboutAlert.setTitle("关于");
+        aboutAlert.setHeaderText("国产数据库与文件系统测试原型软件");
+        aboutAlert.setContentText("版本: 1.0");
+
+        // 显示对话框并等待用户响应
+        aboutAlert.showAndWait();
+    }
+
 }

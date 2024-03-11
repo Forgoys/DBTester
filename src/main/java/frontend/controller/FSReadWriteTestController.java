@@ -15,9 +15,23 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldListCell;
 
+import java.util.Collections;
 import java.util.List;
 
 public class FSReadWriteTestController {
+    @FXML
+    public Label cpuMaxLabel;
+    @FXML
+    public Label cpuMinLabel;
+    @FXML
+    public Label cpuAvgLabel;
+    @FXML
+    public Label memoryMaxLabel;
+    @FXML
+    public Label memoryMinLabel;
+    @FXML
+    public Label memoryAvgLabel;
+
     @FXML
     private TableView<DisplayResult> fioResultsTableView;
     @FXML
@@ -121,9 +135,32 @@ public class FSReadWriteTestController {
         Util.customizeChartSeriesStyle(cpuUsageLineChart);
         Util.customizeChartSeriesStyle(memoryUsageLineChart);
 
+        // 更新CPU使用率的统计信息标签
+        updateStatisticsLabels(timeData.get(0), cpuMaxLabel, cpuMinLabel, cpuAvgLabel);
+
+        // 更新内存使用率的统计信息标签
+        updateStatisticsLabels(timeData.get(1), memoryMaxLabel, memoryMinLabel, memoryAvgLabel);
+
         // 请求布局更新，确保数据变化反映到UI上
         cpuUsageLineChart.requestLayout();
         memoryUsageLineChart.requestLayout();
+    }
+
+    private void updateStatisticsLabels(List<Double> data, Label maxLabel, Label minLabel, Label avgLabel) {
+        if (data.isEmpty()) {
+            maxLabel.setText("最大值: N/A");
+            minLabel.setText("最小值: N/A");
+            avgLabel.setText("平均值: N/A");
+            return;
+        }
+
+        double max = Collections.max(data);
+        double min = Collections.min(data);
+        double avg = data.stream().mapToDouble(a -> a).average().orElse(0);
+
+        maxLabel.setText(String.format("最大值: %.2f", max));
+        minLabel.setText(String.format("最小值: %.2f", min));
+        avgLabel.setText(String.format("平均值: %.2f", avg));
     }
 
     public void clearAll() {
