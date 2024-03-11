@@ -48,6 +48,18 @@
                 <NumberAxis label="IOPS" />
             </yAxis>
         </LineChart>
+        <VBox>
+            <HBox spacing="10">
+                <Label fx:id="iopsReadMaxLabel" text="读最大值: " />
+                <Label fx:id="iopsReadMinLabel" text="读最小值: " />
+                <Label fx:id="iopsReadAvgLabel" text="读平均值: " />
+            </HBox>
+            <HBox spacing="10">
+                <Label fx:id="iopsWriteMaxLabel" text="写最大值: " />
+                <Label fx:id="iopsWriteMinLabel" text="写最小值: " />
+                <Label fx:id="iopsWriteAvgLabel" text="写平均值: " />
+            </HBox>
+        </VBox>
 
         <Label text="读写带宽">
             <font>
@@ -62,6 +74,18 @@
                 <NumberAxis label="带宽 (MB/s)" />
             </yAxis>
         </LineChart>
+        <VBox>
+            <HBox spacing="10">
+                <Label fx:id="bdReadMaxLabel" text="读最大值: " />
+                <Label fx:id="bdReadMinLabel" text="读最小值: " />
+                <Label fx:id="bdReadAvgLabel" text="读平均值: " />
+            </HBox>
+            <HBox spacing="10">
+                <Label fx:id="bdWriteMaxLabel" text="写最大值: " />
+                <Label fx:id="bdWriteMinLabel" text="写最小值: " />
+                <Label fx:id="bdWriteAvgLabel" text="写平均值: " />
+            </HBox>
+        </VBox>
 
         <Label text="读写延迟">
             <font>
@@ -76,5 +100,17 @@
                 <NumberAxis label="延迟 (ms)" />
             </yAxis>
         </LineChart>
+        <VBox>
+            <HBox spacing="10">
+                <Label fx:id="latencyReadMaxLabel" text="读最大值: " />
+                <Label fx:id="latencyReadMinLabel" text="读最小值: " />
+                <Label fx:id="latencyReadAvgLabel" text="读平均值: " />
+            </HBox>
+            <HBox spacing="10">
+                <Label fx:id="latencyWriteMaxLabel" text="写最大值: " />
+                <Label fx:id="latencyWriteMinLabel" text="写最小值: " />
+                <Label fx:id="latencyWriteAvgLabel" text="写平均值: " />
+            </HBox>
+        </VBox>
     </children>
 </VBox>

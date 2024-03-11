@@ -13,6 +13,7 @@
 <?import javafx.scene.text.Font?>
 
 <?import java.net.URL?>
+<?import javafx.scene.layout.HBox?>
 <VBox fillWidth="true" spacing="10" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.controller.DBOtherTestController">
     <stylesheets>
         <URL value="@css/chart-styles.css" />
@@ -37,7 +38,7 @@
                 <Font size="18.0" />
             </font>
         </Label>
-        <TableView fx:id="resultsTableView" prefHeight="130.0" prefWidth="248.0" VBox.vgrow="ALWAYS">
+        <TableView fx:id="resultsTableView" prefHeight="180.0" prefWidth="248.0" VBox.vgrow="ALWAYS">
             <columns>
                 <TableColumn fx:id="metricsColumn" text="性能指标" />
                 <TableColumn fx:id="resultColumn" text="结果" />
@@ -52,32 +53,61 @@
             </font>
         </Label>
         <VBox spacing="10" VBox.vgrow="ALWAYS"> <!-- Changed HBox to VBox for vertical layout -->
-            <LineChart fx:id="cpuUsageLineChart" prefHeight="300" prefWidth="200" VBox.vgrow="ALWAYS">
-                <xAxis>
-                    <CategoryAxis fx:id="cpuTimeAxis" label="采样点" />
-                </xAxis>
-                <yAxis>
-                    <NumberAxis fx:id="cpuAxis" label="CPU (%)" upperBound="90.0" />
-                </yAxis>
-            </LineChart>
+            <VBox>
+                <LineChart fx:id="cpuUsageLineChart" prefHeight="300" prefWidth="200" VBox.vgrow="ALWAYS">
+                    <xAxis>
+                        <CategoryAxis fx:id="cpuTimeAxis" label="采样点" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="cpuAxis" label="CPU (%)" upperBound="90.0" />
+                    </yAxis>
+                </LineChart>
+                <HBox spacing="10">
+                    <Label fx:id="cpuMaxLabel" text="最大值: " />
+                    <Label fx:id="cpuMinLabel" text="最小值: " />
+                    <Label fx:id="cpuAvgLabel" text="平均值: " />
+                </HBox>
+            </VBox>
 
-            <LineChart fx:id="memoryUsageLineChart" prefHeight="300" prefWidth="200" VBox.vgrow="ALWAYS">
-                <xAxis>
-                    <CategoryAxis fx:id="memoryTimeAxis" label="采样点" />
-                </xAxis>
-                <yAxis>
-                    <NumberAxis fx:id="memoryAxis" label="内存 (%)" upperBound="40.0" />
-                </yAxis>
-            </LineChart>
+            <VBox>
+                <LineChart fx:id="memoryUsageLineChart" prefHeight="300" prefWidth="200" VBox.vgrow="ALWAYS">
+                    <xAxis>
+                        <CategoryAxis fx:id="memoryTimeAxis" label="采样点" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="memoryAxis" label="内存 (%)" upperBound="40.0" />
+                    </yAxis>
+                </LineChart>
+                <HBox spacing="10">
+                    <Label fx:id="memoryMaxLabel" text="最大值: " />
+                    <Label fx:id="memoryMinLabel" text="最小值: " />
+                    <Label fx:id="memoryAvgLabel" text="平均值: " />
+                </HBox>
+            </VBox>
 
-            <LineChart fx:id="diskSpeedLineChart" prefHeight="300" prefWidth="200" VBox.vgrow="ALWAYS">
-                <xAxis>
-                    <CategoryAxis fx:id="diskTimeAxis" label="采样点" />
-                </xAxis>
-                <yAxis>
-                    <NumberAxis fx:id="speedAxis" label="速度 (MB/s)" upperBound="400.0" />
-                </yAxis>
-            </LineChart>
+            <VBox>
+                <LineChart fx:id="diskSpeedLineChart" prefHeight="300" prefWidth="200" VBox.vgrow="ALWAYS">
+                    <xAxis>
+                        <CategoryAxis fx:id="diskTimeAxis" label="采样点" />
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="speedAxis" label="速度 (MB/s)" upperBound="400.0" />
+                    </yAxis>
+                </LineChart>
+                <VBox>
+                    <HBox spacing="10">
+                        <Label fx:id="diskReadMaxLabel" text="读最大值: " />
+                        <Label fx:id="diskReadMinLabel" text="读最小值: " />
+                        <Label fx:id="diskReadAvgLabel" text="读平均值: " />
+                    </HBox>
+                    <HBox spacing="10">
+                        <Label fx:id="diskWriteMaxLabel" text="写最大值: " />
+                        <Label fx:id="diskWriteMinLabel" text="写最小值: " />
+                        <Label fx:id="diskWriteAvgLabel" text="写平均值: " />
+                    </HBox>
+                </VBox>
+
+            </VBox>
         </VBox>
     </children>
 </VBox>

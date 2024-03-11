@@ -13,9 +13,35 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 public class DBOtherTestController {
+    @FXML
+    public Label cpuMaxLabel;
+    @FXML
+    public Label cpuMinLabel;
+    @FXML
+    public Label cpuAvgLabel;
+    @FXML
+    public Label memoryMaxLabel;
+    @FXML
+    public Label memoryMinLabel;
+    @FXML
+    public Label memoryAvgLabel;
+    @FXML
+    public Label diskReadMaxLabel;
+    @FXML
+    public Label diskReadMinLabel;
+    @FXML
+    public Label diskReadAvgLabel;
+    @FXML
+    public Label diskWriteMaxLabel;
+    @FXML
+    public Label diskWriteMinLabel;
+    @FXML
+    public Label diskWriteAvgLabel;
+
     public DBOtherTestController() { }
 
     @FXML
@@ -137,10 +163,39 @@ public class DBOtherTestController {
         Util.customizeChartSeriesStyle(memoryUsageLineChart);
         Util.customizeChartSeriesStyle(diskSpeedLineChart);
 
+        // 更新CPU使用率的统计信息标签
+        updateStatisticsLabels(timeData.get(0), cpuMaxLabel, cpuMinLabel, cpuAvgLabel);
+
+        // 更新内存使用率的统计信息标签
+        updateStatisticsLabels(timeData.get(1), memoryMaxLabel, memoryMinLabel, memoryAvgLabel);
+
+        // 更新磁盘读速度的统计信息标签，假设磁盘读数据在timeData的第三个列表中
+        updateStatisticsLabels(timeData.get(2), diskReadMaxLabel, diskReadMinLabel, diskReadAvgLabel);
+
+        // 更新磁盘写速度的统计信息标签，假设磁盘写数据在timeData的第四个列表中
+        updateStatisticsLabels(timeData.get(3), diskWriteMaxLabel, diskWriteMinLabel, diskWriteAvgLabel);
+
         // 请求布局更新，确保数据变化反映到UI上
         cpuUsageLineChart.requestLayout();
         memoryUsageLineChart.requestLayout();
         diskSpeedLineChart.requestLayout();
+    }
+
+    private void updateStatisticsLabels(List<Double> data, Label maxLabel, Label minLabel, Label avgLabel) {
+        if (data.isEmpty()) {
+            maxLabel.setText("最大值: N/A");
+            minLabel.setText("最小值: N/A");
+            avgLabel.setText("平均值: N/A");
+            return;
+        }
+
+        double max = Collections.max(data);
+        double min = Collections.min(data);
+        double avg = data.stream().mapToDouble(a -> a).average().orElse(0);
+
+        maxLabel.setText(String.format("最大值: %.2f", max));
+        minLabel.setText(String.format("最小值: %.2f", min));
+        avgLabel.setText(String.format("平均值: %.2f", avg));
     }
 
     public void clearAll() {
