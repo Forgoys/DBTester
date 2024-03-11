@@ -73,8 +73,18 @@ public class ReadTester extends TestItem{
         query_type = testArgs.values.get(1);
         clients = Integer.parseInt(testArgs.values.get(2));
         password = testArgs.values.get(3);
-        //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
+        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         SetTag();
+        sourceBashrc();
+    }    
+    public static void sourceBashrc() {
+        try {
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc"};
+            Process process = Runtime.getRuntime().exec(command);
+            process.waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     public static void checkDBStatusAndExist(String dataBaseName) {
         String title = "TDengine服务及数据库状态检测";

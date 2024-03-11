@@ -255,6 +255,7 @@ public class MainAppController {
             }
         } else if (connectArg.values.size() == 3) {  // TDengine只需要三个参数
             currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2));
+            
             if (DBConnection.checkDBExist(currentDBConnection)) {
                 Util.popUpInfo("数据库连接成功！", "连接成功");
             } else {
