@@ -317,7 +317,7 @@ public class PressTester extends TestItem{
     @Override
     public String getResultDicName() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-        return testName + "-" + testTime + "_" + clients + dateFormat.format(new Date());
+        return "Press" + "_" + testTime + "_w" + clients + "_" + dateFormat.format(new Date());
     }
 
     public static void main(String[] args) {
