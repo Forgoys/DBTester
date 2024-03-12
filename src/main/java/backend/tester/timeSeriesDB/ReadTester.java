@@ -73,8 +73,18 @@ public class ReadTester extends TestItem{
         query_type = testArgs.values.get(1);
         clients = Integer.parseInt(testArgs.values.get(2));
         password = testArgs.values.get(3);
-        //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
+        testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         SetTag();
+        sourceBashrc();
+    }    
+    public static void sourceBashrc() {
+        try {
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc"};
+            Process process = Runtime.getRuntime().exec(command);
+            process.waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     public static void checkDBStatusAndExist(String dataBaseName) {
         String title = "TDengine服务及数据库状态检测";
@@ -169,7 +179,7 @@ public class ReadTester extends TestItem{
     private static boolean checkDBUserPassword() {
         try {
             // 输入指令：taos -u"root" -p"taosdata"能进入taos命令行
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
             Process process = Runtime.getRuntime().exec(command);
     
             // 向进程写入输入
@@ -200,7 +210,7 @@ public class ReadTester extends TestItem{
     // 检测数据库名是否存在
     private static boolean checkDBExist() {
         try {
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
             Process process = Runtime.getRuntime().exec(command);
             BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;

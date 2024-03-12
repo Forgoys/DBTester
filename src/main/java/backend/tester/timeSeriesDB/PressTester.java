@@ -52,8 +52,17 @@ public class PressTester extends TestItem{
         }
         clients = Integer.parseInt(testArgs.values.get(1));
         testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
+        sourceBashrc();
     }
-
+    public static void sourceBashrc() {
+        try {
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc"};
+            Process process = Runtime.getRuntime().exec(command);
+            process.waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     public PressTester() {
 
     }
@@ -135,7 +144,7 @@ public class PressTester extends TestItem{
     private static boolean checkDBUserPassword() {
         try {
             // 输入指令：taos -u"root" -p"taosdata"能进入taos命令行
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
             Process process = Runtime.getRuntime().exec(command);
     
             // 向进程写入输入
@@ -166,7 +175,7 @@ public class PressTester extends TestItem{
     // 检测数据库名是否存在
     private static boolean checkDBExist() {
         try {
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
             Process process = Runtime.getRuntime().exec(command);
             BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -242,7 +251,7 @@ public class PressTester extends TestItem{
     public TestResult getTestResults() {
         testResult = new TestResult();
         testResult.names = TestResult.INFLUXCOMP_PRESS_RES_NAMES;
-        testResult.values = new String[]{String.valueOf(success), String.valueOf(failure)};
+        testResult.values = new String[]{String.valueOf(success), String.valueOf(failure), String.valueOf(Double.POSITIVE_INFINITY), "0"};
         return testResult;
     }
     @Override
@@ -251,13 +260,14 @@ public class PressTester extends TestItem{
     }
     @Override
     public void writeToFile(String resultPath){
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
         try {
             String directoryPath = resultPath;
             File directory = new File(directoryPath);
             if (!directory.exists()) {
                 directory.mkdirs();
             }
-            FileWriter fileWriter = new FileWriter(directoryPath + "/result_press.txt");
+            FileWriter fileWriter = new FileWriter(directoryPath + "/"+ "press_" + testTime + "_w" + clients + "-"+dateFormat.format(new Date()) +".txt");
             fileWriter.write("Thread success count:  " + success + "\n");
             fileWriter.write("Thread failure count:  " + failure + "\n");
             fileWriter.close();
@@ -279,7 +289,7 @@ public class PressTester extends TestItem{
         try {
             File dir = new File(resultPath);
             File[] files = dir.listFiles();
-            if (files != null && files.length == 1) {
+            if (files != null) {
                 File file = files[0];
                 BufferedReader reader = new BufferedReader(new FileReader(file));
                 String line;
@@ -307,7 +317,7 @@ public class PressTester extends TestItem{
     @Override
     public String getResultDicName() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-        return testName + "-" + testTime + "_" + clients + dateFormat.format(new Date());
+        return "Press" + "_" + testTime + "_w" + clients + "_" + dateFormat.format(new Date());
     }
 
     public static void main(String[] args) {

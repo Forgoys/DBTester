@@ -75,6 +75,17 @@ public class WriteTester extends TestItem {
         password = testArgs.values.get(2);
         //testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         SetTag();
+        sourceBashrc();
+    }
+    // 执行source ~/.bashrc命令，使得taos命令可以直接使用
+    public static void sourceBashrc() {
+        try {
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc"};
+            Process process = Runtime.getRuntime().exec(command);
+            process.waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     // 张超群  写一个static函数，检验数据库连接状态，输入String dataBaseName，调用Util.popUpInfo输出数据库连接状态，服务是否启动，数据库是否存在
     // 利用checkDBStatus()和checkDBExist()函数，检查服务是否启动，数据库是否存在
@@ -170,7 +181,7 @@ public class WriteTester extends TestItem {
     private static boolean checkDBUserPassword() {
         try {
             // 输入指令：taos -u"root" -p"taosdata"能进入taos命令行
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
             Process process = Runtime.getRuntime().exec(command);
     
             // 向进程写入输入
@@ -201,7 +212,7 @@ public class WriteTester extends TestItem {
     // 检测数据库名是否存在
     private static boolean checkDBExist() {
         try {
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
             Process process = Runtime.getRuntime().exec(command);
             BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -670,7 +681,7 @@ public class WriteTester extends TestItem {
     private void dropDevopsDatabase() {
         try {
             // 构建命令
-            String command = "taos -u" + dbuser + " -p" + dbpassword + " -s 'drop database if exists devops;'";
+            String command = "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " -s 'drop database if exists devops;'";
             // 执行命令
             ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
             Process process = processBuilder.start();
@@ -689,7 +700,7 @@ public class WriteTester extends TestItem {
     private void createDevopsDatabase() {
         try {
             // 构建命令
-            String command = "taos -u" + dbuser + " -p" + dbpassword + " -s 'create database if not exists devops vgroups 2 buffer 8192 stt_trigger 8;'";
+            String command = "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " -s 'create database if not exists devops vgroups 2 buffer 8192 stt_trigger 8;'";
             // 执行命令
             ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
             Process process = processBuilder.start();

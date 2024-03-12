@@ -1,5 +1,7 @@
 package frontend.connection;
 
+import backend.tester.timeSeriesDB.PressTester;
+
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -200,8 +202,9 @@ public class DBConnection {
     }
     // 涛思不用jdbc
     public static String tdengineExecSQL(String sql, DBConnection dbConnection) {
-        
-        String command = "taos -u" + dbConnection.username + " -p" + dbConnection.password + " -s '" + sql + "'";
+
+//        PressTester.sourceBashrc();
+        String command = "source ~/.bashrc && taos -u" + dbConnection.username + " -p" + dbConnection.password + " -s '" + sql + "'";
         String output = "";
     
         try {
