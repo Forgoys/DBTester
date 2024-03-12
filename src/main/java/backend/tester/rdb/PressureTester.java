@@ -447,7 +447,7 @@ public class PressureTester extends TestItem {
 
         this.testResult = new TestResult();
         testResult.names = TestResult.PRESSURE_TEST_RES_NAMES;
-        testResult.values = new String[] {String.valueOf(avgRequest), String.valueOf(avgFailed)};
+        testResult.values = new String[] {String.valueOf(avgRequest), String.valueOf(avgFailed), String.valueOf(Double.POSITIVE_INFINITY), "0"};
     }
 
     @Override

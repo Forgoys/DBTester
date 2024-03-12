@@ -408,7 +408,7 @@ public class TPCCTester extends TestItem {
                 String tpmCValue = matcher.group(1);
                 testResult = new TestResult();
                 testResult.names = TestResult.TPCC_RES_NAMES;
-                testResult.values = new String[] {tpmCValue};
+                testResult.values = new String[] {tpmCValue, String.valueOf(27000.0 / Double.parseDouble(tpmCValue))};
                 return testResult;
             } else {
                 System.out.println("没有找到 Measured tpmC (NewOrders) 的值");

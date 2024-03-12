@@ -251,7 +251,7 @@ public class PressTester extends TestItem{
     public TestResult getTestResults() {
         testResult = new TestResult();
         testResult.names = TestResult.INFLUXCOMP_PRESS_RES_NAMES;
-        testResult.values = new String[]{String.valueOf(success), String.valueOf(failure)};
+        testResult.values = new String[]{String.valueOf(success), String.valueOf(failure), String.valueOf(Double.POSITIVE_INFINITY), "0"};
         return testResult;
     }
     @Override

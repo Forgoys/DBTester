@@ -47,8 +47,13 @@ public class FSConnection {
             System.out.println("Filesystem server path: " + fsServerPath);
             System.out.println("Filesystem mount path: " + fsMountPath);
 
+            String mountCommand;
             // 构建 mount 挂载命令
-            String mountCommand = "echo " + localSudoPassword + " | sudo -S mount -t " + fileSystemOption + " " + fsServerPath + " " + fsMountPath;
+            if (this.fileSystemOption.equals("ftp") || this.fileSystemOption.equals("glusterfs")) {
+                mountCommand = "echo " + localSudoPassword + " | sudo -S mount -t " + fileSystemOption + " " + fsServerPath + " " + fsMountPath;
+            } else {
+                mountCommand = "ftp " + this.fsUrl;
+            }
 
             System.out.println("Executing command: " + mountCommand);
 

@@ -1,5 +1,6 @@
 package frontend.controller;
 
+import backend.tester.timeSeriesDB.PressTester;
 import frontend.connection.DBConnection;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
@@ -57,6 +58,7 @@ public class DBAdaptTestController {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                    PressTester.sourceBashrc();
                     DBConnection.tdengineExecSQL("DROP TABLE IF EXISTS DataTypeSupportTest;", MainAppController.currentDBConnection);
                     return DBConnection.tdengineExecSQL(sqlText, MainAppController.currentDBConnection);
                 }
