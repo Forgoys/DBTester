@@ -179,7 +179,7 @@ public class ReadTester extends TestItem{
     private static boolean checkDBUserPassword() {
         try {
             // 输入指令：taos -u"root" -p"taosdata"能进入taos命令行
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
             Process process = Runtime.getRuntime().exec(command);
     
             // 向进程写入输入
@@ -210,7 +210,7 @@ public class ReadTester extends TestItem{
     // 检测数据库名是否存在
     private static boolean checkDBExist() {
         try {
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
             Process process = Runtime.getRuntime().exec(command);
             BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
