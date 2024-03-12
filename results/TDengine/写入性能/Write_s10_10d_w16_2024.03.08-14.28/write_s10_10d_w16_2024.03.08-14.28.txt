@@ -1,0 +1,23 @@
+results report destination: 
+results report database: vehicle
+hostname for results report: TDengine
+results report tags: node1
+2024/03/08 14:28:07 Creating database ----
+2024/03/08 14:28:07 Starting workers ----
+worker 0, processed 777609 data 
+worker 1, processed 777609 data 
+worker 2, processed 777609 data 
+worker 3, processed 777609 data 
+worker 4, processed 777609 data 
+worker 5, processed 777609 data 
+worker 6, processed 777609 data 
+worker 7, processed 777609 data 
+worker 8, processed 777609 data 
+worker 9, processed 777609 data 
+worker 10, processed 0 data 
+worker 11, processed 0 data 
+worker 12, processed 0 data 
+worker 13, processed 0 data 
+worker 14, processed 0 data 
+worker 15, processed 0 data 
+loaded 7776000 items in 21.837518sec with 16 workers (mean point rate 356084.43/s, mean value rate 3996058.60/s, 47.31MB/sec from stdin)

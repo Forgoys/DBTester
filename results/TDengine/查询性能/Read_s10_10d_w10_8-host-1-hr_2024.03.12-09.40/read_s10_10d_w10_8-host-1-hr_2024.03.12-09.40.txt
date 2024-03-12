@@ -1,0 +1,13 @@
+daemon URLs: [10.181.8.146]
+Using TDengine C connector: cgo
+Trend statistics using 30 samples
+Reading queries to buffer 
+Reading queries done
+2024/03/12 09:40:17 Started querying with 10 workers
+batch size 1, limit -1
+io.Eof occurs --------------
+2024/03/12 09:40:18 Waiting for workers to finish
+run complete after 100000 queries with 10 workers:
+TDengine max cpu, rand    8 hosts, rand 1h0m0s by 1m : min:     2.28ms ( 437.79/sec), mean:     2.98ms ( 335.12/sec), max:   29.66ms ( 33.72/sec), count:   100000, sum: 298.4sec 
+all queries                                          : min:     2.28ms ( 437.79/sec), mean:     2.98ms ( 335.12/sec), max:   29.66ms ( 33.72/sec), count:   100000, sum: 298.4sec 
+wall clock time: 30.641495sec

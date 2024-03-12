@@ -181,7 +181,7 @@ public class WriteTester extends TestItem {
     private static boolean checkDBUserPassword() {
         try {
             // 输入指令：taos -u"root" -p"taosdata"能进入taos命令行
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
             Process process = Runtime.getRuntime().exec(command);
     
             // 向进程写入输入
@@ -212,7 +212,7 @@ public class WriteTester extends TestItem {
     // 检测数据库名是否存在
     private static boolean checkDBExist() {
         try {
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
             Process process = Runtime.getRuntime().exec(command);
             BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
@@ -681,7 +681,7 @@ public class WriteTester extends TestItem {
     private void dropDevopsDatabase() {
         try {
             // 构建命令
-            String command = "taos -u" + dbuser + " -p" + dbpassword + " -s 'drop database if exists devops;'";
+            String command = "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " -s 'drop database if exists devops;'";
             // 执行命令
             ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
             Process process = processBuilder.start();
@@ -700,7 +700,7 @@ public class WriteTester extends TestItem {
     private void createDevopsDatabase() {
         try {
             // 构建命令
-            String command = "taos -u" + dbuser + " -p" + dbpassword + " -s 'create database if not exists devops vgroups 2 buffer 8192 stt_trigger 8;'";
+            String command = "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " -s 'create database if not exists devops vgroups 2 buffer 8192 stt_trigger 8;'";
             // 执行命令
             ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
             Process process = processBuilder.start();

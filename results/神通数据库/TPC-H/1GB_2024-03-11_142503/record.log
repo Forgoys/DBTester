@@ -1,0 +1,893 @@
+-- using default substitutions
+select
+	l_returnflag,
+	l_linestatus,
+	sum(l_quantity) as sum_qty,
+	sum(l_extendedprice) as sum_base_price,
+	sum(l_extendedprice * (1 - l_discount)) as sum_disc_price,
+	sum(l_extendedprice * (1 - l_discount) * (1 + l_tax)) as sum_charge,
+	avg(l_quantity) as avg_qty,
+	avg(l_extendedprice) as avg_price,
+	avg(l_discount) as avg_disc,
+	count(*) as count_order
+from
+	lineitem
+where
+	l_shipdate <= date '1998-12-01' - interval '90' day (3)
+group by
+	l_returnflag,
+	l_linestatus
+order by
+	l_returnflag,
+	l_linestatus
+LIMIT 10
+ L_RETURNFLAG | L_LINESTATUS |  SUM_QTY  |  SUM_BASE_PRICE  |   SUM_DISC_PRICE   |     SUM_CHARGE     |    AVG_QTY    |    AVG_PRICE    |   AVG_DISC   | COUNT_ORDER 
+--------------+--------------+-----------+------------------+--------------------+--------------------+---------------+-----------------+--------------+-------------
+ A            | F            |  37734107 |   56586554400.73 |     53758257134.87 | 55909065222.827692 |  25.522005853 | 38273.129734621 |  0.049985295 |     1478493
+ N            | F            |    991417 |    1487504710.38 |    1413082168.0541 |  1469649223.194375 |   25.51647192 | 38284.467760848 |  0.050093426 |       38854
+ N            | O            |  74476040 |  111701729697.74 |  106118230307.6056 | 110367043872.49701 |  25.502226769 | 38249.117988908 |  0.049996586 |     2920374
+ R            | F            |  37719753 |    56568041380.9 |    53741292684.604 | 55889619119.831932 |  25.505793612 | 38250.854626099 |  0.050009405 |     1478870
+(4 rows)
+
+-- using default substitutions
+select
+	s_acctbal,
+	s_name,
+	n_name,
+	p_partkey,
+	p_mfgr,
+	s_address,
+	s_phone,
+	s_comment
+from
+	part,
+	supplier,
+	partsupp,
+	nation,
+	region
+where
+	p_partkey = ps_partkey
+	and s_suppkey = ps_suppkey
+	and p_size = 15
+	and p_type like '%BRASS'
+	and s_nationkey = n_nationkey
+	and n_regionkey = r_regionkey
+	and r_name = 'EUROPE'
+	and ps_supplycost = (
+		select
+			min(ps_supplycost)
+		from
+			partsupp,
+			supplier,
+			nation,
+			region
+		where
+			p_partkey = ps_partkey
+			and s_suppkey = ps_suppkey
+			and s_nationkey = n_nationkey
+			and n_regionkey = r_regionkey
+			and r_name = 'EUROPE'
+	)
+order by
+	s_acctbal desc,
+	n_name,
+	s_name,
+	p_partkey
+LIMIT 10
+ S_ACCTBAL |           S_NAME           |           N_NAME           | P_PARTKEY |           P_MFGR           |                S_ADDRESS                |     S_PHONE     |                                           S_COMMENT                                           
+-----------+----------------------------+----------------------------+-----------+----------------------------+-----------------------------------------+-----------------+-----------------------------------------------------------------------------------------------
+   9938.53 | Supplier#000005359         | UNITED KINGDOM             |    185358 | Manufacturer#4             | QKuHYh,vZGiwu2FWEJoLDx04                | 33-429-790-6131 | uriously regular requests hag
+   9937.84 | Supplier#000005969         | ROMANIA                    |    108438 | Manufacturer#1             | ANDENSOSmk,miq23Xfb5RWt6dvUcvt6Qa       | 29-520-692-3537 | efully express instructions. regular requests against the slyly fin
+   9936.22 | Supplier#000005250         | UNITED KINGDOM             |       249 | Manufacturer#4             | B3rqp0xbSEim4Mpy2RH J                   | 33-320-228-2957 | etect about the furiously final accounts. slyly ironic pinto beans sleep inside the furiously
+   9923.77 | Supplier#000002324         | GERMANY                    |     29821 | Manufacturer#4             | y3OD9UywSTOk                            | 17-779-299-1839 | ackages boost blithely. blithely regular deposits c
+   9871.22 | Supplier#000006373         | GERMANY                    |     43868 | Manufacturer#5             | J8fcXWsTqM                              | 17-813-485-8637 | etect blithely bold asymptotes. fluffily ironic platelets wake furiously; blit
+   9870.78 | Supplier#000001286         | GERMANY                    |     81285 | Manufacturer#2             | YKA,E2fjiVd7eUrzp2Ef8j1QxGo2DFnosaTEH   | 17-516-924-4574 |  regular accounts. furiously unusual courts above the fi
+   9870.78 | Supplier#000001286         | GERMANY                    |    181285 | Manufacturer#4             | YKA,E2fjiVd7eUrzp2Ef8j1QxGo2DFnosaTEH   | 17-516-924-4574 |  regular accounts. furiously unusual courts above the fi
+   9852.52 | Supplier#000008973         | RUSSIA                     |     18972 | Manufacturer#2             | t5L67YdBYYH6o,Vz24jpDyQ9                | 32-188-594-7038 | rns wake final foxes. carefully unusual depende
+   9847.83 | Supplier#000008097         | RUSSIA                     |    130557 | Manufacturer#2             | xMe97bpE69NzdwLoX                       | 32-375-640-3593 |  the special excuses. silent sentiments serve carefully final ac
+   9847.57 | Supplier#000006345         | FRANCE                     |     86344 | Manufacturer#1             | VSt3rzk3qG698u6ld8HhOByvrTcSTSvQlDQDag  | 16-886-766-7945 | ges. slyly regular requests are. ruthless, express excuses cajole blithely across the unu
+(10 rows)
+
+-- using default substitutions
+select
+	l_orderkey,
+	sum(l_extendedprice * (1 - l_discount)) as revenue,
+	o_orderdate,
+	o_shippriority
+from
+	customer,
+	orders,
+	lineitem
+where
+	c_mktsegment = 'BUILDING'
+	and c_custkey = o_custkey
+	and l_orderkey = o_orderkey
+	and o_orderdate < date '1995-03-15'
+	and l_shipdate > date '1995-03-15'
+group by
+	l_orderkey,
+	o_orderdate,
+	o_shippriority
+order by
+	revenue desc,
+	o_orderdate
+LIMIT 10
+ L_ORDERKEY |   REVENUE   | O_ORDERDATE | O_SHIPPRIORITY 
+------------+-------------+-------------+----------------
+    2456423 | 406181.0111 | 1995-03-05  |              0
+    3459808 | 405838.6989 | 1995-03-04  |              0
+     492164 |  390324.061 | 1995-02-19  |              0
+    1188320 | 384537.9359 | 1995-03-09  |              0
+    2435712 | 378673.0558 | 1995-02-26  |              0
+    4878020 | 378376.7952 | 1995-03-12  |              0
+    5521732 | 375153.9215 | 1995-03-13  |              0
+    2628192 | 373133.3094 | 1995-02-22  |              0
+     993600 | 371407.4595 | 1995-03-05  |              0
+    2300070 | 367371.1452 | 1995-03-13  |              0
+(10 rows)
+
+-- using default substitutions
+select
+	o_orderpriority,
+	count(*) as order_count
+from
+	orders
+where
+	o_orderdate >= date '1993-07-01'
+	and o_orderdate < date '1993-07-01' + interval '3' month
+	and exists (
+		select
+			*
+		from
+			lineitem
+		where
+			l_orderkey = o_orderkey
+			and l_commitdate < l_receiptdate
+	)
+group by
+	o_orderpriority
+order by
+	o_orderpriority
+LIMIT 10
+ O_ORDERPRIORITY | ORDER_COUNT 
+-----------------+-------------
+ 1-URGENT        |       10594
+ 2-HIGH          |       10476
+ 3-MEDIUM        |       10410
+ 4-NOT SPECIFIED |       10556
+ 5-LOW           |       10487
+(5 rows)
+
+-- using default substitutions
+select
+	n_name,
+	sum(l_extendedprice * (1 - l_discount)) as revenue
+from
+	customer,
+	orders,
+	lineitem,
+	supplier,
+	nation,
+	region
+where
+	c_custkey = o_custkey
+	and l_orderkey = o_orderkey
+	and l_suppkey = s_suppkey
+	and c_nationkey = s_nationkey
+	and s_nationkey = n_nationkey
+	and n_regionkey = r_regionkey
+	and r_name = 'ASIA'
+	and o_orderdate >= date '1994-01-01'
+	and o_orderdate < date '1994-01-01' + interval '1' year
+group by
+	n_name
+order by
+	revenue desc
+LIMIT 10
+           N_NAME           |    REVENUE    
+----------------------------+---------------
+ INDONESIA                  | 55502041.1697
+ VIETNAM                    | 55295086.9967
+ CHINA                      | 53724494.2566
+ INDIA                      | 52035512.0002
+ JAPAN                      | 45410175.6954
+(5 rows)
+
+-- using default substitutions
+select
+	sum(l_extendedprice * l_discount) as revenue
+from
+	lineitem
+where
+	l_shipdate >= date '1994-01-01'
+	and l_shipdate < date '1994-01-01' + interval '1' year
+	and l_discount between .06 - 0.01 and .06 + 0.01
+	and l_quantity < 24
+LIMIT 10
+     REVENUE     
+-----------------
+  123141078.2283
+(1 row)
+
+-- using default substitutions
+select
+	supp_nation,
+	cust_nation,
+	l_year,
+	sum(volume) as revenue
+from
+	(
+		select
+			n1.n_name as supp_nation,
+			n2.n_name as cust_nation,
+			extract(year from l_shipdate) as l_year,
+			l_extendedprice * (1 - l_discount) as volume
+		from
+			supplier,
+			lineitem,
+			orders,
+			customer,
+			nation n1,
+			nation n2
+		where
+			s_suppkey = l_suppkey
+			and o_orderkey = l_orderkey
+			and c_custkey = o_custkey
+			and s_nationkey = n1.n_nationkey
+			and c_nationkey = n2.n_nationkey
+			and (
+				(n1.n_name = 'FRANCE' and n2.n_name = 'GERMANY')
+				or (n1.n_name = 'GERMANY' and n2.n_name = 'FRANCE')
+			)
+			and l_shipdate between date '1995-01-01' and date '1996-12-31'
+	) as shipping
+group by
+	supp_nation,
+	cust_nation,
+	l_year
+order by
+	supp_nation,
+	cust_nation,
+	l_year
+LIMIT 10
+        SUPP_NATION        |        CUST_NATION        | L_YEAR |    REVENUE    
+---------------------------+---------------------------+--------+---------------
+ FRANCE                    | GERMANY                   |   1995 | 54639732.7336
+ FRANCE                    | GERMANY                   |   1996 | 54633083.3076
+ GERMANY                   | FRANCE                    |   1995 | 52531746.6697
+ GERMANY                   | FRANCE                    |   1996 | 52520549.0224
+(4 rows)
+
+-- using default substitutions
+select
+	o_year,
+	sum(case
+		when nation = 'BRAZIL' then volume
+		else 0
+	end) / sum(volume) as mkt_share
+from
+	(
+		select
+			extract(year from o_orderdate) as o_year,
+			l_extendedprice * (1 - l_discount) as volume,
+			n2.n_name as nation
+		from
+			part,
+			supplier,
+			lineitem,
+			orders,
+			customer,
+			nation n1,
+			nation n2,
+			region
+		where
+			p_partkey = l_partkey
+			and s_suppkey = l_suppkey
+			and l_orderkey = o_orderkey
+			and o_custkey = c_custkey
+			and c_nationkey = n1.n_nationkey
+			and n1.n_regionkey = r_regionkey
+			and r_name = 'AMERICA'
+			and s_nationkey = n2.n_nationkey
+			and o_orderdate between date '1995-01-01' and date '1996-12-31'
+			and p_type = 'ECONOMY ANODIZED STEEL'
+	) as all_nations
+group by
+	o_year
+order by
+	o_year
+LIMIT 10
+ O_YEAR |       MKT_SHARE       
+--------+-----------------------
+   1995 |  0.034435890406654797
+   1996 |   0.04148552129353032
+(2 rows)
+
+-- using default substitutions
+select
+	nation,
+	o_year,
+	sum(amount) as sum_profit
+from
+	(
+		select
+			n_name as nation,
+			extract(year from o_orderdate) as o_year,
+			l_extendedprice * (1 - l_discount) - ps_supplycost * l_quantity as amount
+		from
+			part,
+			supplier,
+			lineitem,
+			partsupp,
+			orders,
+			nation
+		where
+			s_suppkey = l_suppkey
+			and ps_suppkey = l_suppkey
+			and ps_partkey = l_partkey
+			and p_partkey = l_partkey
+			and o_orderkey = l_orderkey
+			and s_nationkey = n_nationkey
+			and p_name like '%green%'
+	) as profit
+group by
+	nation,
+	o_year
+order by
+	nation,
+	o_year desc
+LIMIT 10
+           NATION           | O_YEAR |   SUM_PROFIT   
+----------------------------+--------+----------------
+ ALGERIA                    |   1998 |  27136900.1803
+ ALGERIA                    |   1997 |  48611833.4962
+ ALGERIA                    |   1996 |  48285482.6782
+ ALGERIA                    |   1995 |  44402273.5999
+ ALGERIA                    |   1994 |  48694008.0668
+ ALGERIA                    |   1993 |  46044207.7838
+ ALGERIA                    |   1992 |  45636849.4881
+ ARGENTINA                  |   1998 |  28341663.7848
+ ARGENTINA                  |   1997 |  47143964.1176
+ ARGENTINA                  |   1996 |  45255278.6021
+(10 rows)
+
+-- using default substitutions
+select
+	c_custkey,
+	c_name,
+	sum(l_extendedprice * (1 - l_discount)) as revenue,
+	c_acctbal,
+	n_name,
+	c_address,
+	c_phone,
+	c_comment
+from
+	customer,
+	orders,
+	lineitem,
+	nation
+where
+	c_custkey = o_custkey
+	and l_orderkey = o_orderkey
+	and o_orderdate >= date '1993-10-01'
+	and o_orderdate < date '1993-10-01' + interval '3' month
+	and l_returnflag = 'R'
+	and c_nationkey = n_nationkey
+group by
+	c_custkey,
+	c_name,
+	c_acctbal,
+	c_phone,
+	n_name,
+	c_address,
+	c_comment
+order by
+	revenue desc
+LIMIT 10
+ C_CUSTKEY |       C_NAME       |   REVENUE   | C_ACCTBAL |           N_NAME           |                 C_ADDRESS                 |     C_PHONE     |                                                  C_COMMENT                                                  
+-----------+--------------------+-------------+-----------+----------------------------+-------------------------------------------+-----------------+-------------------------------------------------------------------------------------------------------------
+     57040 | Customer#000057040 | 734235.2455 |    632.87 | JAPAN                      | Eioyzjf4pp                                | 22-895-641-3466 | sits. slyly regular requests sleep alongside of the regular inst
+    143347 | Customer#000143347 | 721002.6948 |   2557.47 | EGYPT                      | 1aReFYv,Kw4                               | 14-742-935-3718 | ggle carefully enticing requests. final deposits use bold, bold pinto beans. ironic, idle re
+     60838 | Customer#000060838 | 679127.3077 |   2454.77 | BRAZIL                     | 64EaJ5vMAHWJlBOxJklpNc2RJiWE              | 12-913-494-9813 |  need to boost against the slyly regular account
+    101998 | Customer#000101998 | 637029.5667 |   3790.89 | UNITED KINGDOM             | 01c9CILnNtfOQYmZj                         | 33-593-865-6378 | ress foxes wake slyly after the bold excuses. ironic platelets are furiously carefully bold theodolites
+    125341 | Customer#000125341 |  633508.086 |   4983.51 | GERMANY                    | S29ODD6bceU8QSuuEJznkNaK                  | 17-582-695-5962 | arefully even depths. blithely even excuses sleep furiously. foxes use except the dependencies. ca
+     25501 | Customer#000025501 | 620269.7849 |   7725.04 | ETHIOPIA                   |   W556MXuoiaYCCZamJI,Rn0B4ACUGdkQ8DZ      | 15-874-808-6793 | he pending instructions wake carefully at the pinto beans. regular, final instructions along the slyly fina
+    115831 | Customer#000115831 | 596423.8672 |    5098.1 | FRANCE                     | rFeBbEEyk dl ne7zV5fDrmiq1oK09wV7pxqCgIc  | 16-715-386-3788 | l somas sleep. furiously final deposits wake blithely regular pinto b
+     84223 | Customer#000084223 | 594998.0239 |    528.65 | UNITED KINGDOM             | nAVZCs6BaWap rrM27N 2qBnzc5WBauxbA        | 33-442-824-8191 |  slyly final deposits haggle regular, pending dependencies. pending escapades wake 
+     54289 | Customer#000054289 | 585603.3918 |   5583.02 | IRAN                       | vXCxoCsU0Bad5JQI ,oobkZ                   | 20-834-292-4707 | ely special foxes are quickly finally ironic p
+     39922 | Customer#000039922 | 584878.1134 |   7321.11 | GERMANY                    | Zgy4s50l2GKN4pLDPBU8m342gIw6R             | 17-147-757-8036 | y final requests. furiously final foxes cajole blithely special platelets. f
+(10 rows)
+
+-- using default substitutions
+select
+	ps_partkey,
+	sum(ps_supplycost * ps_availqty) as value
+from
+	partsupp,
+	supplier,
+	nation
+where
+	ps_suppkey = s_suppkey
+	and s_nationkey = n_nationkey
+	and n_name = 'GERMANY'
+group by
+	ps_partkey having
+		sum(ps_supplycost * ps_availqty) > (
+			select
+				sum(ps_supplycost * ps_availqty) * 0.0000200000
+			from
+				partsupp,
+				supplier,
+				nation
+			where
+				ps_suppkey = s_suppkey
+				and s_nationkey = n_nationkey
+				and n_name = 'GERMANY'
+		)
+order by
+	value desc
+LIMIT 10
+ PS_PARTKEY |    VALUE    
+------------+-------------
+     129760 | 17538456.86
+     166726 | 16503353.92
+     191287 | 16474801.97
+     161758 | 16101755.54
+      34452 | 15983844.72
+     139035 | 15907078.34
+       9403 | 15451755.62
+     154358 | 15212937.88
+      38823 | 15064802.86
+      85606 | 15053957.15
+(10 rows)
+
+-- using default substitutions
+select
+	l_shipmode,
+	sum(case
+		when o_orderpriority = '1-URGENT'
+			or o_orderpriority = '2-HIGH'
+			then 1
+		else 0
+	end) as high_line_count,
+	sum(case
+		when o_orderpriority <> '1-URGENT'
+			and o_orderpriority <> '2-HIGH'
+			then 1
+		else 0
+	end) as low_line_count
+from
+	orders,
+	lineitem
+where
+	o_orderkey = l_orderkey
+	and l_shipmode in ('MAIL', 'SHIP')
+	and l_commitdate < l_receiptdate
+	and l_shipdate < l_commitdate
+	and l_receiptdate >= date '1994-01-01'
+	and l_receiptdate < date '1994-01-01' + interval '1' year
+group by
+	l_shipmode
+order by
+	l_shipmode
+LIMIT 10
+ L_SHIPMODE | HIGH_LINE_COUNT | LOW_LINE_COUNT 
+------------+-----------------+----------------
+ MAIL       |            6202 |           9324
+ SHIP       |            6200 |           9262
+(2 rows)
+
+-- using default substitutions
+select
+	c_count,
+	count(*) as custdist
+from
+	(
+		select
+			c_custkey,
+			count(o_orderkey)
+		from
+			customer left outer join orders on
+				c_custkey = o_custkey
+				and o_comment not like '%special%requests%'
+		group by
+			c_custkey
+	) as c_orders (c_custkey, c_count)
+group by
+	c_count
+order by
+	custdist desc,
+	c_count desc
+LIMIT 10
+ C_COUNT | CUSTDIST 
+---------+----------
+       0 |    50005
+       9 |     6641
+      10 |     6532
+      11 |     6014
+       8 |     5937
+      12 |     5639
+      13 |     5024
+      19 |     4793
+       7 |     4687
+      17 |     4587
+(10 rows)
+
+-- using default substitutions
+select
+	100.00 * sum(case
+		when p_type like 'PROMO%'
+			then l_extendedprice * (1 - l_discount)
+		else 0
+	end) / sum(l_extendedprice * (1 - l_discount)) as promo_revenue
+from
+	lineitem,
+	part
+where
+	l_partkey = p_partkey
+	and l_shipdate >= date '1995-09-01'
+	and l_shipdate < date '1995-09-01' + interval '1' month
+LIMIT 10
+     PROMO_REVENUE     
+-----------------------
+ 16.380778626395540147
+(1 row)
+
+-- using default substitutions
+create view revenue0 (supplier_no, total_revenue) as
+	select
+		l_suppkey,
+		sum(l_extendedprice * (1 - l_discount))
+	from
+		lineitem
+	where
+		l_shipdate >= date '1996-01-01'
+		and l_shipdate < date '1996-01-01' + interval '3' month
+	group by
+		l_suppkey;
+CREATE VIEW
+select
+	s_suppkey,
+	s_name,
+	s_address,
+	s_phone,
+	total_revenue
+from
+	supplier,
+	revenue0
+where
+	s_suppkey = supplier_no
+	and total_revenue = (
+		select
+			max(total_revenue)
+		from
+			revenue0
+	)
+order by
+	s_suppkey
+LIMIT 10;
+ S_SUPPKEY |           S_NAME           |     S_ADDRESS     |     S_PHONE     | TOTAL_REVENUE 
+-----------+----------------------------+-------------------+-----------------+---------------
+      8449 | Supplier#000008449         | Wp34zim9qYFbVctdW | 20-469-856-8873 |  1772627.2087
+(1 row)
+
+drop view revenue0;
+DROP VIEW
+-- using default substitutions
+select
+	p_brand,
+	p_type,
+	p_size,
+	count(distinct ps_suppkey) as supplier_cnt
+from
+	partsupp,
+	part
+where
+	p_partkey = ps_partkey
+	and p_brand <> 'Brand#45'
+	and p_type not like 'MEDIUM POLISHED%'
+	and p_size in (49, 14, 23, 45, 19, 3, 36, 9)
+	and ps_suppkey not in (
+		select
+			s_suppkey
+		from
+			supplier
+		where
+			s_comment like '%Customer%Complaints%'
+	)
+group by
+	p_brand,
+	p_type,
+	p_size
+order by
+	supplier_cnt desc,
+	p_brand,
+	p_type,
+	p_size
+LIMIT 10
+   P_BRAND   |          P_TYPE          | P_SIZE | SUPPLIER_CNT 
+-------------+--------------------------+--------+--------------
+ Brand#41    | MEDIUM BRUSHED TIN       |      3 |           28
+ Brand#54    | STANDARD BRUSHED COPPER  |     14 |           27
+ Brand#11    | STANDARD BRUSHED TIN     |     23 |           24
+ Brand#11    | STANDARD BURNISHED BRASS |     36 |           24
+ Brand#15    | MEDIUM ANODIZED NICKEL   |      3 |           24
+ Brand#15    | SMALL ANODIZED BRASS     |     45 |           24
+ Brand#15    | SMALL BURNISHED NICKEL   |     19 |           24
+ Brand#21    | MEDIUM ANODIZED COPPER   |      3 |           24
+ Brand#22    | SMALL BRUSHED NICKEL     |      3 |           24
+ Brand#22    | SMALL BURNISHED BRASS    |     19 |           24
+(10 rows)
+
+-- using default substitutions
+select
+	sum(l_extendedprice) / 7.0 as avg_yearly
+from
+	lineitem,
+	part
+where
+	p_partkey = l_partkey
+	and p_brand = 'Brand#23'
+	and p_container = 'MED BOX'
+	and l_quantity < (
+		select
+			0.2 * avg(l_quantity)
+		from
+			lineitem
+		where
+			l_partkey = p_partkey
+	)
+LIMIT 10
+    AVG_YEARLY    
+------------------
+ 348406.054285714
+(1 row)
+
+-- using default substitutions
+select
+	c_name,
+	c_custkey,
+	o_orderkey,
+	o_orderdate,
+	o_totalprice,
+	sum(l_quantity)
+from
+	customer,
+	orders,
+	lineitem
+where
+	o_orderkey in (
+		select
+			l_orderkey
+		from
+			lineitem
+		group by
+			l_orderkey having
+				sum(l_quantity) > 300
+	)
+	and c_custkey = o_custkey
+	and o_orderkey = l_orderkey
+group by
+	c_name,
+	c_custkey,
+	o_orderkey,
+	o_orderdate,
+	o_totalprice
+order by
+	o_totalprice desc,
+	o_orderdate
+LIMIT 10
+       C_NAME       | C_CUSTKEY | O_ORDERKEY | O_ORDERDATE | O_TOTALPRICE | SUM 
+--------------------+-----------+------------+-------------+--------------+-----
+ Customer#000128120 |    128120 |    4722021 | 1994-04-07  |    544089.09 | 323
+ Customer#000144617 |    144617 |    3043270 | 1997-02-12  |    530604.44 | 317
+ Customer#000013940 |     13940 |    2232932 | 1997-04-13  |    522720.61 | 304
+ Customer#000066790 |     66790 |    2199712 | 1996-09-30  |    515531.82 | 327
+ Customer#000046435 |     46435 |    4745607 | 1997-07-03  |    508047.99 | 309
+ Customer#000015272 |     15272 |    3883783 | 1993-07-28  |    500241.33 | 302
+ Customer#000146608 |    146608 |    3342468 | 1994-06-12  |    499794.58 | 303
+ Customer#000096103 |     96103 |    5984582 | 1992-03-16  |    494398.79 | 312
+ Customer#000024341 |     24341 |    1474818 | 1992-11-15  |    491348.26 | 302
+ Customer#000137446 |    137446 |    5489475 | 1997-05-23  |    487763.25 | 311
+(10 rows)
+
+-- using default substitutions
+select
+	sum(l_extendedprice* (1 - l_discount)) as revenue
+from
+	lineitem,
+	part
+where
+	(
+		p_partkey = l_partkey
+		and p_brand = 'Brand#12'
+		and p_container in ('SM CASE', 'SM BOX', 'SM PACK', 'SM PKG')
+		and l_quantity >= 1 and l_quantity <= 1 + 10
+		and p_size between 1 and 5
+		and l_shipmode in ('AIR', 'AIR REG')
+		and l_shipinstruct = 'DELIVER IN PERSON'
+	)
+	or
+	(
+		p_partkey = l_partkey
+		and p_brand = 'Brand#23'
+		and p_container in ('MED BAG', 'MED BOX', 'MED PKG', 'MED PACK')
+		and l_quantity >= 10 and l_quantity <= 10 + 10
+		and p_size between 1 and 10
+		and l_shipmode in ('AIR', 'AIR REG')
+		and l_shipinstruct = 'DELIVER IN PERSON'
+	)
+	or
+	(
+		p_partkey = l_partkey
+		and p_brand = 'Brand#34'
+		and p_container in ('LG CASE', 'LG BOX', 'LG PACK', 'LG PKG')
+		and l_quantity >= 20 and l_quantity <= 20 + 10
+		and p_size between 1 and 15
+		and l_shipmode in ('AIR', 'AIR REG')
+		and l_shipinstruct = 'DELIVER IN PERSON'
+	)
+LIMIT 10
+    REVENUE    
+---------------
+  3083843.0578
+(1 row)
+
+-- using default substitutions
+select
+	s_name,
+	s_address
+from
+	supplier,
+	nation
+where
+	s_suppkey in (
+		select
+			ps_suppkey
+		from
+			partsupp
+		where
+			ps_partkey in (
+				select
+					p_partkey
+				from
+					part
+				where
+					p_name like 'forest%'
+			)
+			and ps_availqty > (
+				select
+					0.5 * sum(l_quantity)
+				from
+					lineitem
+				where
+					l_partkey = ps_partkey
+					and l_suppkey = ps_suppkey
+					and l_shipdate >= date '1994-01-01'
+					and l_shipdate < date '1994-01-01' + interval '1' year
+			)
+	)
+	and s_nationkey = n_nationkey
+	and n_name = 'CANADA'
+order by
+	s_name
+LIMIT 10
+           S_NAME           |               S_ADDRESS               
+----------------------------+---------------------------------------
+ Supplier#000000020         | iybAE,RmTymrZVYaFZva2SH,j
+ Supplier#000000091         | YV45D7TkfdQanOOZ7q9QxkyGUapU1oOWU6q3
+ Supplier#000000205         | rF uV8d0JNEk
+ Supplier#000000285         | Br7e1nnt1yxrw6ImgpJ7YdhFDjuBf
+ Supplier#000000287         | 7a9SP7qW5Yku5PvSg
+ Supplier#000000354         | w8fOo5W,aS
+ Supplier#000000378         | FfbhyCxWvcPrO8ltp9
+ Supplier#000000402         | i9Sw4DoyMhzhKXCH9By,AYSgmD
+ Supplier#000000530         | 0qwCMwobKY OcmLyfRXlagA8ukENJv,
+ Supplier#000000555         | TfB,a5bfl3Ah 3Z 74GqnNs6zKVGM
+(10 rows)
+
+-- using default substitutions
+select
+	s_name,
+	count(*) as numwait
+from
+	supplier,
+	lineitem l1,
+	orders,
+	nation
+where
+	s_suppkey = l1.l_suppkey
+	and o_orderkey = l1.l_orderkey
+	and o_orderstatus = 'F'
+	and l1.l_receiptdate > l1.l_commitdate
+	and exists (
+		select
+			*
+		from
+			lineitem l2
+		where
+			l2.l_orderkey = l1.l_orderkey
+			and l2.l_suppkey <> l1.l_suppkey
+	)
+	and not exists (
+		select
+			*
+		from
+			lineitem l3
+		where
+			l3.l_orderkey = l1.l_orderkey
+			and l3.l_suppkey <> l1.l_suppkey
+			and l3.l_receiptdate > l3.l_commitdate
+	)
+	and s_nationkey = n_nationkey
+	and n_name = 'SAUDI ARABIA'
+group by
+	s_name
+order by
+	numwait desc,
+	s_name
+LIMIT 10
+           S_NAME           | NUMWAIT 
+----------------------------+---------
+ Supplier#000002829         |      20
+ Supplier#000005808         |      18
+ Supplier#000000262         |      17
+ Supplier#000000496         |      17
+ Supplier#000002160         |      17
+ Supplier#000002301         |      17
+ Supplier#000002540         |      17
+ Supplier#000003063         |      17
+ Supplier#000005178         |      17
+ Supplier#000008331         |      17
+(10 rows)
+
+-- using default substitutions
+select
+	cntrycode,
+	count(*) as numcust,
+	sum(c_acctbal) as totacctbal
+from
+	(
+		select
+			substring(c_phone from 1 for 2) as cntrycode,
+			c_acctbal
+		from
+			customer
+		where
+			substring(c_phone from 1 for 2) in
+				('13', '31', '23', '29', '30', '18', '17')
+			and c_acctbal > (
+				select
+					avg(c_acctbal)
+				from
+					customer
+				where
+					c_acctbal > 0.00
+					and substring(c_phone from 1 for 2) in
+						('13', '31', '23', '29', '30', '18', '17')
+			)
+			and not exists (
+				select
+					*
+				from
+					orders
+				where
+					o_custkey = c_custkey
+			)
+	) as custsale
+group by
+	cntrycode
+order by
+	cntrycode
+LIMIT 10
+ CNTRYCODE | NUMCUST | TOTACCTBAL 
+-----------+---------+------------
+ 13        |     888 | 6737713.99
+ 17        |     861 | 6460573.72
+ 18        |     964 |  7236687.4
+ 23        |     892 | 6701457.95
+ 29        |     948 | 7158866.63
+ 30        |     909 | 6808436.13
+ 31        |     922 | 6806670.18
+(7 rows)
+
