@@ -324,10 +324,15 @@ public class TPCHTester extends TestItem {
     @Override
     public TestResult getTestResults() {
         // 读取结果文件
+        double rst = 0;
         File retFile = new File(this.resultDirectory,  "result.txt");
         try(BufferedReader br = new BufferedReader(new FileReader(retFile))) {
             testResult = new TestResult();
             testResult.values = br.readLine().split(" ");
+            for (String s : testResult.values) {
+                rst += Double.parseDouble(s);
+            }
+            testResult.values[0] = String.valueOf(3600 / rst);
             testResult.names = TestResult.TPCH_RES_NAMES;
         } catch (IOException e) {
             throw new RuntimeException(e);
