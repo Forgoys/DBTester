@@ -7,19 +7,15 @@ import backend.tester.TestItem;
 import frontend.connection.DBConnection;
 
 import java.io.*;
-import java.sql.Statement;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
-import java.net.URL;
-import java.net.URLClassLoader;
-
-import java.sql.*;
-
 import java.util.Properties;
+import java.util.Random;
 import java.util.logging.Logger;
 
 
@@ -58,6 +54,24 @@ class MyDBConnection {
         this.jdbcDriverClassName = determineDriverClassName(jdbcDriverPath);
     }
 
+    private static List<String> parseSQLScript(String scriptFilePath) {
+        List<String> sqlStatements = new ArrayList<>();
+        StringBuilder sqlStatementBuilder = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(scriptFilePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sqlStatementBuilder.append(line).append("\n");
+                if (line.trim().endsWith(";")) {
+                    sqlStatements.add(sqlStatementBuilder.toString());
+                    sqlStatementBuilder.setLength(0);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return sqlStatements;
+    }
+
     /**
      * 根据数据库url分析数据库品牌名和数据库名
      *
@@ -88,7 +102,6 @@ class MyDBConnection {
         dbNameEnd = (dbNameEnd == -1) ? url.length() : dbNameEnd;
         this.dbName = url.substring(dbNameStart, dbNameEnd);
     }
-
 
     private String determineDriverClassName(String jdbcDriverPath) {
         // 这个方法的实现需要根据实际情况来设计。
@@ -138,33 +151,15 @@ class MyDBConnection {
     }
 
     public boolean executeSQLScript(String filePath) throws SQLException {
-        File script = new  File(filePath);
+        File script = new File(filePath);
         List<String> sqlList = parseSQLScript(filePath);
         boolean ret = true;
-        for(String sql : sqlList) {
-            if(!executeSQL(sql)) {
+        for (String sql : sqlList) {
+            if (!executeSQL(sql)) {
                 ret = false;
             }
         }
         return ret;
-    }
-
-    private static List<String> parseSQLScript(String scriptFilePath) {
-        List<String> sqlStatements = new ArrayList<>();
-        StringBuilder sqlStatementBuilder = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(scriptFilePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sqlStatementBuilder.append(line).append("\n");
-                if (line.trim().endsWith(";")) {
-                    sqlStatements.add(sqlStatementBuilder.toString());
-                    sqlStatementBuilder.setLength(0);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return sqlStatements;
     }
 
     // 从ResultSet中提取数据
@@ -188,50 +183,6 @@ class MyDBConnection {
             } catch (SQLException e) {
                 System.out.println("Failed to close the database connection: " + e.getMessage());
             }
-        }
-    }
-
-    // Inner class to wrap the dynamically loaded driver
-    private static class DriverShim implements Driver {
-        private Driver driver;
-
-        DriverShim(Driver d) {
-            this.driver = d;
-        }
-
-        @Override
-        public boolean acceptsURL(String u) throws SQLException {
-            return this.driver.acceptsURL(u);
-        }
-
-        @Override
-        public Connection connect(String u, Properties p) throws SQLException {
-            return this.driver.connect(u, p);
-        }
-
-        @Override
-        public int getMajorVersion() {
-            return this.driver.getMajorVersion();
-        }
-
-        @Override
-        public int getMinorVersion() {
-            return this.driver.getMinorVersion();
-        }
-
-        @Override
-        public DriverPropertyInfo[] getPropertyInfo(String u, Properties p) throws SQLException {
-            return this.driver.getPropertyInfo(u, p);
-        }
-
-        @Override
-        public boolean jdbcCompliant() {
-            return this.driver.jdbcCompliant();
-        }
-
-        @Override
-        public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-            return this.driver.getParentLogger();
         }
     }
 
@@ -276,7 +227,6 @@ class MyDBConnection {
         this.jdbcDriverClassName = jdbcDriverClassName;
     }
 
-
     public String getDbBrandName() {
         return dbBrandName;
     }
@@ -296,16 +246,63 @@ class MyDBConnection {
     public int getPort() {
         return port;
     }
+
+    // Inner class to wrap the dynamically loaded driver
+    private static class DriverShim implements Driver {
+        private final Driver driver;
+
+        DriverShim(Driver d) {
+            this.driver = d;
+        }
+
+        @Override
+        public boolean acceptsURL(String u) throws SQLException {
+            return this.driver.acceptsURL(u);
+        }
+
+        @Override
+        public Connection connect(String u, Properties p) throws SQLException {
+            return this.driver.connect(u, p);
+        }
+
+        @Override
+        public int getMajorVersion() {
+            return this.driver.getMajorVersion();
+        }
+
+        @Override
+        public int getMinorVersion() {
+            return this.driver.getMinorVersion();
+        }
+
+        @Override
+        public DriverPropertyInfo[] getPropertyInfo(String u, Properties p) throws SQLException {
+            return this.driver.getPropertyInfo(u, p);
+        }
+
+        @Override
+        public boolean jdbcCompliant() {
+            return this.driver.jdbcCompliant();
+        }
+
+        @Override
+        public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+            return this.driver.getParentLogger();
+        }
+    }
 }
 
 
 public class PressureTester extends TestItem {
 
     /**
+     * 测试时长，单位ms
+     */
+    private final int test_time;
+    /**
      * 测试根目录
      */
     public String testHomePath;
-
     /**
      * 测试语句所在路径
      */
@@ -314,12 +311,10 @@ public class PressureTester extends TestItem {
      * sql文件
      */
     private File[] sqlFiles;
-
     /**
      * 结果文件存放路径
      */
     private String resultDirectory;
-
     /**
      * 数据库连接相关参数
      */
@@ -327,12 +322,6 @@ public class PressureTester extends TestItem {
     private String jdbcUrl;
     private String username;
     private String password;
-
-    /**
-     * 测试时长，单位ms
-     */
-    private final int test_time;
-
     /**
      * 测试规模
      */
@@ -368,11 +357,34 @@ public class PressureTester extends TestItem {
         test_time = Integer.parseInt(testArgs.values.get(1)) * 60000;
     }
 
+    public static void main(String[] args) {
+        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
+                "jdbc:oscar://10.181.8.146:2004/TPCH_5",
+                "SYSDBA",
+                "szoscar55");
+
+        TestArguments arguments = new TestArguments();
+        arguments.values.add("4"); // 线程数
+        arguments.values.add("5"); // 测试分钟数
+
+        TestItem tester = new PressureTester("pressureTest", dbConnection, arguments);
+
+        try {
+
+            tester.testEnvPrepare();
+
+            tester.startTest();
+
+            TestResult results = tester.getTestResults();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * 初始化相关属性
      */
-    private void initialization() throws Exception{
+    private void initialization() throws Exception {
 
         // 获取工具包根目录
         File projectDir = new File(System.getProperty("user.dir"));
@@ -380,12 +392,12 @@ public class PressureTester extends TestItem {
 
         // 检查工具目录
         File toolRootDir = new File(toolsRootPath);
-        if(!toolRootDir.exists() || !toolRootDir.isDirectory()) {
+        if (!toolRootDir.exists() || !toolRootDir.isDirectory()) {
             throw new Exception("未检测到工具目录:：" + toolsRootPath);
         }
 
         // 创建压力测试测试目录
-        if(!toolsRootPath.endsWith("/")) {
+        if (!toolsRootPath.endsWith("/")) {
             toolsRootPath += "/";
         }
         testHomePath = toolsRootPath + "/RDB_test/pressure_test/";
@@ -396,7 +408,7 @@ public class PressureTester extends TestItem {
         // sql查询语句所在目录
         sqlsPath = testHomePath + "queries/";
         File sqlsDir;
-        if((sqlsDir = new File(sqlsPath)).exists()) {
+        if ((sqlsDir = new File(sqlsPath)).exists()) {
             sqlFiles = sqlsDir.listFiles();
         }
 
@@ -427,7 +439,7 @@ public class PressureTester extends TestItem {
         // 启动多个线程
         PressureThread[] pressureThreads = new PressureThread[thread_num];
         for (int i = 0; i < thread_num; i++) {
-            pressureThreads[i] =  new PressureThread();
+            pressureThreads[i] = new PressureThread();
             pressureThreads[i].start();
         }
 
@@ -447,7 +459,7 @@ public class PressureTester extends TestItem {
 
         this.testResult = new TestResult();
         testResult.names = TestResult.PRESSURE_TEST_RES_NAMES;
-        testResult.values = new String[] {String.valueOf(avgRequest), String.valueOf(avgFailed), String.valueOf(Double.POSITIVE_INFINITY), "0"};
+        testResult.values = new String[]{String.valueOf(avgRequest), String.valueOf(avgFailed), String.valueOf(Double.POSITIVE_INFINITY), "0"};
     }
 
     @Override
@@ -479,7 +491,7 @@ public class PressureTester extends TestItem {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } finally {
-            if(pw != null) {
+            if (pw != null) {
                 pw.close();
             }
         }
@@ -488,9 +500,9 @@ public class PressureTester extends TestItem {
     @Override
     public TestAllResult readFromFile(String resultPath) {
         File retFile = new File(resultPath, "result.txt");
-        try(BufferedReader reader = new BufferedReader(new FileReader(retFile))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(retFile))) {
             String[] rets = reader.readLine().split(" ");
-            if(rets.length == 2) {
+            if (rets.length == 2) {
                 this.testResult = new TestResult();
                 testResult.values = rets;
             }
@@ -498,7 +510,7 @@ public class PressureTester extends TestItem {
             throw new RuntimeException(e);
         }
         testResult.names = TestResult.PRESSURE_TEST_RES_NAMES;
-       return new TestAllResult(this.testResult);
+        return new TestAllResult(this.testResult);
     }
 
     @Override
@@ -527,7 +539,7 @@ public class PressureTester extends TestItem {
                     System.out.printf("线程%d选择sql语句:%s\n", id, sqlFile.getName());
                     // 执行语句
                     try {
-                        if(!dbConnection.executeSQLScript(sqlFile.getAbsolutePath())) {
+                        if (!dbConnection.executeSQLScript(sqlFile.getAbsolutePath())) {
                             System.out.println("线程" + id + "执行失败！");
                             failedRequestCount++;
                         }
@@ -552,30 +564,6 @@ public class PressureTester extends TestItem {
 
         public int getFailedRequestCount() {
             return failedRequestCount;
-        }
-    }
-
-    public static void main(String[] args) {
-        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
-                "jdbc:oscar://10.181.8.146:2004/TPCH_5",
-                "SYSDBA",
-                "szoscar55");
-
-        TestArguments arguments = new TestArguments();
-        arguments.values.add("4"); // 线程数
-        arguments.values.add("5"); // 测试分钟数
-
-        TestItem tester = new PressureTester("pressureTest", dbConnection, arguments);
-
-        try {
-
-            tester.testEnvPrepare();
-
-            tester.startTest();
-
-            TestResult results = tester.getTestResults();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 }

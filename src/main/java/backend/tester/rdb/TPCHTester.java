@@ -6,10 +6,15 @@ import backend.dataset.TestResult;
 import backend.tester.TestItem;
 import frontend.connection.DBConnection;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * 目前仅支持神通数据库，若需要支持另外两数据库，需要新增脚本文件
@@ -31,8 +36,8 @@ public class TPCHTester extends TestItem {
     /**
      * 相关路径
      */
-    public  String testHomePath;
-    public  String tpchToolPath;
+    public String testHomePath;
+    public String tpchToolPath;
 
     /**
      * 数据集路径
@@ -59,7 +64,8 @@ public class TPCHTester extends TestItem {
      */
     private String diskNameOfDB;
 
-    public TPCHTester(){}
+    public TPCHTester() {
+    }
 
     public TPCHTester(String testName) {
         this.testName = testName;
@@ -72,8 +78,38 @@ public class TPCHTester extends TestItem {
         this.testArgs = testArgs;
     }
 
+    public static void main(String[] args) {
 
-    private void initialization() throws Exception{
+//        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
+//                "jdbc:oscar://10.181.8.146:2005/ADAPTTEST",
+//                "SYSDBA",
+//                "szoscar55");
+//        dbConnection.connect();
+//
+//        TestArguments arguments = new TestArguments();
+//        arguments.values.add("1"); // 测试规模
+//
+//        TPCHTester tester = new TPCHTester("tpch", dbConnection, arguments);
+//
+//        try {
+//
+//            tester.testEnvPrepare();
+//
+//            tester.startTest();
+//
+//            List<List<Double>> tmpTimeData = tester.getTimeData();
+//
+//            TestResult results = tester.getTestResults();
+//
+//            int i = 0;
+//            i++;
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        dbConnection.disconnect();
+    }
+
+    private void initialization() throws Exception {
 
         // 获取工具包根目录
         File projectDir = new File(System.getProperty("user.dir"));
@@ -81,7 +117,7 @@ public class TPCHTester extends TestItem {
 
         // 检查工具目录
         File toolRootDir = new File(toolsRootPath);
-        if(!toolRootDir.exists() || !toolRootDir.isDirectory()) {
+        if (!toolRootDir.exists() || !toolRootDir.isDirectory()) {
             throw new Exception("未检测到工具目录:：" + toolsRootPath);
         }
 
@@ -95,7 +131,7 @@ public class TPCHTester extends TestItem {
         diskNameOfDB = "sdd";
 
         // 创建tpch测试目录
-        if(!toolsRootPath.endsWith("/")) {
+        if (!toolsRootPath.endsWith("/")) {
             toolsRootPath += "/";
         }
         testHomePath = toolsRootPath + "RDB_test/tpch/";
@@ -104,7 +140,7 @@ public class TPCHTester extends TestItem {
         // tpch工具所在根目录
         tpchToolPath = testHomePath + "tpch-tool/dbgen/";
         File tpchToolDir = new File(tpchToolPath);
-        if(!tpchToolDir.exists()) {
+        if (!tpchToolDir.exists()) {
             throw new Exception("未检测到tpch相关工具: " + tpchToolPath);
         }
 
@@ -144,7 +180,6 @@ public class TPCHTester extends TestItem {
         status = Status.READY;
     }
 
-
     /**
      * 开始测试
      */
@@ -154,13 +189,13 @@ public class TPCHTester extends TestItem {
             throw new InterruptedException("测试尚未就绪，请先调用环境配置函数");
         } else if (status == Status.RUNNING) {
             throw new InterruptedException("测试正在进行，请勿重复启动");
-        } else if(status == Status.FINISHED) {
+        } else if (status == Status.FINISHED) {
             throw new InterruptedException("测试已经结束，如需再次测试，请新建测试实例");
         }
 
         // 创建结果文件夹
         File resDir = new File(resultDirectory);
-        if(!resDir.exists()) {
+        if (!resDir.exists()) {
             resDir.mkdirs();
         }
         /*                                    正式执行测试                                       */
@@ -168,7 +203,6 @@ public class TPCHTester extends TestItem {
         execCommands(new File(tpchToolPath), cmd);
         this.status = Status.FINISHED;
     }
-
 
     /**
      * 检查工具是否存在
@@ -232,7 +266,6 @@ public class TPCHTester extends TestItem {
         }
         return true;
     }
-
 
     private void createDataSet(String fileDir) throws Exception {
         // 生成数据文件存放目录
@@ -320,13 +353,12 @@ public class TPCHTester extends TestItem {
         return timeDataList;
     }
 
-
     @Override
     public TestResult getTestResults() {
         // 读取结果文件
         double rst = 0;
-        File retFile = new File(this.resultDirectory,  "result.txt");
-        try(BufferedReader br = new BufferedReader(new FileReader(retFile))) {
+        File retFile = new File(this.resultDirectory, "result.txt");
+        try (BufferedReader br = new BufferedReader(new FileReader(retFile))) {
             testResult = new TestResult();
             testResult.values = br.readLine().split(" ");
             for (String s : testResult.values) {
@@ -340,7 +372,6 @@ public class TPCHTester extends TestItem {
         return testResult;
     }
 
-
     @Override
     public String getResultDicName() {
         return new File(resultDirectory).getName();
@@ -348,9 +379,9 @@ public class TPCHTester extends TestItem {
 
     @Override
     public void writeToFile(String resultPath) {
-        if(status != Status.FINISHED) {
+        if (status != Status.FINISHED) {
             System.out.println("还未生成结果文件");
-            return ;
+            return;
         }
         File file = new File(resultPath);
         if (!file.exists()) {
@@ -362,10 +393,10 @@ public class TPCHTester extends TestItem {
 
     @Override
     public TestAllResult readFromFile(String resultPath) {
-        if(resultPath == null) {
+        if (resultPath == null) {
             return null;
         }
-        if(!resultPath.endsWith("/")) {
+        if (!resultPath.endsWith("/")) {
             resultPath += "/";
         }
         this.resultDirectory = resultPath;
@@ -375,36 +406,5 @@ public class TPCHTester extends TestItem {
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
         return List.of();
-    }
-
-    public static void main(String[] args) {
-
-//        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
-//                "jdbc:oscar://10.181.8.146:2005/ADAPTTEST",
-//                "SYSDBA",
-//                "szoscar55");
-//        dbConnection.connect();
-//
-//        TestArguments arguments = new TestArguments();
-//        arguments.values.add("1"); // 测试规模
-//
-//        TPCHTester tester = new TPCHTester("tpch", dbConnection, arguments);
-//
-//        try {
-//
-//            tester.testEnvPrepare();
-//
-//            tester.startTest();
-//
-//            List<List<Double>> tmpTimeData = tester.getTimeData();
-//
-//            TestResult results = tester.getTestResults();
-//
-//            int i = 0;
-//            i++;
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//        dbConnection.disconnect();
     }
 }

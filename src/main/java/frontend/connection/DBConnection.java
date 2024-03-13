@@ -1,10 +1,6 @@
 package frontend.connection;
 
-import backend.tester.timeSeriesDB.PressTester;
-
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -38,12 +34,14 @@ public class DBConnection {
 
     public DBConnection() {
     }
+
     // 涛思不用jdbc
     public DBConnection(String dbName, String username, String password) {
         this.dbName = dbName;
         this.username = username;
         this.password = password;
     }
+
     public DBConnection(String jdbcDriverPath, String dbURL, String username, String password) {
         this.jdbcDriverPath = jdbcDriverPath;
         this.dbURL = dbURL;
@@ -56,14 +54,97 @@ public class DBConnection {
         this.jdbcDriverClassName = determineDriverClassName(jdbcDriverPath);
     }
 
+    // 涛思不用jdbc
+    public static String tdengineExecSQL(String sql, DBConnection dbConnection) {
+
+//        PressTester.sourceBashrc();
+        String command = "source ~/.bashrc && taos -u" + dbConnection.username + " -p" + dbConnection.password + " -s '" + sql + "'";
+        String output = "";
+
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
+            Process process = processBuilder.start();
+
+            // 读取输入流
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = inputReader.readLine()) != null) {
+                output += line + "\n";
+            }
+
+            // 读取错误流
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            while ((line = errorReader.readLine()) != null) {
+                output += line + "\n";
+            }
+
+            process.waitFor();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return output;
+    }
+
+    private static boolean checkDBUserPassword(DBConnection dbConnection) {
+        try {
+            // 输入指令：taos -u"root" -p"taosdata"能进入taos命令行
+            String[] command = {"/bin/bash", "-c", "taos -u" + dbConnection.username + " -p" + dbConnection.password + " 2>&1"};
+            Process process = Runtime.getRuntime().exec(command);
+
+            // 向进程写入输入
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+            writer.write("q\n");
+            writer.flush();
+            writer.close();
+
+            // 读取命令行指令的输入流
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = inputReader.readLine()) != null) {
+                // 打印命令行指令的执行结果
+
+                // 检查是否存在"Authentication failure"的错误信息
+                if (line.contains("Authentication failure") || line.contains("Invalid user")) {
+                    return false;
+                }
+            }
+
+            // 如果没有"Authentication failure"的错误信息，那么认为命令执行成功
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean checkDBExist(DBConnection dbConnection) {
+        try {
+            String[] command = {"/bin/bash", "-c", "taos -u" + dbConnection.username + " -p" + dbConnection.password + " -s \"use " + dbConnection.dbName + ";\" 2>&1"};
+            Process process = Runtime.getRuntime().exec(command);
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = inputReader.readLine()) != null) {
+                if (line.contains("Database not exist")) {
+                    return false;
+                }
+            }
+            return (checkDBUserPassword(dbConnection));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     /**
      * 根据数据库url分析数据库品牌名和数据库名
+     *
      * @param url
      */
     private void analyzeURL(String url) {
         if (url.startsWith("jdbc:postgresql")) {
             this.dbBrandName = "PostgreSQL";
-        } else if(url.startsWith("jdbc:oscar")) {
+        } else if (url.startsWith("jdbc:oscar")) {
             this.dbBrandName = "oscar";
         } else if (url.startsWith("jdbc:mysql")) {
             this.dbBrandName = "MySQL";
@@ -86,20 +167,17 @@ public class DBConnection {
         this.dbName = url.substring(dbNameStart, dbNameEnd);
     }
 
-
-
     private String determineDriverClassName(String jdbcDriverPath) {
         // 这个方法的实现需要根据实际情况来设计。
         // 在很多情况下，驱动类名需要从用户那里获取或者通过分析驱动文件来确定。
         // 这里只是提供一个示例接口，实际实现可能会更复杂。
 
         // 尝试通过数据库品牌来获取驱动类名
-        if(dbBrandName.equals("oscar")) {
+        if (dbBrandName.equals("oscar")) {
             return "com.oscar.Driver";
-        } else if(dbBrandName.equals("opengauss")) {
+        } else if (dbBrandName.equals("opengauss")) {
             return "org.opengauss.Driver";
         } // 可以根据需要添加更多的数据库品牌
-
 
 
         return ""; // 返回空字符串或根据路径推断的类名
@@ -139,9 +217,9 @@ public class DBConnection {
         }
     }
 
-
     /**
      * 执行指定SQL文件中的SQL语句，并返回每条语句的执行结果。
+     *
      * @param sqlFilePath SQL文件的路径
      * @return 每条SQL语句执行结果的列表
      */
@@ -200,87 +278,6 @@ public class DBConnection {
         }
         return builder.toString();
     }
-    // 涛思不用jdbc
-    public static String tdengineExecSQL(String sql, DBConnection dbConnection) {
-
-//        PressTester.sourceBashrc();
-        String command = "source ~/.bashrc && taos -u" + dbConnection.username + " -p" + dbConnection.password + " -s '" + sql + "'";
-        String output = "";
-    
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
-            Process process = processBuilder.start();
-    
-            // 读取输入流
-            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = inputReader.readLine()) != null) {
-                output += line + "\n";
-            }
-    
-            // 读取错误流
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            while ((line = errorReader.readLine()) != null) {
-                output += line + "\n";
-            }
-    
-            process.waitFor();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    
-        return output;
-    }
-
-    private static boolean checkDBUserPassword(DBConnection dbConnection) {
-        try {
-            // 输入指令：taos -u"root" -p"taosdata"能进入taos命令行
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbConnection.username + " -p" + dbConnection.password + " 2>&1"};
-            Process process = Runtime.getRuntime().exec(command);
-
-            // 向进程写入输入
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-            writer.write("q\n");
-            writer.flush();
-            writer.close();
-
-            // 读取命令行指令的输入流
-            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = inputReader.readLine()) != null) {
-                // 打印命令行指令的执行结果
-
-                // 检查是否存在"Authentication failure"的错误信息
-                if (line.contains("Authentication failure") || line.contains("Invalid user") ){
-                    return false;
-                }
-            }
-
-            // 如果没有"Authentication failure"的错误信息，那么认为命令执行成功
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public static boolean checkDBExist(DBConnection dbConnection) {
-        try {
-            String[] command = {"/bin/bash", "-c", "taos -u" + dbConnection.username + " -p" + dbConnection.password + " -s \"use " + dbConnection.dbName + ";\" 2>&1"};
-            Process process = Runtime.getRuntime().exec(command);
-            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = inputReader.readLine()) != null) {
-                if (line.contains("Database not exist")) {
-                    return false;
-                }
-            }
-            return (checkDBUserPassword(dbConnection));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     // 检查数据库连接状态
     public boolean isConnected() {
@@ -299,50 +296,6 @@ public class DBConnection {
             } catch (SQLException e) {
                 System.out.println("Failed to close the database connection: " + e.getMessage());
             }
-        }
-    }
-
-    // Inner class to wrap the dynamically loaded driver
-    private static class DriverShim implements Driver {
-        private Driver driver;
-
-        DriverShim(Driver d) {
-            this.driver = d;
-        }
-
-        @Override
-        public boolean acceptsURL(String u) throws SQLException {
-            return this.driver.acceptsURL(u);
-        }
-
-        @Override
-        public Connection connect(String u, Properties p) throws SQLException {
-            return this.driver.connect(u, p);
-        }
-
-        @Override
-        public int getMajorVersion() {
-            return this.driver.getMajorVersion();
-        }
-
-        @Override
-        public int getMinorVersion() {
-            return this.driver.getMinorVersion();
-        }
-
-        @Override
-        public DriverPropertyInfo[] getPropertyInfo(String u, Properties p) throws SQLException {
-            return this.driver.getPropertyInfo(u, p);
-        }
-
-        @Override
-        public boolean jdbcCompliant() {
-            return this.driver.jdbcCompliant();
-        }
-
-        @Override
-        public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-            return this.driver.getParentLogger();
         }
     }
 
@@ -387,7 +340,6 @@ public class DBConnection {
         this.jdbcDriverClassName = jdbcDriverClassName;
     }
 
-
     public String getDbBrandName() {
         return dbBrandName;
     }
@@ -406,5 +358,49 @@ public class DBConnection {
 
     public int getPort() {
         return port;
+    }
+
+    // Inner class to wrap the dynamically loaded driver
+    private static class DriverShim implements Driver {
+        private final Driver driver;
+
+        DriverShim(Driver d) {
+            this.driver = d;
+        }
+
+        @Override
+        public boolean acceptsURL(String u) throws SQLException {
+            return this.driver.acceptsURL(u);
+        }
+
+        @Override
+        public Connection connect(String u, Properties p) throws SQLException {
+            return this.driver.connect(u, p);
+        }
+
+        @Override
+        public int getMajorVersion() {
+            return this.driver.getMajorVersion();
+        }
+
+        @Override
+        public int getMinorVersion() {
+            return this.driver.getMinorVersion();
+        }
+
+        @Override
+        public DriverPropertyInfo[] getPropertyInfo(String u, Properties p) throws SQLException {
+            return this.driver.getPropertyInfo(u, p);
+        }
+
+        @Override
+        public boolean jdbcCompliant() {
+            return this.driver.jdbcCompliant();
+        }
+
+        @Override
+        public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+            return this.driver.getParentLogger();
+        }
     }
 }

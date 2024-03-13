@@ -2,15 +2,16 @@ package frontend.controller;
 
 import backend.dataset.DisplayResult;
 import backend.dataset.TestResult;
-import frontend.connection.DBConnection;
-import frontend.connection.SSHConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Side;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.util.Collections;
@@ -41,9 +42,8 @@ public class DBOtherTestController {
     public Label diskWriteMinLabel;
     @FXML
     public Label diskWriteAvgLabel;
-
-    public DBOtherTestController() { }
-
+    @FXML
+    public TextArea currentStepTextArea;
     @FXML
     private LineChart<String, Number> cpuUsageLineChart;
     @FXML
@@ -51,18 +51,16 @@ public class DBOtherTestController {
     @FXML
     private LineChart<String, Number> diskSpeedLineChart;
     @FXML
-    public TextArea currentStepTextArea;
-
-    @FXML
     private TableView<DisplayResult> resultsTableView;
     @FXML
     private TableColumn<DisplayResult, String> metricsColumn;
     @FXML
     private TableColumn<DisplayResult, String> resultColumn;
-
     private List<List<Double>> timeData;
+    private final ObservableList<DisplayResult> displayResultsData = FXCollections.observableArrayList();
 
-    private ObservableList<DisplayResult> displayResultsData = FXCollections.observableArrayList();
+    public DBOtherTestController() {
+    }
 
     public void initialize() {
         resultsTableView.widthProperty().addListener((obs, oldVal, newVal) -> {

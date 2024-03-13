@@ -3,9 +3,7 @@ package backend.tester;
 
 import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
-import backend.dataset.TestTimeData;
 import frontend.connection.DBConnection;
-import frontend.connection.SSHConnection;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,17 +16,15 @@ import java.util.List;
 /**
  * 测试项父类，各测试项需要继承该类
  */
-public abstract class TestItem implements Testable, Writable{
-    /**
-     * 测试项目名称：TPC-C，TPC-H等
-     */
-    protected String testName;
-
+public abstract class TestItem implements Testable, Writable {
     /**
      * 软件相关工具、脚本所在的根目录名字
      */
     public static final String TOOLS_ROOT_NAME = "tools";
-
+    /**
+     * 测试项目名称：TPC-C，TPC-H等
+     */
+    protected String testName;
     /**
      * 软件相关工具、脚本所在的根目录名字
      * 此目录下再分为三个子目录分别用于关系数据库、时序数据库和文件系统
@@ -36,37 +32,10 @@ public abstract class TestItem implements Testable, Writable{
      * 例如获取项目路径为/home/uname/package/DBTster, 那该变量的值就为/home/uname/package/tools
      */
     protected String toolsRootPath;
-
-    public enum Status {
-        /**
-         * 准备阶段，例如参数未配置
-          */
-        UNPREPARED,
-        /**
-         * 就绪状态
-         */
-        READY,
-        /**
-         * 测试项正在运行
-         */
-        RUNNING,
-        /**
-         * 测试项已完成
-         */
-        FINISHED;
-    }
-
     /**
      * 当前测试项的状态。你需要处理该状态的切换。
      */
     protected Status status = Status.UNPREPARED;
-
-    /**
-     * ssh远程连接句柄，通过该句柄与远程服务器进行交互。。直接使用MainAppController.sshConnection
-     * 如果某项测试需要用到该句柄，则需在子类中初始化该句柄。
-     */
-//    protected SSHConnection sshStmt;
-
     /**
      * 数据库连接句柄，通过该句柄与远程数据库进行交互。直接使用MainAppController.dbConnection
      * 如果某项测试需要用到该句柄，则需在子类中初始化该句柄。
@@ -74,21 +43,25 @@ public abstract class TestItem implements Testable, Writable{
     protected DBConnection DBStmt;
 
     /**
+     * ssh远程连接句柄，通过该句柄与远程服务器进行交互。。直接使用MainAppController.sshConnection
+     * 如果某项测试需要用到该句柄，则需在子类中初始化该句柄。
+     */
+//    protected SSHConnection sshStmt;
+    /**
      * 测试参数
      */
     protected TestArguments testArgs;
-
     /**
      * 保存测试过程中的时序数据
      */
     protected List<List<Double>> timeDataList;
-
     /**
      * 保存测试结果
      */
     protected TestResult testResult;
 
-    public TestItem(){}
+    public TestItem() {
+    }
 
     public TestItem(String testName, DBConnection DBStmt) {
         this.testName = testName;
@@ -110,14 +83,14 @@ public abstract class TestItem implements Testable, Writable{
     }
 
     public static void execCommands(File workDir, String... commands) {
-        if(workDir != null && (!workDir.exists() || !workDir.isDirectory())) {
+        if (workDir != null && (!workDir.exists() || !workDir.isDirectory())) {
             System.out.println("工作路径设置不正确");
         }
         // 执行数据生成脚本
         try {
             // 构建进程
             ProcessBuilder builder = new ProcessBuilder();
-            if(workDir != null)
+            if (workDir != null)
                 builder.directory(workDir);
 
             ArrayList<String> cmdList = new ArrayList<>();
@@ -144,19 +117,19 @@ public abstract class TestItem implements Testable, Writable{
     }
 
     public static void execCommandWithOutPrint(File workDir, String cmd, String args) {
-        if(workDir != null && (!workDir.exists() || !workDir.isDirectory())) {
+        if (workDir != null && (!workDir.exists() || !workDir.isDirectory())) {
             System.out.println("工作路径设置不正确");
         }
         // 执行数据生成脚本
         try {
             // 构建进程
             ProcessBuilder builder = new ProcessBuilder();
-            if(workDir != null)
+            if (workDir != null)
                 builder.directory(workDir);
             // 设置命令及参数
             List<String> command = new ArrayList<>();
             command.add(cmd);
-            if(!args.isEmpty()) {
+            if (!args.isEmpty()) {
                 args = args.trim();
                 args = " " + args;
                 command.add(args);
@@ -175,7 +148,7 @@ public abstract class TestItem implements Testable, Writable{
     }
 
     public static String execCommandsWithReturn(File workDir, String... commands) {
-        if(workDir != null && (!workDir.exists() || !workDir.isDirectory())) {
+        if (workDir != null && (!workDir.exists() || !workDir.isDirectory())) {
             System.out.println("工作路径设置不正确");
         }
         StringBuilder output = new StringBuilder();
@@ -183,7 +156,7 @@ public abstract class TestItem implements Testable, Writable{
         try {
             // 构建进程
             ProcessBuilder builder = new ProcessBuilder();
-            if(workDir != null)
+            if (workDir != null)
                 builder.directory(workDir);
 
             ArrayList<String> cmdList = new ArrayList<>();
@@ -209,6 +182,25 @@ public abstract class TestItem implements Testable, Writable{
             e.printStackTrace();
         }
         return output.toString().trim();
+    }
+
+    public enum Status {
+        /**
+         * 准备阶段，例如参数未配置
+         */
+        UNPREPARED,
+        /**
+         * 就绪状态
+         */
+        READY,
+        /**
+         * 测试项正在运行
+         */
+        RUNNING,
+        /**
+         * 测试项已完成
+         */
+        FINISHED
     }
 
 }

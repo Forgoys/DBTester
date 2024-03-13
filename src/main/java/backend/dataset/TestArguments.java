@@ -1,7 +1,6 @@
 package backend.dataset;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 测试参数抽象类，需要定义测试参数子类继承该类
@@ -9,16 +8,6 @@ import java.util.List;
 public class TestArguments {
 
 
-    /**
-     * 各数据值，以String格式保存
-     */
-    public ArrayList<String> values;
-
-    public TestArguments() {
-        values = new ArrayList<>();
-    }
-
-    //*************************************常量值************************************************
     /**
      * TPCC测试参数属性
      */
@@ -30,8 +19,6 @@ public class TestArguments {
             new ArgumentProperty("运行时长(min)", new String[]{"1", "5", "10", "20", "30", "40",
                     "50", "60", "70", "80", "90", "100", "110", "120"})
     };
-
-
     /**
      * TPCH测试参数属性
      */
@@ -40,33 +27,32 @@ public class TestArguments {
             new ArgumentProperty("数据规模", new String[]{"1", "5", "10", "20"}),
     };
 
+    //*************************************常量值************************************************
     public static final ArgumentProperty[] PRESSURE_TEST_ARG_PROPERTIES = new ArgumentProperty[]{
 
             new ArgumentProperty("线程数", new String[]{"16", "32", "64", "128", "256"}),
 
             new ArgumentProperty("测试时长(min)", new String[]{"1", "3", "5"}),
     };
-
     /**
      * influxdb-comparision工具时序数据库测试的参数属性
      */
-    public static final ArgumentProperty[] INFLUXCOMP_WRITE_ARG_PROPERTIES = new ArgumentProperty[] {
-            new ArgumentProperty("写入场景", new String[]{"10台*10天","100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟"}),
-            new ArgumentProperty("客户端数", new String[]{"16","100"}),
+    public static final ArgumentProperty[] INFLUXCOMP_WRITE_ARG_PROPERTIES = new ArgumentProperty[]{
+            new ArgumentProperty("写入场景", new String[]{"10台*10天", "100台*30天", "4000台*3天", "2万台*3小时", "10万台*3小时", "100万台*3分钟"}),
+            new ArgumentProperty("客户端数", new String[]{"16", "100"}),
             new ArgumentProperty("本机sudo密码")
     };
-    public static final ArgumentProperty[] INFLUXCOMP_READ_ARG_PROPERTIES = new ArgumentProperty[] {
-            new ArgumentProperty("查询场景", new String[]{"10台*10天","100台*30天","4000台*3天","2万台*3小时","10万台*3小时","100万台*3分钟*"}),
-            new ArgumentProperty("查询类型", new String[]{"8-host-1-hr","1-host-1-hr","1-host-12-hr"}),
-            new ArgumentProperty("客户端数", new String[]{"10","100"}),
+    public static final ArgumentProperty[] INFLUXCOMP_READ_ARG_PROPERTIES = new ArgumentProperty[]{
+            new ArgumentProperty("查询场景", new String[]{"10台*10天", "100台*30天", "4000台*3天", "2万台*3小时", "10万台*3小时", "100万台*3分钟*"}),
+            new ArgumentProperty("查询类型", new String[]{"8-host-1-hr", "1-host-1-hr", "1-host-12-hr"}),
+            new ArgumentProperty("客户端数", new String[]{"10", "100"}),
             //new ArgumentProperty("查询语句数量",new String[]{"1万","5万","10万"})，固定为10万
             new ArgumentProperty("本机sudo密码")
     };
-    public static final ArgumentProperty[] INFLUXCOMP_PRESS_ARG_PROPERTIES = new ArgumentProperty[] {
-            new ArgumentProperty("测试时间", new String[]{"1分钟","10分钟","100分钟"}),
-            new ArgumentProperty("客户端数", new String[]{"10","100","1000"})
+    public static final ArgumentProperty[] INFLUXCOMP_PRESS_ARG_PROPERTIES = new ArgumentProperty[]{
+            new ArgumentProperty("测试时间", new String[]{"1分钟", "10分钟", "100分钟"}),
+            new ArgumentProperty("客户端数", new String[]{"10", "100", "1000"})
     };
-
     /*
      * FIO读写速度测试参数属性
      * */
@@ -78,11 +64,10 @@ public class TestArguments {
             // 文件块大小，有候选项
             new ArgumentProperty("文件块大小", new String[]{"4k", "8k", "16k", "32k", "64k"}),
             // 文件大小，有候选项
-            new ArgumentProperty("文件大小", new String[]{"16k","1G", "4G", "8G"}),
+            new ArgumentProperty("文件大小", new String[]{"16k", "1G", "4G", "8G"}),
             // 读写方式，有候选项
             new ArgumentProperty("读写方式", new String[]{"随机读", "随机写", "顺序读", "顺序写", "70%顺序读,30%顺序写", "70%随机读,30%随机写"}),
     };
-
     /*
      * IOZone读写速度测试参数属性
      * */
@@ -96,7 +81,6 @@ public class TestArguments {
             // 文件大小，有候选项
             new ArgumentProperty("文件大小", new String[]{"8k", "1G", "4G", "8G"}),
     };
-
     // fio并发度测试参数属性
     public static final ArgumentProperty[] FIO_PARALLEL_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试目录，用户输入
@@ -106,7 +90,6 @@ public class TestArguments {
             // sudo密码，用户输入
             new ArgumentProperty("本机sudo密码"),
     };
-
     // fio小文件测试参数属性
     public static final ArgumentProperty[] FIO_MINIFILE_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试目录，用户输入
@@ -114,7 +97,6 @@ public class TestArguments {
             // sudo密码，用户输入
             new ArgumentProperty("本机sudo密码"),
     };
-
     // fio可靠性测试参数属性
     public static final ArgumentProperty[] FIO_RELIABLE_ARG_PROPERTIES = new ArgumentProperty[]{
             // 测试目录，用户输入
@@ -124,7 +106,14 @@ public class TestArguments {
             // sudo密码，用户输入
             new ArgumentProperty("本机sudo密码"),
     };
+    /**
+     * 各数据值，以String格式保存
+     */
+    public ArrayList<String> values;
 
+    public TestArguments() {
+        values = new ArrayList<>();
+    }
 
     /**
      * @param testProject 测试项目中文名

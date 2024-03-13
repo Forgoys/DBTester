@@ -12,15 +12,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 public class DBReliabilityTestController {
     @FXML
+    public TextArea currentStepTextArea;
+    @FXML
     private TableView<DisplayResult> resultsTableView;
     @FXML
     private TableColumn<DisplayResult, String> metricsColumn;
     @FXML
     private TableColumn<DisplayResult, String> resultColumn;
-    @FXML
-    public TextArea currentStepTextArea;
-
-    private ObservableList<DisplayResult> displayResultsData = FXCollections.observableArrayList();
+    private final ObservableList<DisplayResult> displayResultsData = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {

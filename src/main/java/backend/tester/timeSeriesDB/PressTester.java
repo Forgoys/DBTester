@@ -5,40 +5,33 @@ import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
 import frontend.connection.DBConnection;
-import frontend.connection.SSHConnection;
-import frontend.controller.Util;
 
 import java.io.*;
-import java.util.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
-public class PressTester extends TestItem{
+public class PressTester extends TestItem {
+    // 指定要检查的文件名列表
+    public static final String[] DATA_SET_FILE_NAMES = {"bulk_data_gen", "bulk_load_tdengine", "bulk_query_gen", "query_benchmarker_tdengine",
+            "taos_queries.csv", "taospress.py", "config/TDDashboardSchema.toml", "config/TDengineSchema.toml", "data", "usage"};
+    // 测试工具路径，存在二进制文件、config文件夹(内含两个toml文件)、monitor_write.sh、monitor_read.sh，以及用于存储数据集和结果的data和usage文件夹
+    public static String testHomePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
     static String password = "";
     static String dbuser = "root";
     static String dbpassword = "taosdata";
     static String dbname = "devops";
-
     private static String testTime = "1分钟";
     private static int clients = 10;
     private static int success = 0;
-    private static int failure = 0;
-    // 测试工具路径，存在二进制文件、config文件夹(内含两个toml文件)、monitor_write.sh、monitor_read.sh，以及用于存储数据集和结果的data和usage文件夹
-    public static String testHomePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
     // testHomePath为当前测试工具的路径
+    private static int failure = 0;
 
-    // 指定要检查的文件名列表
-    public static final String[] DATA_SET_FILE_NAMES = {"bulk_data_gen","bulk_load_tdengine","bulk_query_gen","query_benchmarker_tdengine",
-        "taos_queries.csv","taospress.py","config/TDDashboardSchema.toml","config/TDengineSchema.toml","data","usage"};
-
-    public PressTester(String testName, DBConnection DBStmt,TestArguments testArgs) {
+    public PressTester(String testName, DBConnection DBStmt, TestArguments testArgs) {
         this.testName = testName;
         this.testArgs = testArgs;
         this.DBStmt = DBStmt;
@@ -54,6 +47,11 @@ public class PressTester extends TestItem{
         testHomePath = new File(System.getProperty("user.dir")).getParent() + "/tools/TSDB";
         sourceBashrc();
     }
+
+    public PressTester() {
+
+    }
+
     public static void sourceBashrc() {
         try {
             String[] command = {"/bin/bash", "-c", "source ~/.bashrc"};
@@ -63,8 +61,99 @@ public class PressTester extends TestItem{
             e.printStackTrace();
         }
     }
-    public PressTester() {
 
+    // 检查数据库是否开启，即taosd进程是否存在
+    private static boolean checkDBStatus() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("ps", "-ef");
+            Process process = processBuilder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains("taosd")) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // 输入指令：taos -uroot -ptaosdata能进入taos命令行
+    private static boolean checkDBUserPassword() {
+        try {
+            // 输入指令：taos -u"root" -p"taosdata"能进入taos命令行
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
+            Process process = Runtime.getRuntime().exec(command);
+
+            // 向进程写入输入
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+            writer.write("q\n");
+            writer.flush();
+            writer.close();
+
+            // 读取命令行指令的输入流
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = inputReader.readLine()) != null) {
+                // 打印命令行指令的执行结果
+
+                // 检查是否存在"Authentication failure"的错误信息
+                if (line.contains("Authentication failure") || line.contains("Invalid user")) {
+                    return false;
+                }
+            }
+
+            // 如果没有"Authentication failure"的错误信息，那么认为命令执行成功
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 检测数据库名是否存在
+    private static boolean checkDBExist() {
+        try {
+            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
+            Process process = Runtime.getRuntime().exec(command);
+            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = inputReader.readLine()) != null) {
+                if (line.contains("Database not exist")) {
+                    return false;
+                }
+            }
+            return checkDBUserPassword();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static void main(String[] args) {
+        String homePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
+        String resultPath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare/result/Press-2024-03-08-11-46-13";
+        TestArguments arguments = new TestArguments();
+        arguments.values = new ArrayList<>();
+        arguments.values.add("1分钟");
+        arguments.values.add("10");
+        DBConnection DBStmt = new DBConnection("devops", "root", "taosdata");
+        //WriteTester(String testName, String homePath, String sudoPassord, DBConnection DBStmt,TestArguments testArgs)
+        PressTester tester = new PressTester("Press", DBStmt, arguments);
+        try {
+            //tester.SetTag();
+            tester.testEnvPrepare();
+            tester.startTest();
+            tester.writeToFile(resultPath);
+            tester.getTestResults();//获取本测试结果
+            //System.out.println(tester.getTestResults().values[0]);
+            //System.out.println(tester.getTimeData());//获取本测试的监控数据
+            System.out.println(tester.readFromFile(resultPath).testResult.values[0]);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -123,80 +212,14 @@ public class PressTester extends TestItem{
         }
         return true;
     }
-    // 检查数据库是否开启，即taosd进程是否存在
-    private static boolean checkDBStatus() {
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder("ps", "-ef");
-            Process process = processBuilder.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.contains("taosd")) {
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-    // 输入指令：taos -uroot -ptaosdata能进入taos命令行
-    private static boolean checkDBUserPassword() {
-        try {
-            // 输入指令：taos -u"root" -p"taosdata"能进入taos命令行
-            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " 2>&1"};
-            Process process = Runtime.getRuntime().exec(command);
-    
-            // 向进程写入输入
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-            writer.write("q\n");
-            writer.flush();
-            writer.close();
-    
-            // 读取命令行指令的输入流
-            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = inputReader.readLine()) != null) {
-                // 打印命令行指令的执行结果
-    
-                // 检查是否存在"Authentication failure"的错误信息
-                if (line.contains("Authentication failure") || line.contains("Invalid user")) {
-                    return false;
-                }
-            }
-    
-            // 如果没有"Authentication failure"的错误信息，那么认为命令执行成功
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    // 检测数据库名是否存在
-    private static boolean checkDBExist() {
-        try {
-            String[] command = {"/bin/bash", "-c", "source ~/.bashrc && taos -u" + dbuser + " -p" + dbpassword + " -s \"use " + dbname + ";\" 2>&1"};
-            Process process = Runtime.getRuntime().exec(command);
-            BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = inputReader.readLine()) != null) {
-                if (line.contains("Database not exist")) {
-                    return false;
-                }
-            }
-            return true && checkDBUserPassword();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+
     @Override
     public void startTest() throws IOException, InterruptedException {
         if (status == Status.UNPREPARED) {
             throw new InterruptedException("测试尚未准备，请检查输入的参数");
         } else if (status == Status.RUNNING) {
             throw new InterruptedException("测试正在进行，请勿重复启动");
-        } else if(status == Status.FINISHED) {
+        } else if (status == Status.FINISHED) {
             throw new InterruptedException("测试已经结束，如需再次测试，请新建测试实例");
         }
         status = Status.RUNNING;
@@ -209,8 +232,8 @@ public class PressTester extends TestItem{
         // 执行taopress.py程序
         // 切换到testHomePath目录下
 
-        String command = "python taospress.py --user " + dbuser + " --password " + dbpassword + 
-                        " --database " + dbname + " --threadnum " + clients + " --test_time " + testTime;
+        String command = "python taospress.py --user " + dbuser + " --password " + dbpassword +
+                " --database " + dbname + " --threadnum " + clients + " --test_time " + testTime;
         System.out.println(command);
         //Process process = Runtime.getRuntime().exec(command);
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
@@ -240,7 +263,7 @@ public class PressTester extends TestItem{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
+
         // 输出success和failure
         System.out.println("Thread success count:  " + success);
         System.out.println("Thread failure count:  " + failure);
@@ -254,12 +277,14 @@ public class PressTester extends TestItem{
         testResult.values = new String[]{String.valueOf(success), String.valueOf(failure), String.valueOf(Double.POSITIVE_INFINITY), "0"};
         return testResult;
     }
+
     @Override
-    public List<List<Double>> getTimeData(){
+    public List<List<Double>> getTimeData() {
         return null;
     }
+
     @Override
-    public void writeToFile(String resultPath){
+    public void writeToFile(String resultPath) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
         try {
             String directoryPath = resultPath;
@@ -267,7 +292,7 @@ public class PressTester extends TestItem{
             if (!directory.exists()) {
                 directory.mkdirs();
             }
-            FileWriter fileWriter = new FileWriter(directoryPath + "/"+ "press_" + testTime + "_w" + clients + "-"+dateFormat.format(new Date()) +".txt");
+            FileWriter fileWriter = new FileWriter(directoryPath + "/" + "press_" + testTime + "_w" + clients + "-" + dateFormat.format(new Date()) + ".txt");
             fileWriter.write("Thread success count:  " + success + "\n");
             fileWriter.write("Thread failure count:  " + failure + "\n");
             fileWriter.close();
@@ -275,14 +300,16 @@ public class PressTester extends TestItem{
             e.printStackTrace();
         }
     }
+
     @Override
     public TestAllResult readFromFile(String resultPath) {
         TestAllResult result = new TestAllResult();
-        
+
         result.timeDataResult = readFromFile1(resultPath);
         result.testResult = getTestResults1(resultPath);
         return result;
     }
+
     public TestResult getTestResults1(String resultPath) {
         testResult = new TestResult();
         testResult.names = TestResult.INFLUXCOMP_PRESS_RES_NAMES;
@@ -310,37 +337,15 @@ public class PressTester extends TestItem{
         }
         return testResult;
     }
+
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
         return null;
     }
+
     @Override
     public String getResultDicName() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
         return "Press" + "_" + testTime + "_w" + clients + "_" + dateFormat.format(new Date());
-    }
-
-    public static void main(String[] args) {
-        String homePath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare";
-        String resultPath = "/home/wlx/disk/hugo/tsbstaos/build/tsdbcompare/result/Press-2024-03-08-11-46-13";
-        TestArguments arguments = new TestArguments();
-        arguments.values = new ArrayList<>();
-        arguments.values.add("1分钟");
-        arguments.values.add("10");
-        DBConnection DBStmt = new DBConnection("devops","root","taosdata");
-        //WriteTester(String testName, String homePath, String sudoPassord, DBConnection DBStmt,TestArguments testArgs)
-        PressTester tester = new PressTester("Press", DBStmt, arguments);
-        try {
-            //tester.SetTag();
-            tester.testEnvPrepare();
-            tester.startTest();
-            tester.writeToFile(resultPath);
-            tester.getTestResults();//获取本测试结果
-            //System.out.println(tester.getTestResults().values[0]);
-            //System.out.println(tester.getTimeData());//获取本测试的监控数据
-            System.out.println(tester.readFromFile(resultPath).testResult.values[0]);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

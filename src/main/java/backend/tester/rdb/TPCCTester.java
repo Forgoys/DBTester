@@ -24,19 +24,16 @@ public class TPCCTester extends TestItem {
      */
     public static final String[] DATA_SET_FILE_NAMES = {"config.csv", "cust-hist.csv", "customer.csv", "district.csv", "item.csv",
             "new-order.csv", "order.csv", "order-line.csv", "stock.csv", "warehouse.csv"};
-
+    /**
+     * 模板配置文件名字
+     */
+    public static final String TMP_PROPS_NAME = "props";
     /**
      * 相关脚本，数组形式的需要针对每个数据库都写一个版本
      */
     private static final String DATA_GENERATE_SCRIPT = "./runLoader.sh";
     private static final String[] DATA_IMPORT_SCRIPTS = new String[]{"./import_data_TPCC.sh"};
     private static final String AUTOTEST_SCRIPT = "./auto_test_one.sh";
-
-    /**
-     * 模板配置文件名字
-     */
-    public static final String TMP_PROPS_NAME = "props";
-
     /**
      * 相关路径
      */
@@ -84,7 +81,8 @@ public class TPCCTester extends TestItem {
      */
     private String diskNameOfDB;
 
-    public TPCCTester(){}
+    public TPCCTester() {
+    }
 
     public TPCCTester(String testName) {
         this.testName = testName;
@@ -97,8 +95,70 @@ public class TPCCTester extends TestItem {
         this.testArgs = testArgs;
     }
 
+    private static void updatePropsFile(Map<String, String> map, String inputFilePath, String outputFilePath) {
+        File inputFile = new File(inputFilePath);
+        File outputFile = new File(outputFilePath);
 
-    private void initialization() throws Exception{
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // 检查是否存在 map 中的键
+                for (Map.Entry<String, String> entry : map.entrySet()) {
+                    String key = entry.getKey();
+                    if (line.startsWith(key + "=")) {
+                        // 替换文件中的值
+                        line = key + "=" + entry.getValue();
+                        break;
+                    }
+                }
+                // 写入更新后的行到新文件中
+                writer.write(line);
+                writer.newLine();
+            }
+
+            System.out.println("文件更新成功！");
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static void main(String[] args) {
+//        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
+//                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
+//                "SYSDBA",
+//                "szoscar55");
+//        dbConnection.connect();
+
+//
+//        TestArguments arguments = new TestArguments();
+//        arguments.values = new ArrayList<>();
+//        arguments.values.add("20");
+//        arguments.values.add("128");
+//        arguments.values.add("16");
+//        arguments.values.add("1");
+//
+//        TPCCTester tester = new TPCCTester("tpcc", dbConnection, arguments);
+//
+//        try {
+//            tester.testEnvPrepare();
+//
+//            tester.startTest();
+//
+//            List<List<Double>> tmpTimeData = tester.getTimeData();
+//
+//            TestResult results = tester.getTestResults();
+//
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        dbConnection.disconnect();
+    }
+
+    private void initialization() throws Exception {
 
         // 获取工具包根目录
         File projectDir = new File(System.getProperty("user.dir"));
@@ -106,7 +166,7 @@ public class TPCCTester extends TestItem {
 
         // 检查工具目录
         File toolRootDir = new File(toolsRootPath);
-        if(!toolRootDir.exists() || !toolRootDir.isDirectory()) {
+        if (!toolRootDir.exists() || !toolRootDir.isDirectory()) {
             throw new Exception("未检测到工具目录:：" + toolsRootPath);
         }
 
@@ -131,14 +191,14 @@ public class TPCCTester extends TestItem {
         // 创建tpcc测试目录
         testHomePath = toolsRootPath + "RDB_test/tpcc/";
         File testHomePathFile = new File(testHomePath);
-        if(!testHomePathFile.exists())
+        if (!testHomePathFile.exists())
             testHomePathFile.mkdirs();
 
         /// 测试工具benchmarksql工具所在目录
         toolHomePath = testHomePath + "benchmarksql-5.0/";
         toolPath = toolHomePath + "run/";
         File toolDir = new File(toolPath);
-        if(!toolDir.exists()) {
+        if (!toolDir.exists()) {
             throw new Exception("未检测到benchmarksql工具");
         }
 
@@ -152,8 +212,6 @@ public class TPCCTester extends TestItem {
         // 结果目录格式类似于/home/wlx/cx/result20_oscar_2024-03-05_21-22-34/
         resultDirectory = String.format("%s%s/%dwarehouses_%s/", testHomePath, "results", dataSize, formatDateTime);
     }
-
-
 
     /**
      * 测试环境准备：软件部署、数据集导入
@@ -177,7 +235,6 @@ public class TPCCTester extends TestItem {
         status = Status.READY;
     }
 
-
     /**
      * 开始测试
      */
@@ -187,7 +244,7 @@ public class TPCCTester extends TestItem {
             throw new InterruptedException("测试尚未就绪，请先调用环境配置函数");
         } else if (status == Status.RUNNING) {
             throw new InterruptedException("测试正在进行，请勿重复启动");
-        } else if(status == Status.FINISHED) {
+        } else if (status == Status.FINISHED) {
             throw new InterruptedException("测试已经，如需再次测试，请新建测试实例");
         }
         // 正式执行测试
@@ -270,7 +327,6 @@ public class TPCCTester extends TestItem {
         return true;
     }
 
-
     private void createDataSet(String fileDir) throws Exception {
         // 执行数据生成脚本
         execCommands(new File(toolPath), "./runLoader.sh " + propsFileName);
@@ -292,36 +348,6 @@ public class TPCCTester extends TestItem {
         HashMap<String, String> argsMap = getRealValueHashMap();
         // 模板配置文件中值替换并生成新配置文件
         updatePropsFile(argsMap, toolPath + TMP_PROPS_NAME, oldFile.getAbsolutePath());
-    }
-
-    private static void updatePropsFile(Map<String, String> map, String inputFilePath, String outputFilePath) {
-        File inputFile = new File(inputFilePath);
-        File outputFile = new File(outputFilePath);
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // 检查是否存在 map 中的键
-                for (Map.Entry<String, String> entry : map.entrySet()) {
-                    String key = entry.getKey();
-                    if (line.startsWith(key + "=")) {
-                        // 替换文件中的值
-                        line = key + "=" + entry.getValue();
-                        break;
-                    }
-                }
-                // 写入更新后的行到新文件中
-                writer.write(line);
-                writer.newLine();
-            }
-
-            System.out.println("文件更新成功！");
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
     }
 
     private HashMap<String, String> getRealValueHashMap() {
@@ -389,11 +415,10 @@ public class TPCCTester extends TestItem {
         return timeDataList;
     }
 
-
     @Override
     public TestResult getTestResults() {
         // 如果已经生成了结果，则直接返回
-        if(this.testResult != null) {
+        if (this.testResult != null) {
             return this.testResult;
         }
         // 读取结果文件
@@ -408,7 +433,7 @@ public class TPCCTester extends TestItem {
                 String tpmCValue = matcher.group(1);
                 testResult = new TestResult();
                 testResult.names = TestResult.TPCC_RES_NAMES;
-                testResult.values = new String[] {tpmCValue, String.valueOf(27000.0 / Double.parseDouble(tpmCValue))};
+                testResult.values = new String[]{tpmCValue, String.valueOf(27000.0 / Double.parseDouble(tpmCValue))};
                 return testResult;
             } else {
                 System.out.println("没有找到 Measured tpmC (NewOrders) 的值");
@@ -424,9 +449,9 @@ public class TPCCTester extends TestItem {
 
     @Override
     public void writeToFile(String resultPath) {
-        if(status != Status.FINISHED) {
+        if (status != Status.FINISHED) {
             System.out.println("还未生成结果文件");
-            return ;
+            return;
         }
         File file = new File(resultPath);
         if (!file.exists()) {
@@ -439,10 +464,10 @@ public class TPCCTester extends TestItem {
 
     @Override
     public TestAllResult readFromFile(String resultPath) {
-        if(resultPath == null) {
+        if (resultPath == null) {
             return null;
         }
-        if(!resultPath.endsWith("/")) {
+        if (!resultPath.endsWith("/")) {
             resultPath += "/";
         }
         this.resultDirectory = resultPath;
@@ -452,38 +477,5 @@ public class TPCCTester extends TestItem {
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
         return List.of();
-    }
-
-    public static void main(String[] args) {
-//        DBConnection dbConnection = new DBConnection("/home/wlx/cx/benchmarksql-5.0/lib/oscar/oscarJDBC.jar",
-//                "jdbc:oscar://10.181.8.146:2003/TPCC_20",
-//                "SYSDBA",
-//                "szoscar55");
-//        dbConnection.connect();
-
-//
-//        TestArguments arguments = new TestArguments();
-//        arguments.values = new ArrayList<>();
-//        arguments.values.add("20");
-//        arguments.values.add("128");
-//        arguments.values.add("16");
-//        arguments.values.add("1");
-//
-//        TPCCTester tester = new TPCCTester("tpcc", dbConnection, arguments);
-//
-//        try {
-//            tester.testEnvPrepare();
-//
-//            tester.startTest();
-//
-//            List<List<Double>> tmpTimeData = tester.getTimeData();
-//
-//            TestResult results = tester.getTestResults();
-//
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//        dbConnection.disconnect();
     }
 }

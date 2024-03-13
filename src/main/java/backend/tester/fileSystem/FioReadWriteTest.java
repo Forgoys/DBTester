@@ -3,43 +3,36 @@ package backend.tester.fileSystem;
 import backend.dataset.TestAllResult;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 
 import java.io.*;
-import java.lang.reflect.Array;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
-
 
 public class FioReadWriteTest extends TestItem {
+    // 测试结果保存文件
+    String fioReadWriteTestResultTxt;
+    // sudo权限
+    String localSudoPassword;
+    // 指令运行结果
+    TestResult fioRWTestResult = new TestResult();
     // 用户参数 目录 文件块大小 文件大小 读写方式
     private String directory;
     private String bs;
     private String size;
     private String rwIndex;
     private String rwOption;
-
     // 资源检测脚本名称
     private String monitorScriptName;
     private String monitorResultCSV;
-
-    // 测试结果保存文件
-    String fioReadWriteTestResultTxt;
-
-    // sudo权限
-    String localSudoPassword;
-
-    // 指令运行结果
-    TestResult fioRWTestResult = new TestResult();
 
     public FioReadWriteTest() {
     }
@@ -78,6 +71,41 @@ public class FioReadWriteTest extends TestItem {
         fioReadWriteTestResultTxt = "fioReadWriteTestResult.txt";
     }
 
+    // 将带宽从KiB/s或MiB/s转换为KiB/s
+    private static double convertBWToMiB(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "KiB":
+                return numericalValue;
+            case "MiB":
+                return numericalValue * 1000;
+            default:
+                return 0;
+        }
+    }
+
+    // 将延迟从nsec、usec或msec转换为usec
+    private static double convertLatencyToMsec(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "nsec":
+                return numericalValue / 1000;
+            case "usec":
+                return numericalValue;
+            case "msec":
+                return numericalValue * 1000;
+            default:
+                return 0;
+        }
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/autotuning/zf/glusterfs/software_test", "666", "4k", "16k", "%70随机读,%30随机写");
+//        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/parallels/Desktop/fs", "lhjlhj6929", "4k", "8k", "%70随机读,%30随机写");
+        fioReadWriteTest.startTest();
+        fioReadWriteTest.readFromFile("/home/autotuning/zf/glusterfs/software_test/readWriteTest");
+    }
+
     public int executeCommand(String command) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command("bash", "-c", command);
@@ -91,7 +119,7 @@ public class FioReadWriteTest extends TestItem {
     @Override
     public void testEnvPrepare() throws IOException, InterruptedException {
         int exitCode = 0;
-        String command = new String();
+        String command = "";
 
         // 创建readWriteTest文件夹
         command = "mkdir -p " + directory;
@@ -188,35 +216,6 @@ public class FioReadWriteTest extends TestItem {
         System.out.println("FIO读写速度测试完成");
     }
 
-
-    // 将带宽从KiB/s或MiB/s转换为KiB/s
-    private static double convertBWToMiB(String value, String unit) {
-        double numericalValue = Double.parseDouble(value);
-        switch (unit) {
-            case "KiB":
-                return numericalValue;
-            case "MiB":
-                return numericalValue * 1000;
-            default:
-                return 0;
-        }
-    }
-
-    // 将延迟从nsec、usec或msec转换为usec
-    private static double convertLatencyToMsec(String value, String unit) {
-        double numericalValue = Double.parseDouble(value);
-        switch (unit) {
-            case "nsec":
-                return numericalValue / 1000;
-            case "usec":
-                return numericalValue;
-            case "msec":
-                return numericalValue * 1000;
-            default:
-                return 0;
-        }
-    }
-
     public void fioResultSave(List<String> results) {
         StringBuilder textBuilder = new StringBuilder();
         for (String result : results) {
@@ -289,7 +288,6 @@ public class FioReadWriteTest extends TestItem {
 
         System.out.println("FIO读写测试结果保存完成");
     }
-
 
     @Override
     public TestResult getTestResults() {
@@ -480,12 +478,5 @@ public class FioReadWriteTest extends TestItem {
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
         return null;
-    }
-
-    public static void main(String[] args) throws IOException, InterruptedException {
-        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/autotuning/zf/glusterfs/software_test", "666", "4k", "16k", "%70随机读,%30随机写");
-//        FioReadWriteTest fioReadWriteTest = new FioReadWriteTest("/home/parallels/Desktop/fs", "lhjlhj6929", "4k", "8k", "%70随机读,%30随机写");
-        fioReadWriteTest.startTest();
-        fioReadWriteTest.readFromFile("/home/autotuning/zf/glusterfs/software_test/readWriteTest");
     }
 }

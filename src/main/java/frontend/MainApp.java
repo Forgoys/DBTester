@@ -10,6 +10,10 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class MainApp extends Application {
+    public static void main(String[] args) {
+        launch();
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApp.class.getResource("main-view.fxml"));
@@ -27,9 +31,5 @@ public class MainApp extends Application {
         stage.setOnCloseRequest(event -> controller.closeAll());
 
         stage.show();
-    }
-
-    public static void main(String[] args) {
-        launch();
     }
 }

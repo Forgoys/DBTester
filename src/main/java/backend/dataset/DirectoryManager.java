@@ -41,6 +41,7 @@ public class DirectoryManager {
 
     /**
      * 从相对路径分析测试对象和测试项目，例如results/InfluxDB/可靠性/Result123，则输出InfluxDB和可靠性
+     *
      * @param relativePath 相对路径，以results开始
      * @return String数组，第0个是测试对象名，第1格式测试项目名
      */
@@ -57,9 +58,8 @@ public class DirectoryManager {
     }
 
     /**
-     *
-     * @param testObject 测试对象名（要严格对应）
-     * @param testProject 测试项目名（要严格对应）
+     * @param testObject           测试对象名（要严格对应）
+     * @param testProject          测试项目名（要严格对应）
      * @param testResultFolderName 测试结果文件名
      * @return 该测试结果文件所处的绝对路径
      */
@@ -70,6 +70,7 @@ public class DirectoryManager {
 
     /**
      * 创建目录
+     *
      * @param absolutePath 所要创建目录的绝对路径，可以调用 DirectoryManager.buildAbsolutePath方法生成
      */
     public static void fakeMakeDir(String absolutePath) {

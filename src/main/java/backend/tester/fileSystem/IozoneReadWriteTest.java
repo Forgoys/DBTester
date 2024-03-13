@@ -13,14 +13,13 @@ import java.util.List;
 
 public class IozoneReadWriteTest extends TestItem {
 
+    // 指令运行结果
+    TestResult iozoneRWTestResult = new TestResult();
     // 执行参数 工具路径 测试文件名 文件块大小 文件大小
     private String toolDirectory;
     private String fileName;
     private String blockSize;
     private String fileSize;
-
-    // 指令运行结果
-    TestResult iozoneRWTestResult = new TestResult();
 
     // 安装iozone工具
     @Override

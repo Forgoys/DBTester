@@ -207,6 +207,7 @@ public class SSHConnection {
 
     /**
      * 从服务器下载指定路径的文件到本地目录下
+     *
      * @param remoteFilePath
      * @param localDirPath
      * @throws SftpException
@@ -221,6 +222,7 @@ public class SSHConnection {
 
     /**
      * 将服务器上指定目录下载到本地指定目录下
+     *
      * @param remoteDirPath
      * @param localDirPath
      * @throws SftpException
@@ -228,7 +230,7 @@ public class SSHConnection {
     public void downloadDirectory(String remoteDirPath, String localDirPath) throws SftpException {
         String remoteDirName = Paths.get(remoteDirPath).getFileName().toString();
         File localDir = new File(localDirPath, remoteDirName);
-        if(!localDir.exists()) {
+        if (!localDir.exists()) {
             localDir.mkdirs();
         }
         downloadDirectoryRecursively(remoteDirPath, localDir.getAbsolutePath());
@@ -255,6 +257,7 @@ public class SSHConnection {
 
     /**
      * 上传本地文件到服务器指定路径下
+     *
      * @param localFilePath
      * @param remoteDirPath
      * @throws SftpException

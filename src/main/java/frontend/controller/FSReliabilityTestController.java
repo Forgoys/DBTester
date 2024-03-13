@@ -1,18 +1,18 @@
 package frontend.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
-
-import java.util.Collections;
-import java.util.List;
 import javafx.geometry.Side;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 
+import java.util.Collections;
+import java.util.List;
+
 public class FSReliabilityTestController {
+    @FXML
+    public TextArea currentStepTextArea;
     @FXML
     private Label iopsReadMaxLabel;
     @FXML
@@ -49,16 +49,12 @@ public class FSReliabilityTestController {
     private Label latencyWriteMinLabel;
     @FXML
     private Label latencyWriteAvgLabel;
-
     @FXML
     private LineChart<String, Number> iopsLineChart;
     @FXML
     private LineChart<String, Number> bandwidthLineChart;
     @FXML
     private LineChart<String, Number> latencyLineChart;
-    @FXML
-    public TextArea currentStepTextArea;
-
     // 假设这是从某处获取的timeData数据
     private List<List<Double>> timeData;
 

@@ -5,39 +5,33 @@ import backend.dataset.TestResult;
 import backend.dataset.TestTimeData;
 import backend.tester.TestItem;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-
-import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ReliableTest extends TestItem {
 
+    // sudo权限
+    String localSudoPassword;
     // 用户输入参数
     private String directory;
     private String timeChoose; // 4h 24h 7day
     private String fioReliableTestTime; // 对应的秒数
     private String reliableResultDirectory; // 结果存放目录
     private String reliableTestScriptName; // 执行可靠性测试脚本名称
-
     private String processReliableResultCsvName; // 保存结果的csv文件名
     private String reliableResultCSV;
-
-    // sudo权限
-    String localSudoPassword;
-
     // 资源检测脚本名称
     private String monitorScriptName;
     private String monitorResultCSV;
 
     // 存放时序性数据
-    private TestTimeData reliableTimeData = new TestTimeData();
-    private List<List<String>> reliableResultList = new ArrayList<>();
+    private final TestTimeData reliableTimeData = new TestTimeData();
+    private final List<List<String>> reliableResultList = new ArrayList<>();
 
     public ReliableTest(String directory, String timeChoose, String localSudoPassword) throws IOException, InterruptedException {
         this.directory = directory + "/reliableTest";
@@ -51,6 +45,40 @@ public class ReliableTest extends TestItem {
 
     public ReliableTest() {
 
+    }
+
+    // 将带宽从KiB/s或MiB/s转换为KiB/s
+    private static double convertBWToMiB(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "KiB":
+                return numericalValue;
+            case "MiB":
+                return numericalValue * 1000;
+            default:
+                return 0;
+        }
+    }
+
+    // 将延迟从nsec、usec或msec转换为usec
+    private static double convertLatencyToMsec(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "nsec":
+                return numericalValue / 1000;
+            case "usec":
+                return numericalValue;
+            case "msec":
+                return numericalValue * 1000;
+            default:
+                return 0;
+        }
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        ReliableTest reliableTest = new ReliableTest("/home/autotuning/zf/glusterfs/software_test", "1min", "666");
+        reliableTest.startTest();
+        reliableTest.readFromFile("/home/autotuning/zf/glusterfs/software_test/reliableTest");
     }
 
     public int executeCommand(String command) throws IOException, InterruptedException {
@@ -78,13 +106,13 @@ public class ReliableTest extends TestItem {
                     seconds = value;
                     break;
                 case "min":
-                    seconds = value * 60;
+                    seconds = value * 60L;
                     break;
                 case "h":
-                    seconds = value * 3600;
+                    seconds = value * 3600L;
                     break;
                 case "day":
-                    seconds = value * 86400;
+                    seconds = value * 86400L;
                     break;
                 default:
                     throw new IllegalArgumentException("Invalid time suffix: " + suffix);
@@ -197,34 +225,6 @@ public class ReliableTest extends TestItem {
 
         // 处理结果
         processReliableResult();
-    }
-
-    // 将带宽从KiB/s或MiB/s转换为KiB/s
-    private static double convertBWToMiB(String value, String unit) {
-        double numericalValue = Double.parseDouble(value);
-        switch (unit) {
-            case "KiB":
-                return numericalValue;
-            case "MiB":
-                return numericalValue * 1000;
-            default:
-                return 0;
-        }
-    }
-
-    // 将延迟从nsec、usec或msec转换为usec
-    private static double convertLatencyToMsec(String value, String unit) {
-        double numericalValue = Double.parseDouble(value);
-        switch (unit) {
-            case "nsec":
-                return numericalValue / 1000;
-            case "usec":
-                return numericalValue;
-            case "msec":
-                return numericalValue * 1000;
-            default:
-                return 0;
-        }
     }
 
     public void fioResultSave(String content) {
@@ -461,12 +461,6 @@ public class ReliableTest extends TestItem {
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
         return List.of();
-    }
-
-    public static void main(String[] args) throws IOException, InterruptedException {
-        ReliableTest reliableTest = new ReliableTest("/home/autotuning/zf/glusterfs/software_test", "1min", "666");
-        reliableTest.startTest();
-        reliableTest.readFromFile("/home/autotuning/zf/glusterfs/software_test/reliableTest");
     }
 
 }

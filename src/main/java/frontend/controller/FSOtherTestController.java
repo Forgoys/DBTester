@@ -1,25 +1,25 @@
 package frontend.controller;
 
 import backend.dataset.DisplayResult;
+import backend.dataset.TestResult;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import backend.dataset.TestResult;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 public class FSOtherTestController {
+    @FXML
+    public TextArea currentStepTextArea;
     @FXML
     private TableView<DisplayResult> fioResultsTableView;
     @FXML
     private TableColumn<DisplayResult, String> metricsColumn;
     @FXML
     private TableColumn<DisplayResult, String> resultColumn;
-    @FXML
-    public TextArea currentStepTextArea;
-
-    private ObservableList<DisplayResult> displayResultsData = FXCollections.observableArrayList();
+    private final ObservableList<DisplayResult> displayResultsData = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {

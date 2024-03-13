@@ -12,10 +12,8 @@ import backend.tester.rdb.TPCHTester;
 import backend.tester.timeSeriesDB.PressTester;
 import backend.tester.timeSeriesDB.ReadTester;
 import backend.tester.timeSeriesDB.WriteTester;
-import eu.hansolo.tilesfx.Test;
 import frontend.connection.DBConnection;
 import frontend.connection.FSConnection;
-import frontend.connection.SSHConnection;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -30,10 +28,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MainAppController {
 //    public static SSHConnection currentSSHConnection;
@@ -45,6 +40,7 @@ public class MainAppController {
      * 文件系统连接
      */
     public static FSConnection currentFSConnection;
+    static String testObjectOut = null;
     /**
      * 数据库适配性测试界面的控制器
      */
@@ -66,16 +62,9 @@ public class MainAppController {
      * 文件系统读写速度测试结果界面的控制器
      */
     FSOtherTestController fsOtherTestController;
-
-    static String testObjectOut = null;
-
     TestItem testItem;
-    //    @FXML
-//    private TitledPane sshConnectionTitledPane;
-    @FXML
-    private TitledPane testObjectConfigTitledPane;
-    @FXML
-    private TitledPane testProjectConfigTitledPane;
+    TestResult testResult;
+    List<List<Double>> testTimeData;
     // ssh 连接参数
 //    @FXML
 //    private TextField sshIPInput;
@@ -85,7 +74,12 @@ public class MainAppController {
 //    private TextField sshUserNameInput;
 //    @FXML
 //    private TextField sshPasswordInput;
-
+    //    @FXML
+//    private TitledPane sshConnectionTitledPane;
+    @FXML
+    private TitledPane testObjectConfigTitledPane;
+    @FXML
+    private TitledPane testProjectConfigTitledPane;
     /**
      * 测试对象选择下拉列表
      */
@@ -112,19 +106,8 @@ public class MainAppController {
     @FXML
     private ScrollPane rightScrollPane;
 
-    TestResult testResult;
-    List<List<Double>> testTimeData;
-
-    @FXML
-    private void initialize() {
-        // 初始化时不允许展开
-//        sshConnectionTitledPane.setExpanded(true);
-        testObjectConfigTitledPane.setExpanded(true);
-        testObjectConfigTitledPane.setDisable(false);
-        testProjectConfigTitledPane.setDisable(false);
-        DirectoryManager.createDirectories();  // 创建结果目录
-//        testObjectConfigTitledPane.setDisable(true);
-//        testProjectConfigTitledPane.setDisable(true);
+    public static String getTestObject() {
+        return testObjectOut;
     }
 
     // =================================== ssh连接服务器 =================================================
@@ -170,6 +153,18 @@ public class MainAppController {
 //    }
 
     // ================================ 数据库连接或文件系统挂载 ===========================================
+
+    @FXML
+    private void initialize() {
+        // 初始化时不允许展开
+//        sshConnectionTitledPane.setExpanded(true);
+        testObjectConfigTitledPane.setExpanded(true);
+        testObjectConfigTitledPane.setDisable(false);
+        testProjectConfigTitledPane.setDisable(false);
+        DirectoryManager.createDirectories();  // 创建结果目录
+//        testObjectConfigTitledPane.setDisable(true);
+//        testProjectConfigTitledPane.setDisable(true);
+    }
 
     /**
      * 根据选择的测试对象，显示对应的连接参数，更新可选择的测试项目
@@ -255,7 +250,7 @@ public class MainAppController {
             }
         } else if (connectArg.values.size() == 3) {  // TDengine只需要三个参数
             currentDBConnection = new DBConnection(connectArg.values.get(0), connectArg.values.get(1), connectArg.values.get(2));
-            
+
             if (DBConnection.checkDBExist(currentDBConnection)) {
                 Util.popUpInfo("数据库连接成功！", "连接成功");
             } else {
@@ -378,6 +373,8 @@ public class MainAppController {
         return rowIndex;
     }
 
+    // ================================== 测试项目参数配置 ==========================================
+
     /**
      * 设置文件系统挂载参数配置的相关UI
      *
@@ -411,8 +408,6 @@ public class MainAppController {
 
         return rowIndex;
     }
-
-    // ================================== 测试项目参数配置 ==========================================
 
     /**
      * 测试项目选择及参数配置显示
@@ -701,7 +696,6 @@ public class MainAppController {
 
                     // 在新线程中执行任务
                     new Thread(task).start();
-                    ;
                 } else {
                     dbReliabilityTestController.clearAll();
                     message2Update = new StringBuilder();
@@ -856,6 +850,9 @@ public class MainAppController {
         }
     }
 
+
+    // ===============================结果文件导入和导出====================================
+
     /**
      * 根据测试项目名称动态加载视图到ScrollPane中，并更新对应的控制器引用
      *
@@ -920,9 +917,6 @@ public class MainAppController {
             e.printStackTrace();
         }
     }
-
-
-    // ===============================结果文件导入和导出====================================
 
     /**
      * 导出测试结果文件夹
@@ -1072,10 +1066,6 @@ public class MainAppController {
         if (currentDBConnection != null) {
             currentDBConnection.disconnect();
         }
-    }
-
-    public static String getTestObject() {
-        return testObjectOut;
     }
 
     @FXML

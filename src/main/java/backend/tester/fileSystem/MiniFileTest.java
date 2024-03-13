@@ -15,6 +15,10 @@ import java.util.regex.Pattern;
 
 public class MiniFileTest extends TestItem {
 
+    // sudo权限
+    String localSudoPassword;
+    // 指令运行结果
+    TestResult fioMiniFileTestResult = new TestResult();
     // 参数 root目录 测试的小文件名 测试小文件路径 脚本名 脚本路径
     private String directory;
     private String miniFileName;
@@ -24,17 +28,9 @@ public class MiniFileTest extends TestItem {
     private String miniFileWriteScriptName;
     private String miniFileWriteScriptPath;
     private String miniFileWriteNum; // 文件写入数量
-
-
-    // sudo权限
-    String localSudoPassword;
-
     // 资源检测脚本名称
     private String monitorScriptName;
     private String monitorResultCSV;
-
-    // 指令运行结果
-    TestResult fioMiniFileTestResult = new TestResult();
     // 脚本执行后结果保存在txt文件
 //    private String fioMiniFileTestResultPath;
 //    private String fioMiniFileTestResultTxt;
@@ -62,6 +58,43 @@ public class MiniFileTest extends TestItem {
 
         monitorScriptName = "monitor.sh";
         monitorResultCSV = "fioMiniFileTestMonitorResult.csv";
+    }
+
+    // 将带宽从KiB/s或MiB/s转换为KiB/s
+    private static double convertBWToMiB(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "KiB":
+                return numericalValue;
+            case "MiB":
+                return numericalValue * 1000;
+            default:
+                return 0;
+        }
+    }
+
+    // 将延迟从nsec、usec或msec转换为usec
+    private static double convertLatencyToMsec(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "nsec":
+                return numericalValue / 1000;
+            case "usec":
+                return numericalValue;
+            case "msec":
+                return numericalValue * 1000;
+            default:
+                return 0;
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+//        MiniFileTest miniFileTest = new MiniFileTest("/home/wlx/fsTest", "Admin@wlx");
+        MiniFileTest miniFileTest = new MiniFileTest("/home/autotuning/zf/glusterfs/software_test", "666");
+        miniFileTest.startTest();
+        String name = miniFileTest.getResultDicName();
+        System.out.println(name);
+        miniFileTest.readFromFile("/home/autotuning/zf/glusterfs/software_test/miniFileTest");
     }
 
     public int executeCommand(String command) throws IOException, InterruptedException {
@@ -193,34 +226,6 @@ public class MiniFileTest extends TestItem {
         System.out.println("系统资源监测关闭,检测结果保存在" + monitorResultCSV + " exit code:" + monitorExitCode);
 
         fioResultSave(results);
-    }
-
-    // 将带宽从KiB/s或MiB/s转换为KiB/s
-    private static double convertBWToMiB(String value, String unit) {
-        double numericalValue = Double.parseDouble(value);
-        switch (unit) {
-            case "KiB":
-                return numericalValue;
-            case "MiB":
-                return numericalValue * 1000;
-            default:
-                return 0;
-        }
-    }
-
-    // 将延迟从nsec、usec或msec转换为usec
-    private static double convertLatencyToMsec(String value, String unit) {
-        double numericalValue = Double.parseDouble(value);
-        switch (unit) {
-            case "nsec":
-                return numericalValue / 1000;
-            case "usec":
-                return numericalValue;
-            case "msec":
-                return numericalValue * 1000;
-            default:
-                return 0;
-        }
     }
 
     public void fioResultSave(List<String> results) {
@@ -381,14 +386,5 @@ public class MiniFileTest extends TestItem {
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
         return null;
-    }
-
-    public static void main(String[] args) throws Exception {
-//        MiniFileTest miniFileTest = new MiniFileTest("/home/wlx/fsTest", "Admin@wlx");
-        MiniFileTest miniFileTest = new MiniFileTest("/home/autotuning/zf/glusterfs/software_test", "666");
-        miniFileTest.startTest();
-        String name = miniFileTest.getResultDicName();
-        System.out.println(name);
-        miniFileTest.readFromFile("/home/autotuning/zf/glusterfs/software_test/miniFileTest");
     }
 }

@@ -15,19 +15,16 @@ import java.util.regex.Pattern;
 
 public class FioParallelTest extends TestItem {
 
+    // sudo权限
+    String localSudoPassword;
+    // 指令运行结果
+    TestResult fioParallelTestResult = new TestResult();
     // 获取用户参数 测试目录 并发线程数
     private String directory;
     private String numjobs;
-
-    // sudo权限
-    String localSudoPassword;
-
     // 资源检测脚本名称
     private String monitorScriptName;
     private String monitorResultCSV;
-
-    // 指令运行结果
-    TestResult fioParallelTestResult = new TestResult();
     // 测试结果保存文件
     private String fioParallelTestResultTxt;
 
@@ -44,6 +41,42 @@ public class FioParallelTest extends TestItem {
         fioParallelTestResultTxt = "fioParallelTestResult.txt";
     }
 
+    // 将带宽从KiB/s或MiB/s转换为KiB/s
+    private static double convertBWToMiB(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "KiB":
+                return numericalValue;
+            case "MiB":
+                return numericalValue * 1000;
+            default:
+                return 0;
+        }
+    }
+
+    // 将延迟从nsec、usec或msec转换为usec
+    private static double convertLatencyToMsec(String value, String unit) {
+        double numericalValue = Double.parseDouble(value);
+        switch (unit) {
+            case "nsec":
+                return numericalValue / 1000;
+            case "usec":
+                return numericalValue;
+            case "msec":
+                return numericalValue * 1000;
+            default:
+                return 0;
+        }
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        FioParallelTest fioParallelTest = new FioParallelTest("/home/autotuning/zf/glusterfs/software_test", "16", "666");
+        fioParallelTest.startTest();
+        String name = fioParallelTest.getResultDicName();
+        System.out.println(name);
+        fioParallelTest.readFromFile("/home/autotuning/zf/glusterfs/software_test/parallelTest");
+    }
+
     public int executeCommand(String command) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command("bash", "-c", command);
@@ -57,7 +90,7 @@ public class FioParallelTest extends TestItem {
     @Override
     public void testEnvPrepare() throws RuntimeException, IOException, InterruptedException {
         int exitCode = 0;
-        String command = new String();
+        String command = "";
 
         // 创建ParallelTest文件夹
         command = "mkdir -p " + directory;
@@ -137,34 +170,6 @@ public class FioParallelTest extends TestItem {
         fioResultSave(results);
 
         System.out.println("并发度测试完成");
-    }
-
-    // 将带宽从KiB/s或MiB/s转换为KiB/s
-    private static double convertBWToMiB(String value, String unit) {
-        double numericalValue = Double.parseDouble(value);
-        switch (unit) {
-            case "KiB":
-                return numericalValue;
-            case "MiB":
-                return numericalValue * 1000;
-            default:
-                return 0;
-        }
-    }
-
-    // 将延迟从nsec、usec或msec转换为usec
-    private static double convertLatencyToMsec(String value, String unit) {
-        double numericalValue = Double.parseDouble(value);
-        switch (unit) {
-            case "nsec":
-                return numericalValue / 1000;
-            case "usec":
-                return numericalValue;
-            case "msec":
-                return numericalValue * 1000;
-            default:
-                return 0;
-        }
     }
 
     public void fioResultSave(List<String> results) {
@@ -321,13 +326,5 @@ public class FioParallelTest extends TestItem {
     @Override
     public List<List<Double>> readFromFile1(String resultPath) {
         return null;
-    }
-
-    public static void main(String[] args) throws IOException, InterruptedException {
-        FioParallelTest fioParallelTest = new FioParallelTest("/home/autotuning/zf/glusterfs/software_test", "16", "666");
-        fioParallelTest.startTest();
-        String name = fioParallelTest.getResultDicName();
-        System.out.println(name);
-        fioParallelTest.readFromFile("/home/autotuning/zf/glusterfs/software_test/parallelTest");
     }
 }

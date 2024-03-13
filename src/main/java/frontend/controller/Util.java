@@ -1,16 +1,11 @@
 package frontend.controller;
 
 import backend.dataset.TestArguments;
-import backend.tester.fileSystem.FioReadWriteTest;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -66,6 +61,7 @@ public class Util {
 
     /**
      * 清除gridPane第一行之后的所有行，第一行是测试对象或项目的下拉列表，后面是相关的参数配置
+     *
      * @param gridPane 装了测试对象或项目的gridPane
      */
     public static void clearGridPaneRowsAfterFirst(GridPane gridPane) {
@@ -211,7 +207,7 @@ public class Util {
     public static boolean checkSudoPassword(String password) {
         String command = "sudo -S ls /root"; // 示例命令，需要sudo权限
         try {
-            Process process = Runtime.getRuntime().exec(new String[] {"sh", "-c", command});
+            Process process = Runtime.getRuntime().exec(new String[]{"sh", "-c", command});
             OutputStream os = process.getOutputStream();
             os.write((password + "\n").getBytes()); // 向进程输出流写入密码
             os.flush();

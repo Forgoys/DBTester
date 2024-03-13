@@ -15,7 +15,8 @@ public class DBAdaptTestController {
     @FXML
     TextArea sqlOutputTextArea;
 
-    public DBAdaptTestController() {}
+    public DBAdaptTestController() {
+    }
 
     public void onExecuteSqlButtonClick(ActionEvent actionEvent) {
         // 清空输出文本区域
@@ -50,7 +51,7 @@ public class DBAdaptTestController {
                     // 把之前建的测试表删掉
                     MainAppController.currentDBConnection.executeSQL("DROP TABLE IF EXISTS DataTypeSupportTest;");
                     return MainAppController.currentDBConnection.executeSQL(sqlText);
-                } else if (testObject.equals("TDengine")){
+                } else if (testObject.equals("TDengine")) {
                     try {
                         String[] command = {"/bin/bash", "-c", "source ~/.bashrc"};
                         Process process = Runtime.getRuntime().exec(command);

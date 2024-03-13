@@ -24,7 +24,7 @@ public class ArgumentProperty {
      * 判断该参数是否有候选项
      */
     public boolean hasCandidate() {
-        if(candidateValues == null) {
+        if (candidateValues == null) {
             return false;
         }
         return candidateValues.length != 0;

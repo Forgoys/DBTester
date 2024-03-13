@@ -6,7 +6,8 @@ public class DisplayResult {
     private SimpleStringProperty name;
     private SimpleStringProperty value;
 
-    public DisplayResult() {}
+    public DisplayResult() {
+    }
 
     public DisplayResult(String name, String value) {
         this.name = new SimpleStringProperty(name);

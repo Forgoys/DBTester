@@ -13,7 +13,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldListCell;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,26 +30,21 @@ public class FSReadWriteTestController {
     public Label memoryMinLabel;
     @FXML
     public Label memoryAvgLabel;
-
+    @FXML
+    public TextArea currentStepTextArea;
     @FXML
     private TableView<DisplayResult> fioResultsTableView;
     @FXML
     private TableColumn<DisplayResult, String> metricsColumn;
     @FXML
     private TableColumn<DisplayResult, String> resultColumn;
-
-
     @FXML
     private LineChart<String, Number> cpuUsageLineChart;
     @FXML
     private LineChart<String, Number> memoryUsageLineChart;
-
-    @FXML
-    public TextArea currentStepTextArea;
-
     private List<List<Double>> timeData;
 
-    private ObservableList<DisplayResult> displayResultsData = FXCollections.observableArrayList();
+    private final ObservableList<DisplayResult> displayResultsData = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {

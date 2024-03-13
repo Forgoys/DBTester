@@ -5,7 +5,6 @@ import backend.dataset.TestArguments;
 import backend.dataset.TestResult;
 import backend.tester.TestItem;
 import frontend.connection.DBConnection;
-import frontend.connection.SSHConnection;
 
 import java.util.List;
 

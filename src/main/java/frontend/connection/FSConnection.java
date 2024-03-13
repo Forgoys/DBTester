@@ -3,21 +3,18 @@ package frontend.connection;
 import javafx.scene.control.TextField;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 
 public class FSConnection {
+    // sudo权限
+    String localSudoPassword;
     private String fsUrl; // 文件系统路径
     private String mountPath; // 挂载目录
-    private boolean mountFlag = false; // 是否挂载成功
-
+    private final boolean mountFlag = false; // 是否挂载成功
     private TextField fsServerPathTextField;
     private TextField fsMountPathTextField;
     private String fileSystemOption; // 挂载方式
-
-    // sudo权限
-    String localSudoPassword;
 
     public FSConnection() {
     }
@@ -27,6 +24,11 @@ public class FSConnection {
         this.localSudoPassword = localSudoPassword;
         this.fsUrl = fsUrl;
         this.mountPath = mountPath;
+    }
+
+    public static void main(String[] args) {
+        FSConnection fSConnection = new FSConnection("glusterfs", "666", "10.181.8.145:/gv3", "/home/autotuning/zf/glusterfs/software_test/mountTest");
+        fSConnection.mountFS();
     }
 
     /**
@@ -198,10 +200,5 @@ public class FSConnection {
 
     public void setMountPath(String mountPath) {
         this.mountPath = mountPath;
-    }
-
-    public static void main(String[] args) {
-        FSConnection fSConnection = new FSConnection("glusterfs", "666", "10.181.8.145:/gv3", "/home/autotuning/zf/glusterfs/software_test/mountTest");
-        fSConnection.mountFS();
     }
 }
