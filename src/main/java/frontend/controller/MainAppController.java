@@ -177,27 +177,33 @@ public class MainAppController {
         testProjectSelectBox.getItems().clear();
 
         int rowIndex = 1;
-        rowIndex = switch (selectedTestObject) {
-            case "PolarDB", "神通数据库", "OpenGauss" -> {
+        switch (selectedTestObject) {
+            case "PolarDB":
+            case "神通数据库":
+            case "OpenGauss":
                 testProjectSelectBox.getItems().addAll("TPC-C", "TPC-H", "可靠性", "适配性");
-                yield configureDBConnectUI(rowIndex);
-            }
-            case "TDengine" -> {
+                rowIndex = configureDBConnectUI(rowIndex);
+                break;
+            case "TDengine":
                 testProjectSelectBox.getItems().addAll("写入性能", "查询性能", "可靠性", "适配性");
-                yield configureTDengineConnectUI(rowIndex);
-            }
-            case "InfluxDB", "Lindorm" -> {
+                rowIndex = configureTDengineConnectUI(rowIndex);
+                break;
+            case "InfluxDB":
+            case "Lindorm":
                 testProjectSelectBox.getItems().addAll("写入性能", "查询性能", "可靠性", "适配性");
-                yield configureDBConnectUI(rowIndex);
-            }
-            case "GlusterFS", "OceanFS" -> {
+                rowIndex = configureDBConnectUI(rowIndex);
+                break;
+            case "GlusterFS":
+            case "OceanFS":
                 testProjectSelectBox.getItems().addAll("读写速度测试", "并发度测试", "小文件测试", "可靠性测试");
-                yield configureFSConnectUI(rowIndex);
-            }
-            default -> 1;
-            // 根据选定的测试对象更新测试项目下拉菜单，并配置相关UI
-        };
+                rowIndex = configureFSConnectUI(rowIndex);
+                break;
+            default:
+                rowIndex = 1;
+        }
+// 根据选定的测试对象更新测试项目下拉菜单，并配置相关UI
 
+            // 根据选定的测试对象更新测试项目下拉菜单，并配置相关UI
         // 添加确认按钮
         Button testObjectConnectConfirmButton = new Button("确认");
         testObjectConnectConfirmButton.setOnAction(event -> onTestObjectConnectConfirmButtonClicked());

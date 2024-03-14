@@ -127,9 +127,19 @@ public class Util {
                     // 如果找到了Label并且Label的内容是特定的文本，则进行特殊处理
                     if (label != null && "本机sudo密码".equals(label.getText())) {
                         // 这里处理TextField中的内容
-                        if (node instanceof TextField textField) {
+//                        if (node instanceof TextField textField) {
+//                            String textContent = textField.getText();
+//                            // 在这里添加你的特定处理逻辑
+//                            if (!Util.checkSudoPassword(textContent)) {
+//                                Util.popUpInfo("本机超级权限密码错误，请重新输入", "错误");
+//                                return null;
+//                            } else {
+//                                testArguments.values.add(textContent);
+//                            }
+//                        }
+                        if (node instanceof TextField) {
+                            TextField textField = (TextField) node;
                             String textContent = textField.getText();
-                            // 在这里添加你的特定处理逻辑
                             if (!Util.checkSudoPassword(textContent)) {
                                 Util.popUpInfo("本机超级权限密码错误，请重新输入", "错误");
                                 return null;
@@ -137,14 +147,24 @@ public class Util {
                                 testArguments.values.add(textContent);
                             }
                         }
+
                     } else {
                         // 对于非特定Label或其它情况的通用处理
-                        if (node instanceof TextField textField) {
+//                        if (node instanceof TextField textField) {
+//                            testArguments.values.add(textField.getText());
+//                        } else if (node instanceof ComboBox comboBox) {
+//                            String selected = (String) comboBox.getSelectionModel().getSelectedItem();
+//                            testArguments.values.add(selected != null ? selected : "");
+//                        }
+                        if (node instanceof TextField) {
+                            TextField textField = (TextField) node;
                             testArguments.values.add(textField.getText());
-                        } else if (node instanceof ComboBox comboBox) {
+                        } else if (node instanceof ComboBox) {
+                            ComboBox comboBox = (ComboBox) node;
                             String selected = (String) comboBox.getSelectionModel().getSelectedItem();
                             testArguments.values.add(selected != null ? selected : "");
                         }
+
                     }
                 }
             }
